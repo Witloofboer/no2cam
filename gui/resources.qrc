@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/video-camera-64.png</file>
+        <file>icons/C-gold-24.png</file>
+        <file>icons/O-blue-24.png</file>
+        <file>icons/S-blue-24.png</file>
+        <file>icons/W-blue-24.png</file>
+        <file>icons/media-one-32.png</file>
+        <file>icons/media-burst-32.png</file>
+        <file>icons/media-record-32.png</file>
+        <file>icons/media-stop-32.png</file>
+    </qresource>
+</RCC>
