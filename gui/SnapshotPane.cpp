@@ -10,57 +10,57 @@
 
 SnapshotPane::SnapshotPane(QWidget *parent)
     : AbstractMainPane(parent)
-    , mOpticBtn(new QRadioButton(tr("Optic")))
-    , mWavelength(new_WavelengthEdit())
-    , mAccousticFreq(new_NumberEdit("009.999"))
-    , mAccousticPower(new_NumberEdit("009"))
-    , mEET(new_EetEdit())
-    , mCoolDown(new_CooldownEdit())
-    , mSessionName(new QLineEdit)
+    , opticBtn(new QRadioButton(tr("Optic")))
+    , wl(new_WavelengthEdit())
+    , aF(new_NumberEdit("009.999"))
+    , aP(new_NumberEdit(" 0009"))
+    , eet(new_EetEdit())
+    , cooldown(new_CooldownEdit())
+    , session(new QLineEdit)
 {
-    // Optic/accoustic ----------------------------------------------------------
+    // Optic/accoustic ---------------------------------------------------------
 
     auto modeLayout = new QVBoxLayout;
-    modeLayout->addWidget(mOpticBtn);
+    modeLayout->addWidget(opticBtn);
     modeLayout->addWidget(new QRadioButton(tr("Acoustic")));
 
     auto modeBox = new QGroupBox(tr("Parameter mode"));
     modeBox->setLayout(modeLayout);
 
-    connect(mOpticBtn, QRadioButton::toggled, this, SnapshotPane::parameterModeSwitch);
-    mOpticBtn->setChecked(true);
+    connect(opticBtn, QRadioButton::toggled, this, SnapshotPane::parameterModeSwitch);
+    opticBtn->setChecked(true);
 
     // Parameter box ------------------------------------------------------------
 
     int row=0;
 
-    putInGrid(mWavelength, mParameters, row++, tr("Wavelength"), "nm");
-    putInGrid(mAccousticFreq, mParameters, row++, tr("Frequency"), "MHz");
-    putInGrid(mAccousticPower, mParameters, row++, tr("Power"), "mW");
-    putInGrid(mEET, mParameters, row++, tr("Exposure"), "ms");
-    putInGrid(mCoolDown, mParameters, row++, tr("Cooldown"), "ms");
+    putInGrid(aF, paramBox, row++, tr("Frequency"), "[MHz]");
+    putInGrid(aP, paramBox, row++, tr("Power"), "[mW]");
+    putInGrid(wl, paramBox, row++, tr("Wavelength"), "[nm]");
+    putInGrid(eet, paramBox, row++, tr("Exposure"), "[ms]");
+    putInGrid(cooldown, paramBox, row++, tr("Cooldown"), "[ms]");
 
-    mParameters->addWidget(new QLabel("Filename head:"), row, 0);
-    mParameters->addWidget(mSessionName, row, 1, 1, 2);
+    paramBox->addWidget(new QLabel("Session:"), row, 0);
+    paramBox->addWidget(session, row, 1, 1, 2);
     ++row;
 
     // Adapt the AbstractMainPane base
-    mLeftLayout->insertWidget(0, modeBox);
-    mSnapshotBox->setTitle(tr("Snapshot"));
+    leftLayout->insertWidget(0, modeBox);
+    snapshotBox->setTitle(tr("Snapshot"));
 }
 
 void SnapshotPane::parameterModeSwitch()
 {
-    if (mOpticBtn->isChecked())
+    if (opticBtn->isChecked())
     {
-        mWavelength->setEnabled(true);
-        mAccousticFreq->setEnabled(false);
-        mAccousticPower->setEnabled(false);
+        wl->setEnabled(true);
+        aF->setEnabled(false);
+        aP->setEnabled(false);
     }
     else
     {
-        mWavelength->setEnabled(false);
-        mAccousticFreq->setEnabled(true);
-        mAccousticPower->setEnabled(true);
+        wl->setEnabled(false);
+        aF->setEnabled(true);
+        aP->setEnabled(true);
     }
 }

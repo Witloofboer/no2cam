@@ -18,8 +18,17 @@ HEADERS  +=
 
 FORMS    +=
 
+
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../gui/release/ -lgui
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../gui/debug/ -lgui
+else:unix: LIBS += -L$$OUT_PWD/../gui/ -lgui
 
 INCLUDEPATH += $$PWD/../gui
 DEPENDPATH += $$PWD/../gui
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../core/release/ -lcore
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../core/debug/ -lcore
+else:unix: LIBS += -L$$OUT_PWD/../core/ -lcore
+
+INCLUDEPATH += $$PWD/../core
+DEPENDPATH += $$PWD/../core

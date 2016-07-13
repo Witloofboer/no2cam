@@ -7,15 +7,14 @@
 
 AbstractMainPane::AbstractMainPane(QWidget *parent)
     : QWidget(parent)
-    , mLeftLayout(new QVBoxLayout)
-    , mParameters(new QGridLayout)
-    , mSnapshotBox(new QGroupBox)
-    , mSnapshotWidget(new QLabel)
+    , leftLayout(new QVBoxLayout)
+    , paramBox(new QGridLayout)
+    , snapshotBox(new QGroupBox)
 {
     // Parameter box -----------------------------------------------------------
 
     auto parameterBox = new QGroupBox(tr("Parameters"));
-    parameterBox->setLayout(mParameters);
+    parameterBox->setLayout(paramBox);
 
     // Intensity datagram ------------------------------------------------------
 
@@ -28,10 +27,10 @@ AbstractMainPane::AbstractMainPane(QWidget *parent)
 
     // Left Layout -------------------------------------------------------------
 
-    mLeftLayout->addWidget(parameterBox);
-    mLeftLayout->addWidget(datagramBox);
-    mLeftLayout->addStretch();
-    mLeftLayout->addWidget(cameraButtonBox);
+    leftLayout->addWidget(parameterBox);
+    leftLayout->addWidget(datagramBox);
+    leftLayout->addStretch();
+    leftLayout->addWidget(cameraButtonBox);
 
 
     // Snapshot image ----------------------------------------------------------
@@ -45,20 +44,20 @@ AbstractMainPane::AbstractMainPane(QWidget *parent)
     snapshotLayout->addWidget(snapshotLbl);
     snapshotLayout->addStretch();
 
-    mSnapshotBox->setLayout(snapshotLayout);
+    snapshotBox->setLayout(snapshotLayout);
 
 
     // Right layout ------------------------------------------------------------
 
     auto rightLayout = new QVBoxLayout;
     rightLayout->addStretch();
-    rightLayout->addWidget(mSnapshotBox);
+    rightLayout->addWidget(snapshotBox);
     rightLayout->addStretch();
 
     // Main layout -------------------------------------------------------------
 
     auto mainLayout = new QHBoxLayout;
-    mainLayout->addLayout(mLeftLayout);
+    mainLayout->addLayout(leftLayout);
     mainLayout->addLayout(rightLayout);
 
     setLayout(mainLayout);

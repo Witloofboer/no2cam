@@ -19,10 +19,9 @@ signals:
 public slots:
 
 protected:
-    QVBoxLayout *mLeftLayout;
-    QGridLayout *mParameters;
-    QGroupBox   *mSnapshotBox;
-    QLabel      *mSnapshotWidget;
+    QVBoxLayout *leftLayout;
+    QGridLayout *paramBox;
+    QGroupBox   *snapshotBox;
 };
 
 #endif // ABSTRACTMAINPANE_H

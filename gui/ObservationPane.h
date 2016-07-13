@@ -14,12 +14,12 @@ public:
 signals:
 
 private:
-    QLineEdit *mWavelength1;
-    QLineEdit *mWavelength2;
-    QLineEdit *mEET;
-    QLineEdit *mSnapshotsPerObs;
-    QLineEdit *mCoolDown;
-    QLineEdit *mSessionName;
+    QLineEdit *wl1;
+    QLineEdit *wl2;
+    QLineEdit *eet;
+    QLineEdit *cooldown;
+    QLineEdit *shots;
+    QLineEdit *session;
 };
 
 #endif // OBSERVATIONWIDGET_H

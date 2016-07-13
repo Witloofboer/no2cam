@@ -25,10 +25,10 @@ private slots:
     void stopClicked();
 
 private:
-    QPushButton *mTakeOneBtn;
-    QPushButton *mBurstBtn;
-    QPushButton *mRecordBtn;
-    QPushButton *mStopBtn;
+    QPushButton *takeOneBtn;
+    QPushButton *burstBtn;
+    QPushButton *recordBtn;
+    QPushButton *stopBtn;
 };
 
 #endif // CAMERABUTTONPANEL_H

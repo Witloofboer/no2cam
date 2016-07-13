@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += widgets
+QT     += widgets
+CONFIG += c++11
 
 TARGET = gui
 TEMPLATE = lib
