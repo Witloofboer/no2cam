@@ -1,8 +1,8 @@
-#include "AotfCrystal.h"
-
 #include <cmath>
 
-#include "global.h"
+#include "AotfCrystal.h"
+#include "Core.h"
+
 
 inline double pow2(double x) { return x*x; }
 

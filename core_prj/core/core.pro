@@ -9,18 +9,16 @@ CONFIG += c++11
 
 TARGET = core
 TEMPLATE = lib
+CONFIG += staticlib
 
 DEFINES += CORE_LIBRARY
 
 SOURCES += \
     AotfCrystal.cpp \
-    global.cpp \
     Core.cpp
 
-HEADERS +=\
-        core_global.h \
+HEADERS += \
     AotfCrystal.h \
-    global.h \
     Core.h
 
 unix {

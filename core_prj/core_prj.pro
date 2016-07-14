@@ -1,14 +1,9 @@
-CONFIG += c++11
-
 TEMPLATE = subdirs
 
-SUBDIRS += \
-    core \
-    gui \
-    main \
-    mock_up \
-    tests
+CONFIG += c++11
+CONFIG += ordered
 
-main.depends = core gui
-mock_up.depends = core gui
-tests.depends = core
+SUBDIRS += core \
+    core_tst
+
+tst.depends = core_src

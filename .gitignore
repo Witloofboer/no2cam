@@ -1,1 +1,4 @@
 *.pro.user*
+*Makefile*
+*object_script*
+*target_wrapper*

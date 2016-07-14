@@ -1,7 +1,6 @@
-#include "../gui/MainWindow.h"
 #include <QApplication>
 
-#include "../core/global.h"
+#include "../gui/MainWindow.h"
 #include "../core/Core.h"
 
 int main(int argc, char *argv[])

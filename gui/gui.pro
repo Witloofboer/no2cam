@@ -9,6 +9,7 @@ CONFIG += c++11
 
 TARGET = gui
 TEMPLATE = lib
+CONFIG += static
 
 DEFINES += GUI_LIBRARY
 

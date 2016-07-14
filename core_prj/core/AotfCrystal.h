@@ -1,9 +1,7 @@
 #ifndef AOTFCRYSTAL_H
 #define AOTFCRYSTAL_H
 
-#include "core_global.h"
-
-class CORESHARED_EXPORT AotfCrystal
+class AotfCrystal
 {
 public:
     explicit AotfCrystal();

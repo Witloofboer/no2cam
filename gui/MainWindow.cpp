@@ -21,6 +21,8 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     , configurationDlg(new ConfigurationDlg(this))
     , version(version)
 {
+    Q_INIT_RESOURCE(resources);
+
     // -------------------------------------------------------------------------
     // Central widget
     // -------------------------------------------------------------------------
