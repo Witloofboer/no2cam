@@ -5,5 +5,3 @@ CONFIG += ordered
 
 SUBDIRS += core \
     core_tst
-
-tst.depends = core_src

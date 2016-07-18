@@ -9,9 +9,11 @@ CONFIG += c++11
 
 TARGET = core
 TEMPLATE = lib
-CONFIG += staticlib
 
 DEFINES += CORE_LIBRARY
+
+OBJECTS_DIR=../../obj
+DESTDIR=../../bin
 
 SOURCES += \
     AotfCrystal.cpp \

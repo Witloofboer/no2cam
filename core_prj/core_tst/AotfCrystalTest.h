@@ -8,8 +8,10 @@ class AotfCrystalTest : public TestCase
     Q_OBJECT
 
 private slots:
-    void acousticParam();
-    void acousticParam_data();
+    void frequency_power();
+    void frequency_power_data();
+    void wavelength();
+    void wavelength_data();
 };
 
 #endif // AOTFCRYSTALTEST_H

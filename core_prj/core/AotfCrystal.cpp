@@ -13,8 +13,8 @@ AotfCrystal::AotfCrystal()
     loadSetting();
 }
 
-void AotfCrystal::parameters(double alpha_deg, double theta_deg,
-                             double trans_height, double trans_length)
+void AotfCrystal::setParameters(double alpha_deg, double theta_deg,
+                                double trans_height, double trans_length)
 {
     this->alpha_deg = alpha_deg;
     this->theta_deg = theta_deg;
@@ -22,7 +22,7 @@ void AotfCrystal::parameters(double alpha_deg, double theta_deg,
     this->transL = trans_length;
 
     alpha    = alpha_deg * pi / 180.0;
-    theta        = theta_deg * pi / 180.0;
+    theta    = theta_deg * pi / 180.0;
     sin_a    = sin(alpha);
     cos_a    = cos(alpha);
     sin_t    = sin(theta);
@@ -37,6 +37,22 @@ void AotfCrystal::parameters(double alpha_deg, double theta_deg,
     cos2_at  = pow2(cos_at);
 }
 
+double AotfCrystal::wavelength(double freq, double T) const
+{
+    // Solve freq = frequency(lambda, T) for lambda using a Newton's method.
+
+    const double tol = 1e-7; // Tol is 0.1 hz
+
+    double l = 460; // Initial guess is 460 nm
+    double nu = frequency(l, T);
+    while (fabs(freq-nu) > tol)
+    {
+        l += (freq-nu)/(frequency(l+0.5, T)-frequency(l-0.5, T));
+        nu = frequency(l, T);
+    }
+
+    return l;
+}
 
 
 const double rho = 5990.0;  // TeO2 mass density [kg m-3]
@@ -87,7 +103,7 @@ AotfCrystal::acousticParam(double lambda, double T, bool isFrequency) const
 void AotfCrystal::loadSetting()
 {
     gSettings.beginGroup("Crystal parameters");
-    parameters(gSettings.value("cut angle [deg]", 7.65).toDouble(),
+    setParameters(gSettings.value("cut angle [deg]", 7.65).toDouble(),
                gSettings.value("incident angle [deg]", 10.1).toDouble(),
                gSettings.value("transducer height [mm]", 10.0).toDouble(),
                gSettings.value("transducer length [mm]", 15.0).toDouble());

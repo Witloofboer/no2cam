@@ -6,12 +6,12 @@ class AotfCrystal
 public:
     explicit AotfCrystal();
 
-    void parameters(double alpha_deg, double theta_deg,
-                    double trans_height, double trans_length);
+    void setParameters(double alpha_deg, double theta_deg,
+                       double trans_height, double trans_length);
 
-    double acousticFreq(double lambda, double T) const;
-    double acousticPower(double lambda, double T) const;
-
+    double frequency(double lambda, double T) const;
+    double power(double lambda, double T) const;
+    double wavelength(double freq, double T) const;
 
 private:
     void loadSetting();
@@ -38,12 +38,12 @@ private:
     double cos2_at;   // cos²(alpha+theta)
 };
 
-inline double AotfCrystal::acousticFreq(double lambda, double T) const
+inline double AotfCrystal::frequency(double lambda, double T) const
 {
     return acousticParam(lambda, T, true);
 }
 
-inline double AotfCrystal::acousticPower(double lambda, double T) const
+inline double AotfCrystal::power(double lambda, double T) const
 {
     return acousticParam(lambda, T, false);
 }

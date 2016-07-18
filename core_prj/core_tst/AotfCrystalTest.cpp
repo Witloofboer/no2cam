@@ -8,7 +8,7 @@
 
 double f(double x) {return 1e-3*round(x*1e3);}
 
-void AotfCrystalTest::acousticParam()
+void AotfCrystalTest::frequency_power()
 {
     QFETCH(double, lambda);
     QFETCH(double, T);
@@ -20,13 +20,13 @@ void AotfCrystalTest::acousticParam()
     QFETCH(double, power);
 
     AotfCrystal crystal;
-    crystal.parameters(alpha, theta, Ht, Lt);
+    crystal.setParameters(alpha, theta, Ht, Lt);
 
-    QCOMPARE(f(crystal.acousticFreq(lambda, T)), f(freq));
-    QCOMPARE(f(crystal.acousticPower(lambda, T)), f(power));
+    QCOMPARE(f(crystal.frequency(lambda, T)), f(freq));
+    QCOMPARE(f(crystal.power(lambda, T)), f(power));
 }
 
-void AotfCrystalTest::acousticParam_data()
+void AotfCrystalTest::frequency_power_data()
 {
     QTest::addColumn<double>("lambda");
     QTest::addColumn<double>("T");
@@ -44,6 +44,29 @@ void AotfCrystalTest::acousticParam_data()
     QTest::newRow("Theta")  << 450.0 << 21.0 << 7.5 << 11.0 << 10.0 << 10.0 << 142.559 << 151.870;
     QTest::newRow("t_high") << 450.0 << 21.0 << 7.5 << 10.0 << 11.0 << 10.0 << 142.123 << 160.895;
     QTest::newRow("t_wide") << 450.0 << 21.0 << 7.5 << 10.0 << 10.0 << 11.0 << 142.123 << 132.971;
+}
+
+void AotfCrystalTest::wavelength()
+{
+    QFETCH(double, lambda);
+    QFETCH(double, T);
+
+    AotfCrystal crystal;
+
+    const double freq = crystal.frequency(lambda, T);
+
+    QCOMPARE(f(crystal.wavelength(freq, T)), f(lambda));
+}
+
+void AotfCrystalTest::wavelength_data()
+{
+    QTest::addColumn<double>("lambda");
+    QTest::addColumn<double>("T");
+
+    QTest::newRow("0") << 460.0 << 21.0;
+    QTest::newRow("1") << 470.0 << 21.0;
+    QTest::newRow("2") << 460.0 << 31.0;
+    QTest::newRow("3") << 470.0 << 31.0;
 }
 
 static AotfCrystalTest testCase;
