@@ -20,6 +20,7 @@ SOURCES += \
     Core.cpp
 
 HEADERS += \
+    core_global.h \
     AotfCrystal.h \
     Core.h
 

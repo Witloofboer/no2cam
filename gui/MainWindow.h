@@ -3,11 +3,14 @@
 
 #include <QMainWindow>
 #include <QString>
+
+#include "gui_global.h"
+
 class QStackedWidget;
 class QAction;
 class ConfigurationDlg;
 
-class MainWindow : public QMainWindow
+class GUISHARED_EXPORT MainWindow : public QMainWindow
 {
     Q_OBJECT
 

@@ -4,6 +4,8 @@
 #include <QSettings>
 #include <QThread>
 
+#include "core_global.h"
+
 class Core : public QThread
 {
     Q_OBJECT
@@ -12,6 +14,6 @@ public:
 };
 
 extern QSettings gSettings;
-extern Core gCore;
+extern CORESHARED_EXPORT Core gCore;
 
 #endif // CORE_H
