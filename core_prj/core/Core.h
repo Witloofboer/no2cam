@@ -11,6 +11,7 @@ class Core : public QThread
     Q_OBJECT
 public:
     Core();
+
 };
 
 extern QSettings gSettings;

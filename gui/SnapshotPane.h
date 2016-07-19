@@ -18,13 +18,13 @@ private slots:
     void parameterModeSwitch();
 
 private:
-    QRadioButton *opticBtn;
-    QLineEdit *wl;
-    QLineEdit *aF;
-    QLineEdit *aP;
-    QLineEdit *eet;
-    QLineEdit *cooldown;
-    QLineEdit *session;
+    QRadioButton *opticBtn_;
+    QLineEdit *wl_;
+    QLineEdit *aF_;
+    QLineEdit *aP_;
+    QLineEdit *eet_;
+    QLineEdit *cooldown_;
+    QLineEdit *session_;
 };
 
 #endif // SNAPSHOTWIDGET_H

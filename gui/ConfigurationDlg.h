@@ -11,11 +11,11 @@ public:
     ConfigurationDlg(QWidget *parent=0);
 
 private:
-    QLineEdit* cutAngle;   // Cut angle
-    QLineEdit* IncidentAngle;   // Incident angle
-    QLineEdit* transHeight;       // Transducer height
-    QLineEdit* transLength;       // Transducer length
-    QLineEdit* elasticCoeff;     // Photo-elastic coeff.
+    QLineEdit* cutAngle_;       // Cut angle
+    QLineEdit* IncidentAngle_;  // Incident angle
+    QLineEdit* transHeight_;    // Transducer height
+    QLineEdit* transLength_;    // Transducer length
+    QLineEdit* elasticCoeff_;   // Photo-elastic coeff.
 };
 
 #endif // CONFIGURATIONDLG_H

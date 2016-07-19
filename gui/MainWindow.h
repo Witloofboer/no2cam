@@ -37,13 +37,13 @@ private:
     bool okToContinue();
     void notImplemented(const QString& feature);
 
-    QStackedWidget *stackedWidget;
-    QAction *snapshotModeAction;
-    QAction *observationModeAction;
-    QAction *sweepModeAction;
+    QStackedWidget *stackedWidget_;
+    QAction *snapshotModeAction_;
+    QAction *observationModeAction_;
+    QAction *sweepModeAction_;
 
-    ConfigurationDlg *configurationDlg;
-    QString version;
+    ConfigurationDlg *configurationDlg_;
+    QString version_;
 };
 
 #endif // MAINWINDOW_H

@@ -16,12 +16,12 @@ signals:
 public slots:
 
 private:
-    QLineEdit *wl1;
-    QLineEdit *wl2;
-    QLineEdit *wlDelta;
-    QLineEdit *eet;
-    QLineEdit *cooldown;
-    QLineEdit *session;
+    QLineEdit *wl1_;
+    QLineEdit *wl2_;
+    QLineEdit *wlDelta_;
+    QLineEdit *eet_;
+    QLineEdit *cooldown_;
+    QLineEdit *session_;
 };
 
 #endif // SWEEPWIDGET_H

@@ -14,12 +14,12 @@
 
 MainWindow::MainWindow(const QString &version, QWidget *parent)
     : QMainWindow(parent)
-    , stackedWidget(new QStackedWidget)
-    , snapshotModeAction(new QAction("Take &snapshots", this))
-    , observationModeAction(new QAction("Make &observations", this))
-    , sweepModeAction(new QAction("Sweep over &wavelength", this))
-    , configurationDlg(new ConfigurationDlg(this))
-    , version(version)
+    , stackedWidget_(new QStackedWidget)
+    , snapshotModeAction_(new QAction("Take &snapshots", this))
+    , observationModeAction_(new QAction("Make &observations", this))
+    , sweepModeAction_(new QAction("Sweep over &wavelength", this))
+    , configurationDlg_(new ConfigurationDlg(this))
+    , version_(version)
 {
     Q_INIT_RESOURCE(resources);
 
@@ -27,11 +27,11 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     // Central widget
     // -------------------------------------------------------------------------
 
-    stackedWidget->addWidget(new SnapshotPane());
-    stackedWidget->addWidget(new ObservationPane());
-    stackedWidget->addWidget(new SweepingPane());
+    stackedWidget_->addWidget(new SnapshotPane());
+    stackedWidget_->addWidget(new ObservationPane());
+    stackedWidget_->addWidget(new SweepingPane());
 
-    setCentralWidget(stackedWidget);
+    setCentralWidget(stackedWidget_);
 
     // -------------------------------------------------------------------------
     // Actions
@@ -59,30 +59,30 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     connect(exitAction, &QAction::triggered, this, QMainWindow::close);
 
     auto modeGroup = new QActionGroup(this);
-    modeGroup->addAction(snapshotModeAction);
-    modeGroup->addAction(observationModeAction);
-    modeGroup->addAction(sweepModeAction);
+    modeGroup->addAction(snapshotModeAction_);
+    modeGroup->addAction(observationModeAction_);
+    modeGroup->addAction(sweepModeAction_);
 
-    snapshotModeAction->setIcon(QIcon(":/icons/S-blue-24.png"));
-    snapshotModeAction->setIconVisibleInMenu(false);
-    snapshotModeAction->setCheckable(true);
-    snapshotModeAction->setShortcut(QKeySequence("Alt+S"));
-    snapshotModeAction->setStatusTip(tr("Switch to snapshot mode"));
-    connect(snapshotModeAction, QAction::triggered, this, MainWindow::switchMode);
+    snapshotModeAction_->setIcon(QIcon(":/icons/S-blue-24.png"));
+    snapshotModeAction_->setIconVisibleInMenu(false);
+    snapshotModeAction_->setCheckable(true);
+    snapshotModeAction_->setShortcut(QKeySequence("Alt+S"));
+    snapshotModeAction_->setStatusTip(tr("Switch to snapshot mode"));
+    connect(snapshotModeAction_, QAction::triggered, this, MainWindow::switchMode);
 
-    observationModeAction->setIcon(QIcon(":/icons/O-blue-24.png"));
-    observationModeAction->setIconVisibleInMenu(false);
-    observationModeAction->setCheckable(true);
-    observationModeAction->setShortcut(QKeySequence("Alt+O"));
-    observationModeAction->setStatusTip(tr("Switch to observation mode"));
-    connect(observationModeAction, QAction::triggered, this, MainWindow::switchMode);
+    observationModeAction_->setIcon(QIcon(":/icons/O-blue-24.png"));
+    observationModeAction_->setIconVisibleInMenu(false);
+    observationModeAction_->setCheckable(true);
+    observationModeAction_->setShortcut(QKeySequence("Alt+O"));
+    observationModeAction_->setStatusTip(tr("Switch to observation mode"));
+    connect(observationModeAction_, QAction::triggered, this, MainWindow::switchMode);
 
-    sweepModeAction->setIcon(QIcon(":/icons/W-blue-24.png"));
-    sweepModeAction->setIconVisibleInMenu(false);
-    sweepModeAction->setCheckable(true);
-    sweepModeAction->setShortcut(QKeySequence("Alt+W"));
-    sweepModeAction->setStatusTip(tr("Switch to wavelength sweeping mode"));
-    connect(sweepModeAction, QAction::triggered, this, MainWindow::switchMode);
+    sweepModeAction_->setIcon(QIcon(":/icons/W-blue-24.png"));
+    sweepModeAction_->setIconVisibleInMenu(false);
+    sweepModeAction_->setCheckable(true);
+    sweepModeAction_->setShortcut(QKeySequence("Alt+W"));
+    sweepModeAction_->setStatusTip(tr("Switch to wavelength sweeping mode"));
+    connect(sweepModeAction_, QAction::triggered, this, MainWindow::switchMode);
 
     auto cameraStatusAction = new QAction("&Camera status", this);
     connect(cameraStatusAction, QAction::triggered, this, MainWindow::cameraStatus);
@@ -108,9 +108,9 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     fileMenu->addAction(exitAction);
 
     auto modeMenu = menuBar()->addMenu(tr("&Mode"));
-    modeMenu->addAction(snapshotModeAction);
-    modeMenu->addAction(observationModeAction);
-    modeMenu->addAction(sweepModeAction);
+    modeMenu->addAction(snapshotModeAction_);
+    modeMenu->addAction(observationModeAction_);
+    modeMenu->addAction(sweepModeAction_);
 
     auto deviceMenu = menuBar()->addMenu(tr("&Devices"));
     deviceMenu->addAction(cameraStatusAction);
@@ -124,9 +124,9 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     // -------------------------------------------------------------------------
 
     auto toolBar = addToolBar(tr("&Mode"));
-    toolBar->addAction(snapshotModeAction);
-    toolBar->addAction(observationModeAction);
-    toolBar->addAction(sweepModeAction);
+    toolBar->addAction(snapshotModeAction_);
+    toolBar->addAction(observationModeAction_);
+    toolBar->addAction(sweepModeAction_);
     toolBar->addSeparator();
     toolBar->addAction(configureAction);
 
@@ -137,7 +137,7 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     setWindowTitle("NO2 Camera - " + version);
     setWindowIcon(QIcon(":/icons/video-camera-64.png"));
     setFixedSize(sizeHint());
-    snapshotModeAction->setChecked(true);
+    snapshotModeAction_->setChecked(true);
 }
 
 MainWindow::~MainWindow()
@@ -169,27 +169,27 @@ bool MainWindow::saveAsSession()
 
 void MainWindow::switchMode()
 {
-    if (snapshotModeAction->isChecked())
+    if (snapshotModeAction_->isChecked())
     {
-        stackedWidget->setCurrentIndex(0);
+        stackedWidget_->setCurrentIndex(0);
     }
-    else if (observationModeAction->isChecked())
+    else if (observationModeAction_->isChecked())
     {
-        stackedWidget->setCurrentIndex(1);
+        stackedWidget_->setCurrentIndex(1);
     }
-    else if (sweepModeAction->isChecked())
+    else if (sweepModeAction_->isChecked())
     {
-        stackedWidget->setCurrentIndex(2);
+        stackedWidget_->setCurrentIndex(2);
     }
     else
     {
-        configurationDlg->exec();
+        configurationDlg_->exec();
     }
 }
 
 void MainWindow::configure()
 {
-    configurationDlg->exec();
+    configurationDlg_->exec();
 }
 
 void MainWindow::cameraStatus()
@@ -203,7 +203,7 @@ void MainWindow::about()
             (this,
              tr("About NO2_CAM"),
              tr("<h3>NO<sub>2</sub> Camera Control Software</h3>") +
-             "<p>" + tr("Version") + ": " + version + "</p>" +
+             "<p>" + tr("Version") + ": " + version_ + "</p>" +
              tr("<p>Author: Didier Pieroux (didier.pieroux@aeronomie.be)</p>") +
              tr("<p>Copyright 2016 BIRA-IASB</p>") +
              tr("<p>This program is provided AS IS, with NO WARRANTY OF ANY "
@@ -217,7 +217,7 @@ void MainWindow::releaseNotes()
             (this,
              tr("NO2_CAM"),
              "<h2>" + tr("Release notes") + "</h2>" +
-             "<h3>" + tr("Version") + " " + version + "</h3>" +
+             "<h3>" + tr("Version") + " " + version_ + "</h3>" +
              tr("<p>Only the GUI is implemented in this version.</p>"
                 "<p>As a consequence of the lack of logic, the snapshot button"
                 "   remains depressed when clicked. In the final version, it"

@@ -16,25 +16,10 @@ AotfCrystal::AotfCrystal()
 void AotfCrystal::setParameters(double alpha_deg, double theta_deg,
                                 double trans_height, double trans_length)
 {
-    this->alpha_deg = alpha_deg;
-    this->theta_deg = theta_deg;
-    this->transH = trans_height;
-    this->transL = trans_length;
-
-    alpha    = alpha_deg * pi / 180.0;
-    theta    = theta_deg * pi / 180.0;
-    sin_a    = sin(alpha);
-    cos_a    = cos(alpha);
-    sin_t    = sin(theta);
-    cos_t    = cos(theta);
-    sin_at   = sin(alpha+theta);
-    cos_at   = cos(alpha+theta);
-    sin_2a   = sin(2*alpha);
-    cos2_t   = pow2(cos_t);
-    sin2_a   = pow2(sin_a);
-    cos2_a   = pow2(cos_a);
-    sin2_at  = pow2(sin_at);
-    cos2_at  = pow2(cos_at);
+    alpha_deg_ = alpha_deg;
+    theta_deg_ = theta_deg;
+    transH_ = trans_height;
+    transL_ = trans_length;
 }
 
 double AotfCrystal::wavelength(double freq, double T) const
@@ -62,12 +47,27 @@ const double p44 = -0.044;  // Photo-elastic coefficient []
 double
 AotfCrystal::acousticParam(double lambda, double T, bool isFrequency) const
 {
+    const double alpha= alpha_deg_ * pi / 180.0;     // alpha (rad)
+    const double theta= theta_deg_ * pi / 180.0;     // theta (rad)
+    const double sina= sin(alpha);     // sin(alpha)
+    const double cosa= cos(alpha);     // cos(alpha)
+    const double sint= sin(theta);     // sin(thetha)
+    const double cost= cos(theta);     // cos(thetha)
+    const double sinat= sin(alpha+theta);    // sin(alpha+thetha)
+    const double cosat = cos(alpha+theta);    // cos(alpha+thetha)
+    const double sinaa= sin(2*alpha);    // sin(2*alpha)
+    const double sin2a= pow2(sina);    // sin²(alpha)
+    const double cos2a= pow2(cosa);    // cos²(alpha)
+    const double cos2t= pow2(cost);;    // cos²(theta)
+    const double sin2at= pow2(sinat);   // sin²(alpha+theta)
+    const double cos2at= pow2(cosat);   // cos²(alpha+theta)
+
     const double c11 = (5.620-0.00148*T)*1e10;
     const double c12 = (5.120-0.00178*T)*1e10;
     const double c44 = (2.675-0.00020*T)*1e10;
     // Temperature-dependent crystal stiffness coefficients [N m-2]
 
-    const double V2 = (c11-c12)/2/rho*cos2_a + c44/rho*sin2_a;
+    const double V2 = (c11-c12)/2/rho*cos2a + c44/rho*sin2a;
     // Square of the temperature-dependent acoustic wave phase velocity [m2 s-2]
 
     const double l  = lambda * 1e-3;
@@ -80,23 +80,23 @@ AotfCrystal::acousticParam(double lambda, double T, bool isFrequency) const
     const double neT  = neT0*(1 + 18e-6*(T-T0));
     // Temperature-dependent ordinary and extraordinary refractive indices
 
-    const double ni = n0T*neT/sqrt(pow2(neT)*cos2_at + pow2(n0T)*sin2_at);
+    const double ni = n0T*neT/sqrt(pow2(neT)*cos2at + pow2(n0T)*sin2at);
     // Temperature-dependent incident light refractive index
 
     if (isFrequency)
-        return sqrt(V2) * (ni*sin_t - sqrt(pow2(n0T) - pow2(ni)*cos2_t)) / l;
+        return sqrt(V2) * (ni*sint - sqrt(pow2(n0T) - pow2(ni)*cos2t)) / l;
         // Temperature-dependent tuning curve [MHz]
 
-    const double psi = atan((c44-(c11-c12)/2)/(2*rho*V2)*sin_2a);
+    const double psi = atan((c44-(c11-c12)/2)/(2*rho*V2)*sinaa);
     // Temperature-dependent walk-off angle [rad]
 
-    const double p = 0.113*cos_a*cos_at + p44*sin_a*sin_at;
+    const double p = 0.113*cosa*cosat + p44*sina*sinat;
     // Effective photoelastic coefficient
 
     const double M_2 = pow((ni*n0T/sqrt(V2)),3) * pow2(p) / rho;
     // Acousti-optic figure of merit
 
-    return 5e-10*transH*ni/(transL*n0T*M_2)*pow2(l*cos(psi-theta)/cos(psi));
+    return 5e-10*transH_*ni/(transL_*n0T*M_2)*pow2(l*cos(psi-theta)/cos(psi));
     // Acoustic power [mW]
 }
 
@@ -104,8 +104,8 @@ void AotfCrystal::loadSetting()
 {
     gSettings.beginGroup("Crystal parameters");
     setParameters(gSettings.value("cut angle [deg]", 7.65).toDouble(),
-               gSettings.value("incident angle [deg]", 10.1).toDouble(),
-               gSettings.value("transducer height [mm]", 10.0).toDouble(),
-               gSettings.value("transducer length [mm]", 15.0).toDouble());
+                  gSettings.value("incident angle [deg]", 10.1).toDouble(),
+                  gSettings.value("transducer height [mm]", 10.0).toDouble(),
+                  gSettings.value("transducer length [mm]", 15.0).toDouble());
     gSettings.endGroup();
 }
