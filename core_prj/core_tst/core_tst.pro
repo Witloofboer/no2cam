@@ -16,14 +16,12 @@ DESTDIR=../../bin
 
 SOURCES += \
     AotfCrystalTest.cpp \
-    TestCase.cpp \
-    TestHarness.cpp \
-    main_core_tst.cpp
+    CoreTest.cpp \
+    core_tst.cpp
 
 HEADERS += \
     AotfCrystalTest.h \
-    TestCase.h \
-    TestHarness.h
+    CoreTest.h
 
 INCLUDEPATH += $$PWD/../core
 DEPENDPATH += $$PWD/../core

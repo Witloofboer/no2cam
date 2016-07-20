@@ -1,25 +1,40 @@
 #include <cmath>
 
-#include "AotfCrystal.h"
-#include "Core.h"
+#include <QMutex>
+#include <QMutexLocker>
+#include <QSettings>
 
+#include "AotfCrystal.h"
 
 inline double pow2(double x) { return x*x; }
 
 static const double pi = 2*asin(1.0);
 
-AotfCrystal::AotfCrystal()
+AotfCrystal::AotfCrystal(QObject *parent)
+    : QObject(parent)
+    , parametersLock_()
 {
-    loadSetting();
+    restoreSettings();
 }
 
-void AotfCrystal::setParameters(double alpha_deg, double theta_deg,
-                                double trans_height, double trans_length)
+void AotfCrystal::setParameters(Parameters params)
 {
-    alpha_deg_ = alpha_deg;
-    theta_deg_ = theta_deg;
-    transH_ = trans_height;
-    transL_ = trans_length;
+    QMutexLocker lock(&parametersLock_);
+    Q_UNUSED(lock);
+
+    if (params_ != params)
+    {
+        params_ = params;
+        persisteSettings();
+    }
+}
+
+AotfCrystal::Parameters AotfCrystal::getParameters() const
+{
+    QMutexLocker lock(&parametersLock_);
+    Q_UNUSED(lock);
+
+    return params_;
 }
 
 double AotfCrystal::wavelength(double freq, double T) const
@@ -47,20 +62,23 @@ const double p44 = -0.044;  // Photo-elastic coefficient []
 double
 AotfCrystal::acousticParam(double lambda, double T, bool isFrequency) const
 {
-    const double alpha= alpha_deg_ * pi / 180.0;     // alpha (rad)
-    const double theta= theta_deg_ * pi / 180.0;     // theta (rad)
-    const double sina= sin(alpha);     // sin(alpha)
-    const double cosa= cos(alpha);     // cos(alpha)
-    const double sint= sin(theta);     // sin(thetha)
-    const double cost= cos(theta);     // cos(thetha)
-    const double sinat= sin(alpha+theta);    // sin(alpha+thetha)
-    const double cosat = cos(alpha+theta);    // cos(alpha+thetha)
-    const double sinaa= sin(2*alpha);    // sin(2*alpha)
-    const double sin2a= pow2(sina);    // sin²(alpha)
-    const double cos2a= pow2(cosa);    // cos²(alpha)
-    const double cos2t= pow2(cost);;    // cos²(theta)
-    const double sin2at= pow2(sinat);   // sin²(alpha+theta)
-    const double cos2at= pow2(cosat);   // cos²(alpha+theta)
+    const double alpha  = params_.alpha_deg * pi / 180.0; // alpha (rad)
+    const double theta  = params_.theta_deg * pi / 180.0; // theta (rad)
+    const double sina   = sin(alpha);                     // sin(alpha)
+    const double cosa   = cos(alpha);                     // cos(alpha)
+    const double sint   = sin(theta);                     // sin(thetha)
+    const double cost   = cos(theta);                     // cos(thetha)
+    const double sinat  = sin(alpha+theta);               // sin(alpha+thetha)
+    const double cosat  = cos(alpha+theta);               // cos(alpha+thetha)
+    const double sinaa  = sin(2*alpha);                   // sin(2*alpha)
+    const double sin2a  = pow2(sina);                     // sin²(alpha)
+    const double cos2a  = pow2(cosa);                     // cos²(alpha)
+    const double cos2t  = pow2(cost);;                    // cos²(theta)
+    const double sin2at = pow2(sinat);                    // sin²(alpha+theta)
+    const double cos2at = pow2(cosat);                    // cos²(alpha+theta)
+
+    const double &length = params_.transLength;
+    const double &height = params_.transHeight;
 
     const double c11 = (5.620-0.00148*T)*1e10;
     const double c12 = (5.120-0.00178*T)*1e10;
@@ -96,16 +114,43 @@ AotfCrystal::acousticParam(double lambda, double T, bool isFrequency) const
     const double M_2 = pow((ni*n0T/sqrt(V2)),3) * pow2(p) / rho;
     // Acousti-optic figure of merit
 
-    return 5e-10*transH_*ni/(transL_*n0T*M_2)*pow2(l*cos(psi-theta)/cos(psi));
+    return 5e-10*height*ni/(length*n0T*M_2)*pow2(l*cos(psi-theta)/cos(psi));
     // Acoustic power [mW]
 }
 
-void AotfCrystal::loadSetting()
+void AotfCrystal::persisteSettings() const
 {
-    gSettings.beginGroup("Crystal parameters");
-    setParameters(gSettings.value("cut angle [deg]", 7.65).toDouble(),
-                  gSettings.value("incident angle [deg]", 10.1).toDouble(),
-                  gSettings.value("transducer height [mm]", 10.0).toDouble(),
-                  gSettings.value("transducer length [mm]", 15.0).toDouble());
-    gSettings.endGroup();
+    QSettings settings;
+    settings.beginGroup("Crystal");
+    settings.setValue("cut angle [deg]", params_.alpha_deg);
+    settings.setValue("incident angle [deg]", params_.theta_deg);
+    settings.setValue("transducer height [mm]", params_.transHeight);
+    settings.setValue("transducer length [mm]", params_.transLength);
+    settings.endGroup();
+
+}
+
+void AotfCrystal::restoreSettings()
+{
+    QSettings settings;
+
+    Parameters params;
+
+    settings.beginGroup("Crystal");
+    params.alpha_deg = settings.value("cut angle [deg]", 7.65).toDouble();
+    params.theta_deg = settings.value("incident angle [deg]", 10.1).toDouble();
+    params.transHeight = settings.value("transducer height [mm]", 10.0).toDouble();
+    params.transLength = settings.value("transducer length [mm]", 15.0).toDouble();
+    settings.endGroup();
+
+    setParameters(params);
+}
+
+bool operator==(const AotfCrystal::Parameters& lhs,
+                const AotfCrystal::Parameters& rhs)
+{
+    return  lhs.alpha_deg == rhs.alpha_deg &&
+            lhs.theta_deg == rhs.theta_deg &&
+            lhs.transHeight == rhs.transHeight &&
+            lhs.transLength == rhs.transLength;
 }

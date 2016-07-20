@@ -1,17 +1,22 @@
 #ifndef AOTFCRYSTALTEST_H
 #define AOTFCRYSTALTEST_H
 
-#include "TestCase.h"
+#include <QObject>
 
-class AotfCrystalTest : public TestCase
+class AotfCrystalTest : public QObject
 {
     Q_OBJECT
 
 private slots:
+
+    void initTestCase();
+    void cleanupTestCase();
+
     void frequency_power();
     void frequency_power_data();
     void wavelength();
     void wavelength_data();
+    void persisteSettings();
 };
 
 #endif // AOTFCRYSTALTEST_H

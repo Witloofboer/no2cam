@@ -1,6 +1,8 @@
 #ifndef AOTFCRYSTAL_H
 #define AOTFCRYSTAL_H
 
+#include <QMutex>
+#include <QObject>
 #include "core_global.h"
 
 /**
@@ -9,27 +11,31 @@
  * \note In the current version, only a TeO<sub>2</sub> cristal is considered.
  */
 
-class CORESHARED_EXPORT AotfCrystal
+class CORESHARED_EXPORT AotfCrystal: public QObject
 {
 public:
+    Q_OBJECT
+
+public:
+    struct Parameters;
+
     /**
      * Constructs a new AOTF crystal instance.
      *
      * The values of the physical parameters are retreived from the previous
-     * class usage through the execution platform persistence mechanism.
+     * class usage through the platform persistence mechanism.
      */
-    explicit AotfCrystal();
+    explicit AotfCrystal(QObject *parent = 0);
 
     /**
-     * Sets the cystal parameters.
-     *
-     * @param alpha_deg    crystal cut-angle [rad]
-     * @param theta_deg    light incident angle  [rad]
-     * @param trans_height transducer height [mm]
-     * @param trans_length transducer length [mm]
+     * Sets the crystal parameters.
      */
-    void setParameters(double alpha_deg, double theta_deg,
-                       double trans_height, double trans_length);
+    void setParameters(Parameters params);
+
+    /**
+     * Return the cystal parameters.
+     */
+    Parameters getParameters() const;
 
     /**
      * Returns the acoustic frequency matching an optical wavelength at a given
@@ -61,15 +67,52 @@ public:
      */
     double wavelength(double freq, double T) const;
 
+    /**
+     * This structure is a container for the physical parameters of the
+     * crystal.
+     */
+    struct Parameters
+    {
+        double alpha_deg;   /**< crystal cut-angle [rad] */
+        double theta_deg;   /**< light incident angle  [rad] */
+        double transHeight; /**< transducer height [mm] */
+        double transLength; /**< transducer length [mm] */
+
+        friend bool operator==(const AotfCrystal::Parameters& lhs,
+                               const AotfCrystal::Parameters& rhs);
+
+        friend bool operator!=(const AotfCrystal::Parameters& lhs,
+                               const AotfCrystal::Parameters& rhs);
+    };
+
+
 private:
-    void loadSetting();
+    void persisteSettings() const;
+    void restoreSettings();
+
     double acousticParam(double lambda, double T, bool isFrequency) const;
 
-    double alpha_deg_; // alpha [deg]
-    double theta_deg_; // theta [deg]
-    double transH_;    // Transducer height [mm]
-    double transL_;    // Transducer length [mm]
+    Parameters params_;
+    mutable QMutex parametersLock_;
 };
+
+/**
+ * Memberwise equality operator for AotfCrystal::Parameters instances.
+ */
+CORESHARED_EXPORT
+bool operator==(const AotfCrystal::Parameters& lhs,
+                const AotfCrystal::Parameters& rhs);
+
+/**
+ * Memberwise inequality operator for AotfCrystal::Parameters instances.
+ */
+inline
+bool operator!=(const AotfCrystal::Parameters& lhs,
+                const AotfCrystal::Parameters& rhs)
+{
+    return !(lhs == rhs);
+}
+
 
 inline double AotfCrystal::frequency(double lambda, double T) const
 {

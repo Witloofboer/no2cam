@@ -15,7 +15,6 @@ private:
     QLineEdit* IncidentAngle_;  // Incident angle
     QLineEdit* transHeight_;    // Transducer height
     QLineEdit* transLength_;    // Transducer length
-    QLineEdit* elasticCoeff_;   // Photo-elastic coeff.
 };
 
 #endif // CONFIGURATIONDLG_H

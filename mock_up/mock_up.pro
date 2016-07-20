@@ -15,7 +15,7 @@ OBJECTS_DIR=../obj
 DESTDIR=../bin
 
 SOURCES += \
-    main_Mock_up.cpp
+    mock_up.cpp
 
 HEADERS  +=
 

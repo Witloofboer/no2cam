@@ -14,7 +14,6 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     , IncidentAngle_(new_NumberEdit(" 09.9"))
     , transHeight_(new_NumberEdit(" 09.9"))
     , transLength_(new_NumberEdit(" 09.9"))
-    , elasticCoeff_(new_NumberEdit("-09.9"))
 {
     setWindowTitle(tr("Configuration"));
 
@@ -25,11 +24,9 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     putInGrid(IncidentAngle_, crystalGrid, row++, "Incident angle", "[deg]");
     putInGrid(transHeight_, crystalGrid, row++, "Transducer height", "[mm]");
     putInGrid(transLength_, crystalGrid, row++, "Transducer length", "[mm]");
-    putInGrid(elasticCoeff_, crystalGrid, row++, "Photo-elastic coeff", "x 10<sup>-3</sup>");
 
     auto crystalBox = new QGroupBox(tr("Crystal parameters"));
     crystalBox->setLayout(crystalGrid);
-
 
     auto buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok |
                                           QDialogButtonBox::Cancel);

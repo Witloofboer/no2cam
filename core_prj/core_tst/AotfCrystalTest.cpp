@@ -4,9 +4,18 @@
 #include "../core/AotfCrystal.h"
 
 #include "AotfCrystalTest.h"
-#include "TestHarness.h"
 
 double f(double x) {return 1e-3*round(x*1e3);}
+
+void AotfCrystalTest::initTestCase()
+{
+}
+
+void AotfCrystalTest::cleanupTestCase()
+{
+}
+
+
 
 void AotfCrystalTest::frequency_power()
 {
@@ -20,7 +29,7 @@ void AotfCrystalTest::frequency_power()
     QFETCH(double, power);
 
     AotfCrystal crystal;
-    crystal.setParameters(alpha, theta, Ht, Lt);
+    crystal.setParameters({alpha, theta, Ht, Lt});
 
     QCOMPARE(f(crystal.frequency(lambda, T)), f(freq));
     QCOMPARE(f(crystal.power(lambda, T)), f(power));
@@ -52,6 +61,7 @@ void AotfCrystalTest::wavelength()
     QFETCH(double, T);
 
     AotfCrystal crystal;
+    crystal.setParameters({7.65, 10.1, 10.0, 15.0});
 
     const double freq = crystal.frequency(lambda, T);
 
@@ -69,4 +79,18 @@ void AotfCrystalTest::wavelength_data()
     QTest::newRow("3") << 470.0 << 31.0;
 }
 
-static AotfCrystalTest testCase;
+void AotfCrystalTest::persisteSettings()
+{
+    AotfCrystal::Parameters p1 = {1.0, 2.0, 3.0, 4.0};
+    AotfCrystal::Parameters p2 = {1.1, 2.2, 3.3, 4.4};
+
+    AotfCrystal c1;
+    c1.setParameters(p1);
+
+    AotfCrystal c2;
+    QVERIFY(c2.getParameters() == p1);
+    c2.setParameters(p2);
+
+    AotfCrystal c3;
+    QVERIFY(c3.getParameters() == p2);
+}
