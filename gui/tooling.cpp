@@ -2,27 +2,51 @@
 
 #include <QGridLayout>
 #include <QLabel>
-#include <QLineEdit>
 #include <QHBoxLayout>
 
 const QSizePolicy fixedSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-QLineEdit *new_NumberEdit(const QString &inputMask)
+IntLineEdit::IntLineEdit(const QString &inputMask)
 {
-    auto result = new QLineEdit();
-
-    result->setAlignment(Qt::AlignRight);
-    result->setInputMask(inputMask);
-    result->setText(inputMask);
-    result->setFixedWidth((2+inputMask.length()) * result->fontMetrics().width('0'));
-    result->setSizePolicy(fixedSizePolicy);
-
-    return result;
+    setAlignment(Qt::AlignRight);
+    setInputMask(inputMask);
+    setText(inputMask);
+    setFixedWidth((2+inputMask.length()) * fontMetrics().width('0'));
+    setSizePolicy(fixedSizePolicy);
 }
 
-QLineEdit *new_WavelengthEdit() { return new_NumberEdit("999.9"); }
-QLineEdit *new_EetEdit()        { return new_NumberEdit("009.9"); }
-QLineEdit *new_CooldownEdit()   { return new_NumberEdit("009.9"); }
+void IntLineEdit::setValue(int value)
+{
+     setText(QString::number(value));
+}
+
+int IntLineEdit::value()
+{
+     return text().toInt();
+}
+
+DoubleLineEdit::DoubleLineEdit(const QString &inputMask)
+{
+    setAlignment(Qt::AlignRight);
+    setInputMask(inputMask);
+    setText(inputMask);
+    setFixedWidth((2+inputMask.length()) * fontMetrics().width('0'));
+    setSizePolicy(fixedSizePolicy);
+}
+
+void DoubleLineEdit::setValue(double value)
+{
+     setText(QString::number(value));
+}
+
+double DoubleLineEdit::value()
+{
+     return text().toDouble();
+}
+
+DoubleLineEdit *new_WavelengthEdit() { return new DoubleLineEdit("999.9"); }
+DoubleLineEdit *new_EetEdit()        { return new DoubleLineEdit("009.9"); }
+DoubleLineEdit *new_CooldownEdit()   { return new DoubleLineEdit("009.9"); }
 
 void putInGrid(QWidget* widget,
                QGridLayout *grid,

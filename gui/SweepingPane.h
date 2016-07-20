@@ -4,6 +4,7 @@
 #include "AbstractMainPane.h"
 
 class QLineEdit;
+class DoubleLineEdit;
 
 class SweepingPane : public AbstractMainPane
 {
@@ -16,12 +17,12 @@ signals:
 public slots:
 
 private:
-    QLineEdit *wl1_;
-    QLineEdit *wl2_;
-    QLineEdit *wlDelta_;
-    QLineEdit *eet_;
-    QLineEdit *cooldown_;
-    QLineEdit *session_;
+    DoubleLineEdit *wl1_;
+    DoubleLineEdit *wl2_;
+    DoubleLineEdit *wlDelta_;
+    DoubleLineEdit *eet_;
+    DoubleLineEdit *cooldown_;
+    QLineEdit  *session_;
 };
 
 #endif // SWEEPWIDGET_H

@@ -4,6 +4,7 @@
 #include "AbstractMainPane.h"
 
 class QLineEdit;
+class DoubleLineEdit;
 
 class ObservationPane : public AbstractMainPane
 {
@@ -14,12 +15,12 @@ public:
 signals:
 
 private:
-    QLineEdit *wl1_;
-    QLineEdit *wl2_;
-    QLineEdit *eet_;
-    QLineEdit *cooldown_;
-    QLineEdit *shots_;
-    QLineEdit *session_;
+    DoubleLineEdit *wl1_;
+    DoubleLineEdit *wl2_;
+    DoubleLineEdit *eet_;
+    DoubleLineEdit *cooldown_;
+    DoubleLineEdit *shots_;
+    QLineEdit  *session_;
 };
 
 #endif // OBSERVATIONWIDGET_H

@@ -1,16 +1,32 @@
-#ifndef NUMBEREDITWIDGET_H
-#define NUMBEREDITWIDGET_H
+#ifndef TOOLING_H
+#define TOOLING_H
+
+#include <QLineEdit>
 
 class QGridLayout;
-class QLineEdit;
 class QString;
 class QWidget;
 
-QLineEdit *new_NumberEdit(const QString &inputMask);
+class IntLineEdit : public QLineEdit
+{
+public:
+    IntLineEdit(const QString &inputMask);
+    void setValue(int setValue);
+    int value();
+};
 
-QLineEdit *new_WavelengthEdit();
-QLineEdit *new_EetEdit();
-QLineEdit *new_CooldownEdit();
+class DoubleLineEdit : public QLineEdit
+{
+public:
+    DoubleLineEdit(const QString &inputMask);
+    void setValue(double setValue);
+    double value();
+};
+
+
+DoubleLineEdit *new_WavelengthEdit();
+DoubleLineEdit *new_EetEdit();
+DoubleLineEdit *new_CooldownEdit();
 
 void putInGrid(QWidget* widget,
                QGridLayout* grid,
@@ -19,4 +35,4 @@ void putInGrid(QWidget* widget,
                const QString &unit);
 
 
-#endif // NUMBEREDITWIDGET_H
+#endif // TOOLING_H

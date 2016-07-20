@@ -3,18 +3,30 @@
 
 #include <QDialog>
 
-class QLineEdit;
+#include <core/Crystal.h>
+
+class DoubleLineEdit;
 
 class ConfigurationDlg : public QDialog
 {
+    Q_OBJECT
+
 public:
     ConfigurationDlg(QWidget *parent=0);
 
+public slots:
+    void display();
+
+signals:
+    void parametersUpdated(CrystalParameters crystalP);
+
 private:
-    QLineEdit* cutAngle_;       // Cut angle
-    QLineEdit* IncidentAngle_;  // Incident angle
-    QLineEdit* transHeight_;    // Transducer height
-    QLineEdit* transLength_;    // Transducer length
+    DoubleLineEdit* cutAngle_;       // Cut angle
+    DoubleLineEdit* incidentAngle_;  // Incident angle
+    DoubleLineEdit* transHeight_;    // Transducer height
+    DoubleLineEdit* transLength_;    // Transducer length
+
+    CrystalParameters parameters_;
 };
 
 #endif // CONFIGURATIONDLG_H

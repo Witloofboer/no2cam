@@ -4,7 +4,7 @@
 #include <QObject>
 
 #include "core_global.h"
-#include "AotfCrystal.h"
+#include "Crystal.h"
 
 class CORESHARED_EXPORT Core : public QObject
 {
@@ -12,17 +12,15 @@ class CORESHARED_EXPORT Core : public QObject
 public:
     Core();
 
-    AotfCrystal::Parameters getAotfCrystalParameters() const;
-
 public slots:
 
     /**
      * Requests the update of the parameters AOTF crystal.
      */
-    void updateAotfCrystalParameters(AotfCrystal::Parameters params);
+    void updateParameters();
 
 private:
-    AotfCrystal aotfCrystal_;
+    Crystal aotfCrystal_;
 };
 
 extern CORESHARED_EXPORT Core gCore;

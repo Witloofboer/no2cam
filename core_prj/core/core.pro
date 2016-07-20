@@ -16,13 +16,13 @@ OBJECTS_DIR=../../obj
 DESTDIR=../../bin
 
 SOURCES += \
-    AotfCrystal.cpp \
-    Core.cpp
+    Core.cpp \
+    Crystal.cpp
 
 HEADERS += \
     core_global.h \
-    AotfCrystal.h \
-    Core.h
+    Core.h \
+    Crystal.h
 
 unix {
     target.path = /usr/lib

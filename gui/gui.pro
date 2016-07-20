@@ -15,6 +15,7 @@ DEFINES += GUI_LIBRARY
 OBJECTS_DIR=../obj
 DESTDIR=../bin
 
+INCLUDEPATH += ../core_prj/
 
 SOURCES +=\
     tooling.cpp \
@@ -46,3 +47,10 @@ unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../bin/ -lcore
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../bin/ -lcore
+else:unix: LIBS += -L$$OUT_PWD/../bin/ -lcore
+
+INCLUDEPATH += $$PWD/../core_prj/core
+DEPENDPATH += $$PWD/../core_prj/core

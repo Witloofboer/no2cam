@@ -15,7 +15,6 @@ SweepingPane::SweepingPane(QWidget *parent)
     , eet_(new_EetEdit())
     , cooldown_(new_CooldownEdit())
     , session_(new QLineEdit)
-
 {
     // Parameter box -----------------------------------------------------------
 

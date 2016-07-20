@@ -6,9 +6,9 @@ Core::Core()
 {
 }
 
-void Core::updateAotfCrystalParameters(AotfCrystal::Parameters params)
+void Core::updateParameters()
 {
-    aotfCrystal_.setParameters(params);
+    aotfCrystal_.updateParameters();
 }
 
 Core gCore;

@@ -12,6 +12,8 @@
 #include "SweepingPane.h"
 #include "ConfigurationDlg.h"
 
+#include "core/Crystal.h"
+
 MainWindow::MainWindow(const QString &version, QWidget *parent)
     : QMainWindow(parent)
     , stackedWidget_(new QStackedWidget)
@@ -51,7 +53,7 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     configureAction->setIconVisibleInMenu(false);
     configureAction->setShortcut(QKeySequence("Alt+C"));
     configureAction->setStatusTip(tr("Switch to configuration mode"));
-    connect(configureAction, QAction::triggered, this, MainWindow::configure);
+    connect(configureAction, QAction::triggered, configurationDlg_, ConfigurationDlg::display);
 
     auto exitAction = new QAction("E&xit", this);
     exitAction->setShortcut(QKeySequence("Alt+F4"));

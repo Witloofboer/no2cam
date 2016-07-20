@@ -6,6 +6,8 @@
 class QLineEdit;
 class QRadioButton;
 
+class DoubleLineEdit;
+
 class SnapshotPane : public AbstractMainPane
 {
     Q_OBJECT
@@ -19,12 +21,12 @@ private slots:
 
 private:
     QRadioButton *opticBtn_;
-    QLineEdit *wl_;
-    QLineEdit *aF_;
-    QLineEdit *aP_;
-    QLineEdit *eet_;
-    QLineEdit *cooldown_;
-    QLineEdit *session_;
+    DoubleLineEdit *wl_;
+    DoubleLineEdit *aF_;
+    DoubleLineEdit *aP_;
+    DoubleLineEdit *eet_;
+    DoubleLineEdit *cooldown_;
+    QLineEdit  *session_;
 };
 
 #endif // SNAPSHOTWIDGET_H

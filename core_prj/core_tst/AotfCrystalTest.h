@@ -16,7 +16,7 @@ private slots:
     void frequency_power_data();
     void wavelength();
     void wavelength_data();
-    void persisteSettings();
+    void persisteParameters();
 };
 
 #endif // AOTFCRYSTALTEST_H

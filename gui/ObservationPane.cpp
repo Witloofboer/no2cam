@@ -13,7 +13,7 @@ ObservationPane::ObservationPane(QWidget *parent)
     , wl2_(new_WavelengthEdit())
     , eet_(new_EetEdit())
     , cooldown_(new_CooldownEdit())
-    , shots_(new_NumberEdit("00099"))
+    , shots_(new DoubleLineEdit("00099"))
     , session_(new QLineEdit)
 {
     // Parameter box -----------------------------------------------------------

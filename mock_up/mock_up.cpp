@@ -1,6 +1,7 @@
 #include <QApplication>
 
 #include "../gui/MainWindow.h"
+#include "../core/Core.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,6 +12,8 @@ int main(int argc, char *argv[])
 
     MainWindow w("0.1.0 (mockup)");
     w.show();
+
+    Core core;
 
     int result = a.exec();
 
