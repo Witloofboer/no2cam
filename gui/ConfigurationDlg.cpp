@@ -35,8 +35,8 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     connect(buttonBox, QDialogButtonBox::accepted, this, QDialog::accept);
     connect(buttonBox, QDialogButtonBox::rejected, this, QDialog::reject);
 
-    connect(this,   ConfigurationDlg::parametersUpdated,
-            &gCore, Core::updateParameters);
+    connect(this, ConfigurationDlg::parametersUpdated,
+            Core::singleton(), Core::setParameters);
 
     auto layout = new QVBoxLayout;
     layout->addWidget(crystalBox);

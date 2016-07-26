@@ -47,16 +47,6 @@ public:
     explicit Crystal(QObject *parent = 0);
 
     /**
-     * Sets the crystal parameters.
-     */
-    void setParameters(CrystalParameters params);
-
-    /**
-     * Updates the parameters from the persistent area.
-     */
-    void updateParameters();
-
-    /**
      * Returns the acoustic frequency matching an optical wavelength at a given
      * crystal temperature.
      *
@@ -86,10 +76,15 @@ public:
      */
     double wavelength(double freq, double T) const;
 
+    /**
+     * Sets the crystal parameters.
+     */
+    void setParameters(const CrystalParameters& params);
+
 private:
     double acousticParam(double lambda, double T, bool isFrequency) const;
 
-    CrystalParameters params_;
+    CrystalParameters crystalParams;
 };
 
 inline double Crystal::frequency(double lambda, double T) const

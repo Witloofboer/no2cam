@@ -3,8 +3,7 @@
 
 #include <QDialog>
 
-#include <core/Crystal.h>
-
+class CrystalParameters;
 class DoubleLineEdit;
 
 class ConfigurationDlg : public QDialog
@@ -18,15 +17,13 @@ public slots:
     void display();
 
 signals:
-    void parametersUpdated(CrystalParameters crystalP);
+    void parametersUpdated(const CrystalParameters& params);
 
 private:
     DoubleLineEdit* cutAngle_;       // Cut angle
     DoubleLineEdit* incidentAngle_;  // Incident angle
     DoubleLineEdit* transHeight_;    // Transducer height
     DoubleLineEdit* transLength_;    // Transducer length
-
-    CrystalParameters parameters_;
 };
 
 #endif // CONFIGURATIONDLG_H

@@ -13,9 +13,11 @@ int main(int argc, char *argv[])
     MainWindow w("0.1.0 (mockup)");
     w.show();
 
-    Core core;
+    Core::singleton()->start();
 
+    qDebug("Starting GUI thread");
     int result = a.exec();
 
+    Core::singleton()->wait();
     return result;
 }

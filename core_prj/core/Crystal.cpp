@@ -11,16 +11,13 @@ static const double pi = 2*asin(1.0);
 Crystal::Crystal(QObject *parent)
     : QObject(parent)
 {
+    crystalParams.restore();
 }
 
-void Crystal::setParameters(CrystalParameters params)
+void Crystal::setParameters(const CrystalParameters &params)
 {
-    params_ = params;
-}
-
-void Crystal::updateParameters()
-{
-    params_.restore();
+    qDebug("Setting crystal parameters");
+    crystalParams = params;
 }
 
 double Crystal::wavelength(double freq, double T) const
@@ -47,8 +44,8 @@ const double p44 = -0.044;  // Photo-elastic coefficient []
 double
 Crystal::acousticParam(double lambda, double T, bool isFrequency) const
 {
-    const double alpha  = params_.alpha_deg * pi / 180.0; // alpha (rad)
-    const double theta  = params_.theta_deg * pi / 180.0; // theta (rad)
+    const double alpha  = crystalParams.alpha_deg * pi / 180.0; // alpha (rad)
+    const double theta  = crystalParams.theta_deg * pi / 180.0; // theta (rad)
     const double sina   = sin(alpha);                     // sin(alpha)
     const double cosa   = cos(alpha);                     // cos(alpha)
     const double sint   = sin(theta);                     // sin(thetha)
@@ -62,8 +59,8 @@ Crystal::acousticParam(double lambda, double T, bool isFrequency) const
     const double sin2at = pow2(sinat);                    // sin²(alpha+theta)
     const double cos2at = pow2(cosat);                    // cos²(alpha+theta)
 
-    const double &length = params_.transLength;
-    const double &height = params_.transHeight;
+    const double &length = crystalParams.transLength;
+    const double &height = crystalParams.transHeight;
 
     const double c11 = (5.620-0.00148*T)*1e10;
     const double c12 = (5.120-0.00178*T)*1e10;
@@ -105,6 +102,8 @@ Crystal::acousticParam(double lambda, double T, bool isFrequency) const
 
 void CrystalParameters::persiste() const
 {
+    qDebug("Persisting crystal parameters");
+
     QSettings settings;
 
     settings.beginGroup("Crystal");
@@ -117,6 +116,7 @@ void CrystalParameters::persiste() const
 
 void CrystalParameters::restore()
 {
+    qDebug("Restoring crystal parameters");
     QSettings settings;
 
     settings.beginGroup("Crystal");

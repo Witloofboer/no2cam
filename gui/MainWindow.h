@@ -6,8 +6,9 @@
 
 #include "gui_global.h"
 
-class QStackedWidget;
 class QAction;
+class QClauseEvent;
+class QStackedWidget;
 class ConfigurationDlg;
 
 class GUISHARED_EXPORT MainWindow : public QMainWindow
@@ -17,6 +18,15 @@ class GUISHARED_EXPORT MainWindow : public QMainWindow
 public:
     MainWindow(const QString &version, QWidget *parent = 0);
     ~MainWindow();
+
+signals:
+    /**
+     * This signals is emitted when the application has to exit.
+     */
+    void shutdown();
+
+protected:
+    void closeEvent(QCloseEvent *event) override;
 
 private slots:
     void newSession();

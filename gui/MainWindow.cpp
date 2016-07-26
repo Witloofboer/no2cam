@@ -2,6 +2,7 @@
 
 #include <QAction>
 #include <QActionGroup>
+#include <QCloseEvent>
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QToolBar>
@@ -12,6 +13,7 @@
 #include "SweepingPane.h"
 #include "ConfigurationDlg.h"
 
+#include "core.h"
 #include "core/Crystal.h"
 
 MainWindow::MainWindow(const QString &version, QWidget *parent)
@@ -140,11 +142,18 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     setWindowIcon(QIcon(":/icons/video-camera-64.png"));
     setFixedSize(sizeHint());
     snapshotModeAction_->setChecked(true);
+
+    connect(this, MainWindow::shutdown, Core::singleton(), Core::shutdown);
 }
 
 MainWindow::~MainWindow()
 {
+}
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    emit shutdown();
+    QMainWindow::closeEvent(event);
 }
 
 void MainWindow::newSession()
