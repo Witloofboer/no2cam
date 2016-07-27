@@ -15,6 +15,7 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     , incidentAngle_(new DoubleLineEdit(" 09.9"))
     , transHeight_(new DoubleLineEdit(" 09.9"))
     , transLength_(new DoubleLineEdit(" 09.9"))
+    , params_(new CrystalParameters)
 {
     setWindowTitle(tr("Configuration"));
 
@@ -34,7 +35,6 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
 
     connect(buttonBox, QDialogButtonBox::accepted, this, QDialog::accept);
     connect(buttonBox, QDialogButtonBox::rejected, this, QDialog::reject);
-
     connect(this, ConfigurationDlg::parametersUpdated,
             Core::singleton(), Core::setParameters);
 
@@ -42,32 +42,38 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     layout->addWidget(crystalBox);
     layout->addWidget(buttonBox);
     setLayout(layout);
+
+    // Initial population
+    params_->restore();
+    cutAngle_->setValue(params_->alpha_deg);
+    incidentAngle_->setValue(params_->theta_deg);
+    transHeight_->setValue(params_->transHeight);
+    transLength_->setValue(params_->transLength);
+    emit parametersUpdated(*params_);
+}
+
+ConfigurationDlg::~ConfigurationDlg()
+{
+    delete params_;
 }
 
 void ConfigurationDlg::display()
 {
-    CrystalParameters inParams;
-    inParams.restore();
-
-    cutAngle_->setValue(inParams.alpha_deg);
-    incidentAngle_->setValue(inParams.theta_deg);
-    transHeight_->setValue(inParams.transHeight);
-    transLength_->setValue(inParams.transLength);
-
     auto code = QDialog::exec();
 
     if (code == DialogCode::Accepted)
     {
-        CrystalParameters outParams;
-        outParams.alpha_deg = cutAngle_->value();
-        outParams.theta_deg = incidentAngle_->value();
-        outParams.transHeight = transHeight_->value();
-        outParams.transLength = transLength_->value();
-
-        if (inParams != outParams)
+        if (params_->alpha_deg != cutAngle_->value() ||
+            params_->theta_deg != incidentAngle_->value() ||
+            params_->transHeight != transHeight_->value() ||
+            params_->transLength != transLength_->value())
         {
-            outParams.persiste();
-            emit parametersUpdated(outParams);
+            params_->alpha_deg = cutAngle_->value();
+            params_->theta_deg = incidentAngle_->value();
+            params_->transHeight = transHeight_->value();
+            params_->transLength = transLength_->value();
+            params_->persiste();
+            emit parametersUpdated(*params_);
         }
     }
 }

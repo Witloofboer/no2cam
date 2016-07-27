@@ -10,9 +10,7 @@ static const double pi = 2*asin(1.0);
 
 Crystal::Crystal(QObject *parent)
     : QObject(parent)
-{
-    crystalParams.restore();
-}
+{}
 
 void Crystal::setParameters(const CrystalParameters &params)
 {

@@ -12,6 +12,7 @@ class ConfigurationDlg : public QDialog
 
 public:
     ConfigurationDlg(QWidget *parent=0);
+    ~ConfigurationDlg();
 
 public slots:
     void display();
@@ -24,6 +25,8 @@ private:
     DoubleLineEdit* incidentAngle_;  // Incident angle
     DoubleLineEdit* transHeight_;    // Transducer height
     DoubleLineEdit* transLength_;    // Transducer length
+
+    CrystalParameters* params_;
 };
 
 #endif // CONFIGURATIONDLG_H

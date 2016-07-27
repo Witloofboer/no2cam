@@ -25,6 +25,7 @@ struct CORESHARED_EXPORT CrystalParameters
                            const CrystalParameters& rhs);
 };
 
+Q_DECLARE_METATYPE(CrystalParameters)
 
 /**
  * The AotfCrystal class accounsts for the AOTF crystal setup behaviour.

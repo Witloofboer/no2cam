@@ -7,6 +7,8 @@
 static QThread *thread_ = nullptr;
 static Core *singleton_ = nullptr;
 
+static int i_ = qRegisterMetaType<CrystalParameters>();
+
 Core::Core()
     : QObject()
     , crystal_(new Crystal(this))
