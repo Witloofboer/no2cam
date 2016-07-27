@@ -2,46 +2,61 @@
 #include <QThread>
 
 #include "Core.h"
-#include "CoreThread.h"
 #include "Crystal.h"
+
+static QThread *thread_ = nullptr;
+static Core *singleton_ = nullptr;
 
 Core::Core()
     : QObject()
     , crystal_(new Crystal(this))
-    , thread_(new CoreThread)
 {
 }
 
 Core::~Core()
 {
     delete crystal_;
-    delete thread_;
+}
+
+void Core::init()
+{
+    qDebug("Initialising core layer");
+    thread_ = new QThread;
+    singleton_ = new Core;
+
+    QObject::connect(thread_, QThread::finished, singleton_, Core::shutdown_);
 }
 
 void Core::start()
 {
+    qDebug("Moving core singleton to core thread");
+    singleton_->moveToThread(thread_);
+
     qDebug("Starting core thread");
     thread_->start();
 }
 
-void Core::wait()
+void Core::shutdown()
 {
-    qDebug("Waiting core thread");
+    qDebug("Shutting down core thread");
+    thread_->exit();
     thread_->wait();
 }
 
 Core *Core::singleton()
 {
-    static Core *core = new Core();
-
-    return core;
+    return singleton_;
 }
 
 
-void Core::shutdown()
+void Core::finalise()
 {
-    qDebug("Exiting core thread");
-    thread_->exit();
+    qDebug("Finalising core layer");
+    delete singleton_;
+    delete thread_;
+
+    singleton_ = nullptr;
+    thread_ = nullptr;
 }
 
 
@@ -53,4 +68,10 @@ void Core::setParameters(const CrystalParameters &params)
 void Core::stopDevices()
 {
     qDebug("Stopping devices");
+}
+
+void Core::shutdown_()
+{
+    qDebug("Moving core singleton to main thread");
+    moveToThread(QCoreApplication::instance()->thread());
 }

@@ -19,12 +19,6 @@ public:
     MainWindow(const QString &version, QWidget *parent = 0);
     ~MainWindow();
 
-signals:
-    /**
-     * This signals is emitted when the application has to exit.
-     */
-    void shutdown();
-
 protected:
     void closeEvent(QCloseEvent *event) override;
 

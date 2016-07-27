@@ -25,26 +25,44 @@ public:
     virtual ~Core();
 
     /**
-     * Starts the core layer thread and move the core singleton to it.
+     * Initialises the core layer.
      */
-    void start();
+    static void init();
+
 
     /**
-     * Wait that the core layer thread ends. This method has to be called from
-     * the main thread. At the end of the execution the core singleton is moved
-     * back to the main thread.
+     * Starts the core layer thread.
+     *
+     * \note: the core singleton is moved to that thread.
+     */
+    static void start();
+
+
+    /**
+     * Shutdowns the core layer thread.
+     *
+     * \note:
+     *     1. The core singleton is moved back to the main thread.
+     *     2. The call waits for the end of the thread.
     */
-    void wait();
+    static void shutdown();
+
+
+    /**
+     * Initialises the core layer.
+     */
+    static void finalise();
+
 
     /**
      * Return the core singleton.
      */
     static Core *singleton();
 
-public slots:
 
+public slots:
     /**
-     * Set the parameters.
+     * Sets the parameters.
      */
     void setParameters(const CrystalParameters& params);
 
@@ -53,14 +71,11 @@ public slots:
       */
     void stopDevices();
 
-    /**
-     * Requests the shutdown of the core layer.
-     */
-    void shutdown();
+private slots:
+    void shutdown_();
 
 private:
     Crystal* crystal_;
-    CoreThread* thread_;
 };
 
 #endif // CORE_H

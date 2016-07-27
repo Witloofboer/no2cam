@@ -142,8 +142,6 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     setWindowIcon(QIcon(":/icons/video-camera-64.png"));
     setFixedSize(sizeHint());
     snapshotModeAction_->setChecked(true);
-
-    connect(this, MainWindow::shutdown, Core::singleton(), Core::shutdown);
 }
 
 MainWindow::~MainWindow()
@@ -152,7 +150,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    emit shutdown();
     QMainWindow::closeEvent(event);
 }
 

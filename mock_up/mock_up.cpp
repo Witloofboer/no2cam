@@ -1,23 +1,29 @@
 #include <QApplication>
 
+
 #include "../gui/MainWindow.h"
 #include "../core/Core.h"
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    qSetMessagePattern("%{time hh:mm:ss} (%{threadid}) %{type}: %{message}");
+    QApplication application(argc, argv);
 
     QCoreApplication::setOrganizationName("BIRA-IASB");
     QCoreApplication::setApplicationName("NO2_Cam");
 
+    Core::init();
+
     MainWindow w("0.1.0 (mockup)");
     w.show();
 
-    Core::singleton()->start();
+    Core::start();
 
-    qDebug("Starting GUI thread");
-    int result = a.exec();
+    int result = application.exec();
 
-    Core::singleton()->wait();
+    Core::shutdown();
+
+    Core::finalise();
+
     return result;
 }
