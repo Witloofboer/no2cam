@@ -8,15 +8,23 @@ inline double pow2(double x) { return x*x; }
 
 static const double pi = 2*asin(1.0);
 
+namespace core {
+
+//------------------------------------------------------------------------------
+
 Crystal::Crystal(QObject *parent)
     : QObject(parent)
 {}
+
+//------------------------------------------------------------------------------
 
 void Crystal::setParameters(const CrystalParameters &params)
 {
     qDebug("Setting crystal parameters");
     crystalParams = params;
 }
+
+//------------------------------------------------------------------------------
 
 double Crystal::wavelength(double freq, double T) const
 {
@@ -35,12 +43,13 @@ double Crystal::wavelength(double freq, double T) const
     return l;
 }
 
+//------------------------------------------------------------------------------
+
 const double rho = 5990.0;  // TeO2 mass density [kg m-3]
 const double T0  = 21.0;    // Ref. temperature [°]
 const double p44 = -0.044;  // Photo-elastic coefficient []
 
-double
-Crystal::acousticParam(double lambda, double T, bool isFrequency) const
+double Crystal::acousticParam(double lambda, double T, bool isFrequency) const
 {
     const double alpha  = crystalParams.alpha_deg * pi / 180.0; // alpha (rad)
     const double theta  = crystalParams.theta_deg * pi / 180.0; // theta (rad)
@@ -98,6 +107,8 @@ Crystal::acousticParam(double lambda, double T, bool isFrequency) const
     // Acoustic power [mW]
 }
 
+//------------------------------------------------------------------------------
+
 void CrystalParameters::persiste() const
 {
     qDebug("Persisting crystal parameters");
@@ -112,6 +123,8 @@ void CrystalParameters::persiste() const
     settings.endGroup();
 }
 
+//------------------------------------------------------------------------------
+
 void CrystalParameters::restore()
 {
     qDebug("Restoring crystal parameters");
@@ -125,6 +138,8 @@ void CrystalParameters::restore()
     settings.endGroup();
 }
 
+//------------------------------------------------------------------------------
+
 bool operator==(const CrystalParameters& lhs,
                 const CrystalParameters& rhs)
 {
@@ -132,4 +147,8 @@ bool operator==(const CrystalParameters& lhs,
             lhs.theta_deg == rhs.theta_deg &&
             lhs.transHeight == rhs.transHeight &&
             lhs.transLength == rhs.transLength;
+}
+
+//------------------------------------------------------------------------------
+
 }

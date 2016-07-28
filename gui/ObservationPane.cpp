@@ -6,6 +6,10 @@
 
 #include "tooling.h"
 
+namespace gui {
+
+//------------------------------------------------------------------------------
+
 ObservationPane::ObservationPane(QWidget *parent)
     : AbstractMainPane(parent)
     , wavelength1Edit_(new DoubleLineEdit)
@@ -31,4 +35,8 @@ ObservationPane::ObservationPane(QWidget *parent)
 
     // Adapt the AbstractMainPane base
     snapshotBox_->setTitle(tr("Observation"));
+}
+
+//------------------------------------------------------------------------------
+
 }

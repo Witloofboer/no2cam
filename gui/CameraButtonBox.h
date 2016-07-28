@@ -3,8 +3,14 @@
 
 #include <QGroupBox>
 
+//------------------------------------------------------------------------------
+
 class QPushButton;
 class QWidget;
+
+namespace gui {
+
+//------------------------------------------------------------------------------
 
 class CameraButtonBox : public QGroupBox
 {
@@ -30,5 +36,9 @@ private:
     QPushButton *recordBtn_;
     QPushButton *stopBtn_;
 };
+
+//------------------------------------------------------------------------------
+
+}
 
 #endif // CAMERABUTTONPANEL_H

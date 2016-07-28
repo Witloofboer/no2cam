@@ -3,6 +3,10 @@
 #include <QLabel>
 #include <QHBoxLayout>
 
+namespace gui {
+
+//------------------------------------------------------------------------------
+
 DatagramBox::DatagramBox(QWidget *parent)
     : QGroupBox(tr("Intensity datagram"), parent)
 {
@@ -15,4 +19,8 @@ DatagramBox::DatagramBox(QWidget *parent)
     layout->addWidget(datagramLbl);
     layout->addStretch();
     setLayout(layout);
+}
+
+//------------------------------------------------------------------------------
+
 }

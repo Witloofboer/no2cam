@@ -3,6 +3,10 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 
+namespace gui {
+
+//------------------------------------------------------------------------------
+
 CameraButtonBox::CameraButtonBox(QWidget *parent)
     : QGroupBox(parent)
     , takeOneBtn_(new QPushButton(QIcon(":/icons/media-one-32.png"), ""))
@@ -38,12 +42,16 @@ CameraButtonBox::CameraButtonBox(QWidget *parent)
     setLayout(btnLayout);
 }
 
+//------------------------------------------------------------------------------
+
 void CameraButtonBox::takeOneClicked()
 {
     takeOneBtn_->setEnabled(false);
     burstBtn_->setEnabled(false);
     emit clicked(kTakeOne);
 }
+
+//------------------------------------------------------------------------------
 
 void CameraButtonBox::burstClicked()
 {
@@ -57,6 +65,8 @@ void CameraButtonBox::recordClicked()
     emit clicked(recordBtn_->isChecked() ? kRecord : kEndRecord);
 }
 
+//------------------------------------------------------------------------------
+
 void CameraButtonBox::stopClicked()
 {
     takeOneBtn_->setChecked(false);
@@ -66,3 +76,6 @@ void CameraButtonBox::stopClicked()
     emit clicked(kStop);
 }
 
+//------------------------------------------------------------------------------
+
+}

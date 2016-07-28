@@ -5,6 +5,10 @@
 #include "CameraButtonBox.h"
 #include "DatagramBox.h"
 
+namespace gui {
+
+//------------------------------------------------------------------------------
+
 AbstractMainPane::AbstractMainPane(QWidget *parent)
     : QWidget(parent)
     , leftLayout_(new QVBoxLayout)
@@ -62,4 +66,8 @@ AbstractMainPane::AbstractMainPane(QWidget *parent)
     mainLayout->addLayout(rightLayout);
 
     setLayout(mainLayout);
+}
+
+//------------------------------------------------------------------------------
+
 }

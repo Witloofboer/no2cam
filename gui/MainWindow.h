@@ -6,10 +6,16 @@
 
 #include "gui_global.h"
 
+//------------------------------------------------------------------------------
+
 class QAction;
-class QClauseEvent;
 class QStackedWidget;
+
+namespace gui {
+
 class ConfigurationDlg;
+
+//------------------------------------------------------------------------------
 
 class GUISHARED_EXPORT MainWindow : public QMainWindow
 {
@@ -17,12 +23,8 @@ class GUISHARED_EXPORT MainWindow : public QMainWindow
 
 public:
     MainWindow(const QString &version, QWidget *parent = 0);
-    ~MainWindow();
 
     static MainWindow *instance() {return instance_;}
-
-protected:
-    void closeEvent(QCloseEvent *event) override;
 
 private slots:
     void newSession();
@@ -40,7 +42,6 @@ private slots:
 
 private:
     bool okToContinue();
-    void notImplemented(const QString& feature);
 
     QStackedWidget *stackedWidget_;
     QAction *snapshotModeAction_;
@@ -52,5 +53,9 @@ private:
 
     static MainWindow *instance_;
 };
+
+//------------------------------------------------------------------------------
+
+}
 
 #endif // MAINWINDOW_H

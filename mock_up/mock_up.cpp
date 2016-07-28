@@ -1,29 +1,28 @@
 #include <QApplication>
 
+#include "../gui/gui_lib.h"
+#include "../core/core_lib.h"
 
-#include "../gui/MainWindow.h"
-#include "../core/Core.h"
+//------------------------------------------------------------------------------
 
 int main(int argc, char *argv[])
 {
     qSetMessagePattern("%{time hh:mm:ss} (%{threadid}) %{type}: %{message}");
     QApplication application(argc, argv);
 
-    QCoreApplication::setOrganizationName("BIRA-IASB");
-    QCoreApplication::setApplicationName("NO2_Cam");
+    core::init();
+    gui::init("0.1.0 (mockup)");
 
-    Core::init();
-
-    MainWindow w("0.1.0 (mockup)");
-    w.show();
-
-    Core::start();
+    core::start();
 
     int result = application.exec();
 
-    Core::shutdown();
+    core::shutdown();
 
-    Core::finalise();
+    gui::finalise();
+    core::finalise();
 
     return result;
 }
+
+//------------------------------------------------------------------------------

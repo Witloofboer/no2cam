@@ -3,9 +3,19 @@
 
 #include <QDialog>
 
-class CrystalParameters;
-class DoubleLineEdit;
+//------------------------------------------------------------------------------
+
 class QDialogButtonBox;
+
+namespace core {
+    class CrystalParameters;
+}
+
+namespace gui {
+
+class DoubleLineEdit;
+
+//------------------------------------------------------------------------------
 
 class ConfigurationDlg : public QDialog
 {
@@ -22,7 +32,7 @@ private slots:
     void updateDlgBtns();
 
 signals:
-    void parametersUpdated(const CrystalParameters& params);
+    void parametersUpdated(const core::CrystalParameters& params);
 
 private:
     DoubleLineEdit *cutAngle_;       // Cut angle
@@ -30,8 +40,12 @@ private:
     DoubleLineEdit *transHeight_;    // Transducer height
     DoubleLineEdit *transLength_;    // Transducer length
 
-    CrystalParameters *params_;
+    core::CrystalParameters *params_;
     QDialogButtonBox *buttonBox_;
 };
+
+//------------------------------------------------------------------------------
+
+}
 
 #endif // CONFIGURATIONDLG_H

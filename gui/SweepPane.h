@@ -3,9 +3,15 @@
 
 #include "AbstractMainPane.h"
 
+//------------------------------------------------------------------------------
+
+namespace gui {
+
 class DoubleLineEdit;
 class IntLineEdit;
 class LineEdit;
+
+//------------------------------------------------------------------------------
 
 class SweepingPane : public AbstractMainPane
 {
@@ -25,5 +31,9 @@ private:
     IntLineEdit    *cooldownEdit_;
     LineEdit       *sessionEdit_;
 };
+
+//------------------------------------------------------------------------------
+
+}
 
 #endif // SWEEPWIDGET_H

@@ -26,7 +26,8 @@ SOURCES +=\
     CameraButtonBox.cpp \
     DatagramBox.cpp \
     AbstractMainPane.cpp \
-    ConfigurationDlg.cpp
+    ConfigurationDlg.cpp \
+    gui_lib.cpp
 
 HEADERS +=\
     gui_global.h \
@@ -38,7 +39,8 @@ HEADERS +=\
     DatagramBox.h \
     AbstractMainPane.h \
     ConfigurationDlg.h \
-    SweepPane.h
+    SweepPane.h \
+    gui_lib.h
 
 RESOURCES += \
     resources.qrc

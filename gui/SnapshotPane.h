@@ -3,11 +3,17 @@
 
 #include "AbstractMainPane.h"
 
+//------------------------------------------------------------------------------
+
 class QRadioButton;
+
+namespace gui {
 
 class DoubleLineEdit;
 class IntLineEdit;
 class LineEdit;
+
+//------------------------------------------------------------------------------
 
 class SnapshotPane : public AbstractMainPane
 {
@@ -29,5 +35,9 @@ private:
     IntLineEdit    *cooldownEdit_;
     LineEdit       *sessionEdit_;
 };
+
+//------------------------------------------------------------------------------
+
+}
 
 #endif // SNAPSHOTWIDGET_H

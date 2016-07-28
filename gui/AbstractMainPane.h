@@ -3,10 +3,16 @@
 
 #include <QWidget>
 
+//------------------------------------------------------------------------------
+
 class QGridLayout;
 class QGroupBox;
 class QLabel;
 class QVBoxLayout;
+
+namespace gui {
+
+//------------------------------------------------------------------------------
 
 class AbstractMainPane : public QWidget
 {
@@ -23,5 +29,9 @@ protected:
     QGridLayout *paramBoxLayout_;
     QGroupBox   *snapshotBox_;
 };
+
+//------------------------------------------------------------------------------
+
+}
 
 #endif // ABSTRACTMAINPANE_H

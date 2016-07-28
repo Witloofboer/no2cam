@@ -6,15 +6,27 @@
 
 class QString;
 class QGridLayout;
-class QIntValidator;
+
+namespace gui {
+
+//==============================================================================
+// LineEdit
+//==============================================================================
 
 class LineEdit: public QLineEdit
 {
     Q_OBJECT
 
 public:
-    LineEdit(int length=19, const QString& regexp = "");
+    LineEdit(int length=19, const QString& regexp = ".*");
+
+    bool isValid();
 };
+
+
+//==============================================================================
+// IntLineEdit
+//==============================================================================
 
 class IntLineEdit: public LineEdit
 {
@@ -22,9 +34,16 @@ class IntLineEdit: public LineEdit
 
 public:
     IntLineEdit(int length=7, int nDgts=5);
+
+    bool isValid();
     void setValue(int value);
     int value();
 };
+
+
+//==============================================================================
+// DoubleLineEdit
+//==============================================================================
 
 class DoubleLineEdit: public LineEdit
 {
@@ -41,11 +60,17 @@ private:
     int nFracDgts_;
 };
 
+
+//==============================================================================
+
 void putInGrid(QWidget* widget,
                QGridLayout* grid,
                int row,
                const QString &label,
                const QString &unit);
 
+//==============================================================================
+
+}
 
 #endif // TOOLING_H

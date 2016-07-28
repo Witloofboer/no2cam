@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+//------------------------------------------------------------------------------
+
 class AotfCrystalTest : public QObject
 {
     Q_OBJECT
@@ -18,5 +20,7 @@ private slots:
     void wavelength_data();
     void persisteParameters();
 };
+
+//------------------------------------------------------------------------------
 
 #endif // AOTFCRYSTALTEST_H

@@ -3,6 +3,10 @@
 
 #include <QGroupBox>
 
+namespace gui {
+
+//------------------------------------------------------------------------------
+
 class DatagramBox : public QGroupBox
 {
     Q_OBJECT
@@ -14,4 +18,7 @@ signals:
 public slots:
 };
 
+//------------------------------------------------------------------------------
+
+}
 #endif // INTENSITYDATAGRAM_H

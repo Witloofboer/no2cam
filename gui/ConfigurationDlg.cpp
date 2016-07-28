@@ -8,7 +8,12 @@
 
 #include "core/Crystal.h"
 #include "core/Core.h"
+#include "core/core_lib.h"
 #include "tooling.h"
+
+namespace gui {
+
+//------------------------------------------------------------------------------
 
 ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     : QDialog(parent)
@@ -16,7 +21,7 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     , incidentAngle_(new DoubleLineEdit(7, 2, 1))
     , transHeight_(new DoubleLineEdit(7, 2, 1))
     , transLength_(new DoubleLineEdit(7, 2, 1))
-    , params_(new CrystalParameters)
+    , params_(new core::CrystalParameters)
     , buttonBox_(new QDialogButtonBox(QDialogButtonBox::Ok |
                                       QDialogButtonBox::Cancel))
 {
@@ -36,7 +41,7 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     connect(buttonBox_, QDialogButtonBox::accepted, this, QDialog::accept);
     connect(buttonBox_, QDialogButtonBox::rejected, this, QDialog::reject);
     connect(this, ConfigurationDlg::parametersUpdated,
-            Core::singleton(), Core::setParameters);
+            core::singleton(), core::Core::setParameters);
 
     connect(cutAngle_, DoubleLineEdit::textEdited,
             this, ConfigurationDlg::updateDlgBtns);
@@ -61,10 +66,14 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     emit parametersUpdated(*params_);
 }
 
+//------------------------------------------------------------------------------
+
 ConfigurationDlg::~ConfigurationDlg()
 {
     delete params_;
 }
+
+//------------------------------------------------------------------------------
 
 void ConfigurationDlg::display()
 {
@@ -87,6 +96,8 @@ void ConfigurationDlg::display()
     }
 }
 
+//------------------------------------------------------------------------------
+
 void ConfigurationDlg::updateDlgBtns()
 {
     const bool enabled =
@@ -96,4 +107,8 @@ void ConfigurationDlg::updateDlgBtns()
             transLength_->isValid();
 
     buttonBox_->button(QDialogButtonBox::Ok)->setEnabled(enabled);
+}
+
+//------------------------------------------------------------------------------
+
 }

@@ -3,9 +3,15 @@
 
 #include "AbstractMainPane.h"
 
+//------------------------------------------------------------------------------
+
+namespace gui {
+
 class IntLineEdit;
 class DoubleLineEdit;
 class LineEdit;
+
+//------------------------------------------------------------------------------
 
 class ObservationPane : public AbstractMainPane
 {
@@ -23,5 +29,9 @@ private:
     IntLineEdit    *cooldownEdit_;
     LineEdit       *sessionEdit_;
 };
+
+//------------------------------------------------------------------------------
+
+}
 
 #endif // OBSERVATIONWIDGET_H

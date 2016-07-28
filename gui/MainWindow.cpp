@@ -16,6 +16,10 @@
 #include "core.h"
 #include "core/Crystal.h"
 
+namespace gui {
+
+//------------------------------------------------------------------------------
+
 MainWindow::MainWindow(const QString &version, QWidget *parent)
     : QMainWindow(parent)
     , stackedWidget_(new QStackedWidget)
@@ -25,8 +29,6 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     , configurationDlg_(new ConfigurationDlg(this))
     , version_(version)
 {
-    Q_INIT_RESOURCE(resources);
-
     // -------------------------------------------------------------------------
     // Central widget
     // -------------------------------------------------------------------------
@@ -145,36 +147,39 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     instance_ = this;
 }
 
-MainWindow::~MainWindow()
-{
-}
-
-void MainWindow::closeEvent(QCloseEvent *event)
-{
-    QMainWindow::closeEvent(event);
-}
+//------------------------------------------------------------------------------
 
 void MainWindow::newSession()
 {
-    notImplemented("New");
+    qWarning("New session NOT IMPLEMENTED");
 }
+
+//------------------------------------------------------------------------------
 
 void MainWindow::loadSession()
 {
-    notImplemented("Load");
+    qWarning("Load session NOT IMPLEMENTED");
 }
+
+//------------------------------------------------------------------------------
 
 bool MainWindow::saveSession()
 {
-    notImplemented("Save");
+    qWarning("Save session NOT IMPLEMENTED");
     return true;
 }
 
+
+//------------------------------------------------------------------------------
+
 bool MainWindow::saveAsSession()
 {
-    notImplemented("Save as");
+    qWarning("Save as session NOT IMPLEMENTED");
     return true;
 }
+
+
+//------------------------------------------------------------------------------
 
 void MainWindow::switchMode()
 {
@@ -196,15 +201,23 @@ void MainWindow::switchMode()
     }
 }
 
+//------------------------------------------------------------------------------
+
 void MainWindow::configure()
 {
     configurationDlg_->exec();
 }
 
+
+//------------------------------------------------------------------------------
+
 void MainWindow::cameraStatus()
 {
-    notImplemented("Camera status");
+    qWarning("Save session NOT IMPLEMENTED");
 }
+
+
+//------------------------------------------------------------------------------
 
 void MainWindow::about()
 {
@@ -219,6 +232,9 @@ void MainWindow::about()
                 "KIND.</p>")
              );
 }
+
+
+//------------------------------------------------------------------------------
 
 void MainWindow::releaseNotes()
 {
@@ -236,14 +252,7 @@ void MainWindow::releaseNotes()
              QMessageBox::Ok);
 }
 
-void MainWindow::notImplemented(const QString &feature)
-{
-    QMessageBox::warning
-            (this,
-             "NO2_CAM",
-             "<b>" + feature + "</b> " + tr("is not yet implemented"),
-             QMessageBox::Ok);
-}
+//------------------------------------------------------------------------------
 
 bool MainWindow::okToContinue()
 {
@@ -274,4 +283,10 @@ bool MainWindow::okToContinue()
         return true;
 }
 
+//------------------------------------------------------------------------------
+
 MainWindow *MainWindow::instance_;
+
+//------------------------------------------------------------------------------
+
+}

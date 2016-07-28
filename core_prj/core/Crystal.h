@@ -4,6 +4,10 @@
 #include <QObject>
 #include "core_global.h"
 
+namespace core {
+
+//------------------------------------------------------------------------------
+
 /**
  * This structure is a container for the physical parameters of the
  * crystal.
@@ -25,7 +29,7 @@ struct CORESHARED_EXPORT CrystalParameters
                            const CrystalParameters& rhs);
 };
 
-Q_DECLARE_METATYPE(CrystalParameters)
+//------------------------------------------------------------------------------
 
 /**
  * The AotfCrystal class accounsts for the AOTF crystal setup behaviour.
@@ -88,17 +92,21 @@ private:
     CrystalParameters crystalParams;
 };
 
+//------------------------------------------------------------------------------
+
 inline double Crystal::frequency(double lambda, double T) const
 {
     return acousticParam(lambda, T, true);
 }
+
+//------------------------------------------------------------------------------
 
 inline double Crystal::power(double lambda, double T) const
 {
     return acousticParam(lambda, T, false);
 }
 
-
+//------------------------------------------------------------------------------
 
 /**
  * Memberwise equality operator for AotfCrystalParameters instances.
@@ -106,6 +114,8 @@ inline double Crystal::power(double lambda, double T) const
 CORESHARED_EXPORT
 bool operator==(const CrystalParameters& lhs,
                 const CrystalParameters& rhs);
+
+//------------------------------------------------------------------------------
 
 /**
  * Memberwise inequality operator for AotfCrystalParameters instances.
@@ -116,5 +126,11 @@ bool operator!=(const CrystalParameters& lhs,
 {
     return !(lhs == rhs);
 }
+
+//------------------------------------------------------------------------------
+
+}
+
+Q_DECLARE_METATYPE(core::CrystalParameters)
 
 #endif // CRYSTAL_H

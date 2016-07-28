@@ -6,6 +6,10 @@
 
 #include "tooling.h"
 
+namespace gui {
+
+//------------------------------------------------------------------------------
+
 SweepingPane::SweepingPane(QWidget *parent)
     : AbstractMainPane(parent)
     , wavelength1Edit_(new DoubleLineEdit)
@@ -29,4 +33,8 @@ SweepingPane::SweepingPane(QWidget *parent)
 
     // Adapt the AbstractMainPane base instance
     snapshotBox_->setTitle(tr("Snapshot (Sweep mode)"));
+}
+
+//------------------------------------------------------------------------------
+
 }

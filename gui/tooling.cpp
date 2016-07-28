@@ -1,20 +1,17 @@
 #include "tooling.h"
 
-#include <QApplication>
-#include <QColor>
-#include <QFocusEvent>
 #include <QGridLayout>
-#include <QHBoxLayout>
 #include <QLabel>
 #include <QLocale>
-#include <QMessageBox>
-#include <QPalette>
 #include <QRegExpValidator>
-#include <QTimer>
-
 
 #include "MainWindow.h"
 
+namespace gui {
+
+//==============================================================================
+// LineEdit
+//==============================================================================
 
 LineEdit::LineEdit(int length, const QString &regexp)
     : QLineEdit()
@@ -26,31 +23,66 @@ LineEdit::LineEdit(int length, const QString &regexp)
     setFixedWidth(length * fontMetrics().width('0'));
     setSizePolicy(fixedSizePolicy_);
 
-    if (!regexp.isEmpty())
-    {
-        setValidator(new QRegExpValidator(QRegExp(regexp)));
-    }
+    setValidator(new QRegExpValidator(QRegExp(regexp)));
 }
 
+//------------------------------------------------------------------------------
+
+bool LineEdit::isValid()
+{
+    int pos = 0;
+    QString value = text();
+    return QValidator::Acceptable == validator()->validate(value, pos);
+}
+
+
+//==============================================================================
+// IntLineEdit
+//==============================================================================
 
 IntLineEdit::IntLineEdit(int length, int nDgts)
-    : LineEdit(length, QString("[0-9]{0,%1}").arg(nDgts))
+    : LineEdit(length, QString("^\\d{1,%1}$").arg(nDgts))
 {}
 
-void IntLineEdit::setValue(int value)
+//------------------------------------------------------------------------------
+
+bool IntLineEdit::isValid()
 {
-     setText(QString::number(value));
+    bool ok;
+    locale().toInt(text(), &ok);
+    return ok;
 }
+
+//------------------------------------------------------------------------------
 
 int IntLineEdit::value()
 {
-     return text().toInt();
+    bool ok;
+    int d = locale().toInt(text(), &ok);
+
+    Q_ASSERT(ok);
+    return d;
 }
 
+//------------------------------------------------------------------------------
+
+void IntLineEdit::setValue(int value)
+{
+     setText(locale().toString(value));
+}
+
+
+//==============================================================================
+// DoubleLineEdit
+//==============================================================================
+
 DoubleLineEdit::DoubleLineEdit(int length, int nIntDgts, int nFracDgts)
-    : LineEdit(length, QString("[0-9]{0,%1}[.][0-9]{0,%2}").arg(nIntDgts).arg(nFracDgts))
+    : LineEdit(length,
+               QString("^\\d{1,%1}[.]\\d{0,%2}$").arg(nIntDgts).arg(nFracDgts))
     , nFracDgts_(nFracDgts)
 {}
+
+//------------------------------------------------------------------------------
 
 bool DoubleLineEdit::isValid()
 {
@@ -58,6 +90,8 @@ bool DoubleLineEdit::isValid()
     locale().toDouble(text(), &ok);
     return ok;
 }
+
+//------------------------------------------------------------------------------
 
 double DoubleLineEdit::value()
 {
@@ -68,10 +102,15 @@ double DoubleLineEdit::value()
     return d;
 }
 
+//------------------------------------------------------------------------------
+
 void DoubleLineEdit::setValue(double value)
 {
-     setText(QString::number(value, 'f', nFracDgts_));
+     setText(locale().toString(value, 'f', nFracDgts_));
 }
+
+
+//------------------------------------------------------------------------------
 
 void putInGrid(QWidget* widget,
                QGridLayout *grid,
@@ -87,3 +126,6 @@ void putInGrid(QWidget* widget,
         grid->addWidget(new QLabel(unit), row, 2);
 }
 
+//------------------------------------------------------------------------------
+
+}

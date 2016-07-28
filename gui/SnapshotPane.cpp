@@ -7,6 +7,10 @@
 
 #include "tooling.h"
 
+namespace gui {
+
+//------------------------------------------------------------------------------
+
 SnapshotPane::SnapshotPane(QWidget *parent)
     : AbstractMainPane(parent)
     , selectorBtn_(new QRadioButton(tr("Optic")))
@@ -17,6 +21,7 @@ SnapshotPane::SnapshotPane(QWidget *parent)
     , cooldownEdit_(new IntLineEdit)
     , sessionEdit_(new LineEdit)
 {
+
     // Optic/accoustic ---------------------------------------------------------
 
     auto modeLayout = new QVBoxLayout;
@@ -48,6 +53,8 @@ SnapshotPane::SnapshotPane(QWidget *parent)
     snapshotBox_->setTitle(tr("Snapshot"));
 }
 
+//------------------------------------------------------------------------------
+
 void SnapshotPane::parameterModeSwitch()
 {
     if (selectorBtn_->isChecked())
@@ -62,4 +69,8 @@ void SnapshotPane::parameterModeSwitch()
         frequencyEdit_->setEnabled(true);
         powerEdit_->setEnabled(true);
     }
+}
+
+//------------------------------------------------------------------------------
+
 }
