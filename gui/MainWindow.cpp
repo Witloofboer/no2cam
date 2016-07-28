@@ -10,7 +10,7 @@
 
 #include "SnapshotPane.h"
 #include "ObservationPane.h"
-#include "SweepingPane.h"
+#include "SweepPane.h"
 #include "ConfigurationDlg.h"
 
 #include "core.h"
@@ -142,6 +142,7 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     setWindowIcon(QIcon(":/icons/video-camera-64.png"));
     setFixedSize(sizeHint());
     snapshotModeAction_->setChecked(true);
+    instance_ = this;
 }
 
 MainWindow::~MainWindow()
@@ -272,3 +273,5 @@ bool MainWindow::okToContinue()
     else
         return true;
 }
+
+MainWindow *MainWindow::instance_;

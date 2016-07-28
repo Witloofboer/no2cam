@@ -20,7 +20,7 @@ public slots:
 
 protected:
     QVBoxLayout *leftLayout_;
-    QGridLayout *paramBox_;
+    QGridLayout *paramBoxLayout_;
     QGroupBox   *snapshotBox_;
 };
 

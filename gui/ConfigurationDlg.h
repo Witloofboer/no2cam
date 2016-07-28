@@ -5,6 +5,7 @@
 
 class CrystalParameters;
 class DoubleLineEdit;
+class QDialogButtonBox;
 
 class ConfigurationDlg : public QDialog
 {
@@ -17,16 +18,20 @@ public:
 public slots:
     void display();
 
+private slots:
+    void updateDlgBtns();
+
 signals:
     void parametersUpdated(const CrystalParameters& params);
 
 private:
-    DoubleLineEdit* cutAngle_;       // Cut angle
-    DoubleLineEdit* incidentAngle_;  // Incident angle
-    DoubleLineEdit* transHeight_;    // Transducer height
-    DoubleLineEdit* transLength_;    // Transducer length
+    DoubleLineEdit *cutAngle_;       // Cut angle
+    DoubleLineEdit *incidentAngle_;  // Incident angle
+    DoubleLineEdit *transHeight_;    // Transducer height
+    DoubleLineEdit *transLength_;    // Transducer length
 
-    CrystalParameters* params_;
+    CrystalParameters *params_;
+    QDialogButtonBox *buttonBox_;
 };
 
 #endif // CONFIGURATIONDLG_H

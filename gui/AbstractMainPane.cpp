@@ -8,13 +8,14 @@
 AbstractMainPane::AbstractMainPane(QWidget *parent)
     : QWidget(parent)
     , leftLayout_(new QVBoxLayout)
-    , paramBox_(new QGridLayout)
+    , paramBoxLayout_(new QGridLayout)
     , snapshotBox_(new QGroupBox)
 {
     // Parameter box -----------------------------------------------------------
 
     auto parameterBox = new QGroupBox(tr("Parameters"));
-    parameterBox->setLayout(paramBox_);
+    parameterBox->setLayout(paramBoxLayout_);
+    paramBoxLayout_->setColumnMinimumWidth(0, 75);
 
     // Intensity datagram ------------------------------------------------------
 

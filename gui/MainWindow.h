@@ -19,6 +19,8 @@ public:
     MainWindow(const QString &version, QWidget *parent = 0);
     ~MainWindow();
 
+    static MainWindow *instance() {return instance_;}
+
 protected:
     void closeEvent(QCloseEvent *event) override;
 
@@ -36,7 +38,6 @@ private slots:
     void releaseNotes();
     void about();
 
-
 private:
     bool okToContinue();
     void notImplemented(const QString& feature);
@@ -48,6 +49,8 @@ private:
 
     ConfigurationDlg *configurationDlg_;
     QString version_;
+
+    static MainWindow *instance_;
 };
 
 #endif // MAINWINDOW_H

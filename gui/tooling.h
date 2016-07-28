@@ -2,31 +2,44 @@
 #define TOOLING_H
 
 #include <QLineEdit>
+#include <QDoubleValidator>
 
-class QGridLayout;
 class QString;
-class QWidget;
+class QGridLayout;
+class QIntValidator;
 
-class IntLineEdit : public QLineEdit
+class LineEdit: public QLineEdit
 {
+    Q_OBJECT
+
 public:
-    IntLineEdit(const QString &inputMask);
-    void setValue(int setValue);
+    LineEdit(int length=19, const QString& regexp = "");
+};
+
+class IntLineEdit: public LineEdit
+{
+    Q_OBJECT
+
+public:
+    IntLineEdit(int length=7, int nDgts=5);
+    void setValue(int value);
     int value();
 };
 
-class DoubleLineEdit : public QLineEdit
+class DoubleLineEdit: public LineEdit
 {
+    Q_OBJECT
+
 public:
-    DoubleLineEdit(const QString &inputMask);
-    void setValue(double setValue);
+    DoubleLineEdit(int length=7, int nIntDgts=3, int nFracDgts=1);
+
+    bool isValid();
+    void setValue(double value);
     double value();
+
+private:
+    int nFracDgts_;
 };
-
-
-DoubleLineEdit *new_WavelengthEdit();
-DoubleLineEdit *new_EetEdit();
-DoubleLineEdit *new_CooldownEdit();
 
 void putInGrid(QWidget* widget,
                QGridLayout* grid,

@@ -34,11 +34,11 @@ HEADERS +=\
     MainWindow.h \
     ObservationPane.h \
     SnapshotPane.h \
-    SweepingPane.h \
     CameraButtonBox.h \
     DatagramBox.h \
     AbstractMainPane.h \
-    ConfigurationDlg.h
+    ConfigurationDlg.h \
+    SweepPane.h
 
 RESOURCES += \
     resources.qrc

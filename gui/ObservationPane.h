@@ -3,8 +3,9 @@
 
 #include "AbstractMainPane.h"
 
-class QLineEdit;
+class IntLineEdit;
 class DoubleLineEdit;
+class LineEdit;
 
 class ObservationPane : public AbstractMainPane
 {
@@ -15,12 +16,12 @@ public:
 signals:
 
 private:
-    DoubleLineEdit *wl1_;
-    DoubleLineEdit *wl2_;
-    DoubleLineEdit *eet_;
-    DoubleLineEdit *cooldown_;
-    DoubleLineEdit *shots_;
-    QLineEdit  *session_;
+    DoubleLineEdit *wavelength1Edit_;
+    DoubleLineEdit *wavelength2Edit_;
+    IntLineEdit    *exposureEdit_;
+    IntLineEdit    *snapPerObsEdit_;
+    IntLineEdit    *cooldownEdit_;
+    LineEdit       *sessionEdit_;
 };
 
 #endif // OBSERVATIONWIDGET_H

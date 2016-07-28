@@ -3,6 +3,7 @@
 #include <QDialogButtonBox>
 #include <QGroupBox>
 #include <QLabel>
+#include <QPushButton>
 #include <QVBoxLayout>
 
 #include "core/Crystal.h"
@@ -11,11 +12,13 @@
 
 ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     : QDialog(parent)
-    , cutAngle_(new DoubleLineEdit(" 09.9"))
-    , incidentAngle_(new DoubleLineEdit(" 09.9"))
-    , transHeight_(new DoubleLineEdit(" 09.9"))
-    , transLength_(new DoubleLineEdit(" 09.9"))
+    , cutAngle_(new DoubleLineEdit(7, 2, 1))
+    , incidentAngle_(new DoubleLineEdit(7, 2, 1))
+    , transHeight_(new DoubleLineEdit(7, 2, 1))
+    , transLength_(new DoubleLineEdit(7, 2, 1))
     , params_(new CrystalParameters)
+    , buttonBox_(new QDialogButtonBox(QDialogButtonBox::Ok |
+                                      QDialogButtonBox::Cancel))
 {
     setWindowTitle(tr("Configuration"));
 
@@ -30,17 +33,23 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     auto crystalBox = new QGroupBox(tr("Crystal parameters"));
     crystalBox->setLayout(crystalGrid);
 
-    auto buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok |
-                                          QDialogButtonBox::Cancel);
-
-    connect(buttonBox, QDialogButtonBox::accepted, this, QDialog::accept);
-    connect(buttonBox, QDialogButtonBox::rejected, this, QDialog::reject);
+    connect(buttonBox_, QDialogButtonBox::accepted, this, QDialog::accept);
+    connect(buttonBox_, QDialogButtonBox::rejected, this, QDialog::reject);
     connect(this, ConfigurationDlg::parametersUpdated,
             Core::singleton(), Core::setParameters);
 
+    connect(cutAngle_, DoubleLineEdit::textEdited,
+            this, ConfigurationDlg::updateDlgBtns);
+    connect(incidentAngle_, DoubleLineEdit::textEdited,
+            this, ConfigurationDlg::updateDlgBtns);
+    connect(transHeight_, DoubleLineEdit::textEdited,
+            this, ConfigurationDlg::updateDlgBtns);
+    connect(transLength_, DoubleLineEdit::textEdited,
+            this, ConfigurationDlg::updateDlgBtns);
+
     auto layout = new QVBoxLayout;
     layout->addWidget(crystalBox);
-    layout->addWidget(buttonBox);
+    layout->addWidget(buttonBox_);
     setLayout(layout);
 
     // Initial population
@@ -76,4 +85,15 @@ void ConfigurationDlg::display()
             emit parametersUpdated(*params_);
         }
     }
+}
+
+void ConfigurationDlg::updateDlgBtns()
+{
+    const bool enabled =
+            cutAngle_->isValid() &&
+            incidentAngle_->isValid() &&
+            transHeight_->isValid() &&
+            transLength_->isValid();
+
+    buttonBox_->button(QDialogButtonBox::Ok)->setEnabled(enabled);
 }

@@ -3,10 +3,11 @@
 
 #include "AbstractMainPane.h"
 
-class QLineEdit;
 class QRadioButton;
 
 class DoubleLineEdit;
+class IntLineEdit;
+class LineEdit;
 
 class SnapshotPane : public AbstractMainPane
 {
@@ -20,13 +21,13 @@ private slots:
     void parameterModeSwitch();
 
 private:
-    QRadioButton *opticBtn_;
-    DoubleLineEdit *wl_;
-    DoubleLineEdit *aF_;
-    DoubleLineEdit *aP_;
-    DoubleLineEdit *eet_;
-    DoubleLineEdit *cooldown_;
-    QLineEdit  *session_;
+    QRadioButton   *selectorBtn_;
+    DoubleLineEdit *wavelengthEdit_;
+    DoubleLineEdit *frequencyEdit_;
+    IntLineEdit    *powerEdit_;
+    IntLineEdit    *exposureEdit_;
+    IntLineEdit    *cooldownEdit_;
+    LineEdit       *sessionEdit_;
 };
 
 #endif // SNAPSHOTWIDGET_H

@@ -1,19 +1,41 @@
 #include "tooling.h"
 
+#include <QApplication>
+#include <QColor>
+#include <QFocusEvent>
 #include <QGridLayout>
-#include <QLabel>
 #include <QHBoxLayout>
+#include <QLabel>
+#include <QLocale>
+#include <QMessageBox>
+#include <QPalette>
+#include <QRegExpValidator>
+#include <QTimer>
 
-const QSizePolicy fixedSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-IntLineEdit::IntLineEdit(const QString &inputMask)
+#include "MainWindow.h"
+
+
+LineEdit::LineEdit(int length, const QString &regexp)
+    : QLineEdit()
 {
+    static const QSizePolicy fixedSizePolicy_(QSizePolicy::Fixed,
+                                              QSizePolicy::Fixed);
+
     setAlignment(Qt::AlignRight);
-    setInputMask(inputMask);
-    setText(inputMask);
-    setFixedWidth((2+inputMask.length()) * fontMetrics().width('0'));
-    setSizePolicy(fixedSizePolicy);
+    setFixedWidth(length * fontMetrics().width('0'));
+    setSizePolicy(fixedSizePolicy_);
+
+    if (!regexp.isEmpty())
+    {
+        setValidator(new QRegExpValidator(QRegExp(regexp)));
+    }
 }
+
+
+IntLineEdit::IntLineEdit(int length, int nDgts)
+    : LineEdit(length, QString("[0-9]{0,%1}").arg(nDgts))
+{}
 
 void IntLineEdit::setValue(int value)
 {
@@ -25,28 +47,31 @@ int IntLineEdit::value()
      return text().toInt();
 }
 
-DoubleLineEdit::DoubleLineEdit(const QString &inputMask)
-{
-    setAlignment(Qt::AlignRight);
-    setInputMask(inputMask);
-    setText(inputMask);
-    setFixedWidth((2+inputMask.length()) * fontMetrics().width('0'));
-    setSizePolicy(fixedSizePolicy);
-}
+DoubleLineEdit::DoubleLineEdit(int length, int nIntDgts, int nFracDgts)
+    : LineEdit(length, QString("[0-9]{0,%1}[.][0-9]{0,%2}").arg(nIntDgts).arg(nFracDgts))
+    , nFracDgts_(nFracDgts)
+{}
 
-void DoubleLineEdit::setValue(double value)
+bool DoubleLineEdit::isValid()
 {
-     setText(QString::number(value));
+    bool ok;
+    locale().toDouble(text(), &ok);
+    return ok;
 }
 
 double DoubleLineEdit::value()
 {
-     return text().toDouble();
+    bool ok;
+    double d = locale().toDouble(text(), &ok);
+
+    Q_ASSERT(ok);
+    return d;
 }
 
-DoubleLineEdit *new_WavelengthEdit() { return new DoubleLineEdit("999.9"); }
-DoubleLineEdit *new_EetEdit()        { return new DoubleLineEdit("009.9"); }
-DoubleLineEdit *new_CooldownEdit()   { return new DoubleLineEdit("009.9"); }
+void DoubleLineEdit::setValue(double value)
+{
+     setText(QString::number(value, 'f', nFracDgts_));
+}
 
 void putInGrid(QWidget* widget,
                QGridLayout *grid,
@@ -61,3 +86,4 @@ void putInGrid(QWidget* widget,
     if (!unit.isEmpty())
         grid->addWidget(new QLabel(unit), row, 2);
 }
+
