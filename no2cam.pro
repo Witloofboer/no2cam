@@ -7,4 +7,4 @@ SUBDIRS += \
     core_prj \
     gui \
     main \
-    mock_up
+    mockup

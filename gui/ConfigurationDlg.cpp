@@ -4,6 +4,7 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QPushButton>
+#include <QSettings>
 #include <QVBoxLayout>
 
 #include "core/Crystal.h"
@@ -58,7 +59,7 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     setLayout(layout);
 
     // Initial population
-    params_->restore();
+    restoreParams();
     cutAngle_->setValue(params_->alpha_deg);
     incidentAngle_->setValue(params_->theta_deg);
     transHeight_->setValue(params_->transHeight);
@@ -90,7 +91,7 @@ void ConfigurationDlg::display()
             params_->theta_deg = incidentAngle_->value();
             params_->transHeight = transHeight_->value();
             params_->transLength = transLength_->value();
-            params_->persiste();
+            persisteParams();
             emit parametersUpdated(*params_);
         }
     }
@@ -107,6 +108,42 @@ void ConfigurationDlg::updateDlgBtns()
             transLength_->isValid();
 
     buttonBox_->button(QDialogButtonBox::Ok)->setEnabled(enabled);
+}
+
+//------------------------------------------------------------------------------
+
+static const char *alphaLbl = "cut angle [deg]";
+static const char *thetaLbl = "incident angle [deg]";
+static const char *transHeightLbl = "transducer height [mm]";
+static const char *transLengthLbl = "transducer length [mm]";
+
+void ConfigurationDlg::persisteParams() const
+{
+    qDebug("Persisting parameters");
+
+    QSettings settings;
+
+    settings.beginGroup("Crystal");
+    settings.setValue(alphaLbl, params_->alpha_deg);
+    settings.setValue(thetaLbl, params_->theta_deg);
+    settings.setValue(transHeightLbl, params_->transHeight);
+    settings.setValue(transLengthLbl, params_->transLength);
+    settings.endGroup();
+}
+
+//------------------------------------------------------------------------------
+
+void ConfigurationDlg::restoreParams()
+{
+    qDebug("Restoring parameters");
+    QSettings settings;
+
+    settings.beginGroup("Crystal");
+    params_->alpha_deg = settings.value(alphaLbl, 7.65).toDouble();
+    params_->theta_deg = settings.value(thetaLbl, 10.1).toDouble();
+    params_->transHeight = settings.value(transHeightLbl, 10.0).toDouble();
+    params_->transLength = settings.value(transLengthLbl, 15.0).toDouble();
+    settings.endGroup();
 }
 
 //------------------------------------------------------------------------------

@@ -78,14 +78,3 @@ void AotfCrystalTest::wavelength_data()
     QTest::newRow("2") << 460.0 << 31.0;
     QTest::newRow("3") << 470.0 << 31.0;
 }
-
-void AotfCrystalTest::persisteParameters()
-{
-    CrystalParameters p_write = {1.0, 2.0, 3.0, 4.0};
-    CrystalParameters p_read;
-
-    p_write.persiste();
-    p_read.restore();
-
-    QVERIFY(p_write == p_read);
-}

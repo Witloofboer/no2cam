@@ -35,6 +35,9 @@ signals:
     void parametersUpdated(const core::CrystalParameters& params);
 
 private:
+    void persisteParams() const;
+    void restoreParams();
+
     DoubleLineEdit *cutAngle_;       // Cut angle
     DoubleLineEdit *incidentAngle_;  // Incident angle
     DoubleLineEdit *transHeight_;    // Transducer height

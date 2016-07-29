@@ -9,14 +9,14 @@ CONFIG += console
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = mock_up
+TARGET = mockup
 TEMPLATE = app
 
 OBJECTS_DIR=../obj
 DESTDIR=../bin
 
 SOURCES += \
-    mock_up.cpp
+    mockup.cpp
 
 HEADERS  +=
 

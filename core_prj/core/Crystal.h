@@ -19,9 +19,6 @@ struct CORESHARED_EXPORT CrystalParameters
     double transHeight; /**< transducer height [mm] */
     double transLength; /**< transducer length [mm] */
 
-    void persiste() const;
-    void restore();
-
     friend bool operator==(const CrystalParameters& lhs,
                            const CrystalParameters& rhs);
 
