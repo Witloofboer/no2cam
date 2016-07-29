@@ -37,6 +37,7 @@ signals:
 private:
     void persisteParams() const;
     void restoreParams();
+    void pushParamsToGui();
 
     DoubleLineEdit *cutAngle_;       // Cut angle
     DoubleLineEdit *incidentAngle_;  // Incident angle

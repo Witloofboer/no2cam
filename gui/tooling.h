@@ -2,7 +2,6 @@
 #define TOOLING_H
 
 #include <QLineEdit>
-#include <QDoubleValidator>
 
 class QString;
 class QGridLayout;
@@ -21,6 +20,13 @@ public:
     LineEdit(int length=19, const QString& regexp = ".*");
 
     bool isValid();
+
+signals:
+    void focusLost();
+
+protected:
+    virtual void keyPressEvent(QKeyEvent *event) override;
+    virtual void focusOutEvent(QFocusEvent *event) override;
 };
 
 
@@ -33,7 +39,7 @@ class IntLineEdit: public LineEdit
     Q_OBJECT
 
 public:
-    IntLineEdit(int length=7, int nDgts=5);
+    IntLineEdit(int length=9, int nDgts=5);
 
     bool isValid();
     void setValue(int value);
@@ -50,7 +56,7 @@ class DoubleLineEdit: public LineEdit
     Q_OBJECT
 
 public:
-    DoubleLineEdit(int length=7, int nIntDgts=3, int nFracDgts=1);
+    DoubleLineEdit(int length=9, int nIntDgts=3, int nFracDgts=1);
 
     bool isValid();
     void setValue(double value);

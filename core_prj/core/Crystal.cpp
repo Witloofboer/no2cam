@@ -20,7 +20,7 @@ Crystal::Crystal(QObject *parent)
 
 void Crystal::setParameters(const CrystalParameters &params)
 {
-    qDebug("Setting crystal parameters");
+    qInfo("Setting crystal parameters");
     crystalParams = params;
 }
 

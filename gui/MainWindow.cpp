@@ -28,12 +28,13 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     , sweepModeAction_(new QAction("Sweep over &wavelength", this))
     , configurationDlg_(new ConfigurationDlg(this))
     , version_(version)
+    , snapshotPane_(new SnapshotPane)
 {
     // -------------------------------------------------------------------------
     // Central widget
     // -------------------------------------------------------------------------
 
-    stackedWidget_->addWidget(new SnapshotPane());
+    stackedWidget_->addWidget(snapshotPane_);
     stackedWidget_->addWidget(new ObservationPane());
     stackedWidget_->addWidget(new SweepingPane());
 
@@ -47,10 +48,10 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     auto loadAction = new QAction("&Load", this);
     auto saveAction = new QAction("&Save", this);
     auto saveAsAction = new QAction("Save &as", this);
-    connect(newAction, QAction::triggered, this, MainWindow::newSession);
-    connect(loadAction, QAction::triggered, this, MainWindow::loadSession);
-    connect(saveAction, QAction::triggered, this, MainWindow::saveSession);
-    connect(saveAsAction, QAction::triggered, this, MainWindow::saveAsSession);
+    connect(newAction, QAction::triggered, this, newSession);
+    connect(loadAction, QAction::triggered, this, loadSession);
+    connect(saveAction, QAction::triggered, this, saveSession);
+    connect(saveAsAction, QAction::triggered, this, saveAsSession);
 
     auto configureAction = new QAction("&Configure", this);
     configureAction->setIcon(QIcon(":/icons/C-gold-24.png"));
@@ -62,7 +63,7 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     auto exitAction = new QAction("E&xit", this);
     exitAction->setShortcut(QKeySequence("Alt+F4"));
     exitAction->setStatusTip(tr("Exit the application"));
-    connect(exitAction, &QAction::triggered, this, QMainWindow::close);
+    connect(exitAction, &QAction::triggered, this, close);
 
     auto modeGroup = new QActionGroup(this);
     modeGroup->addAction(snapshotModeAction_);
@@ -74,30 +75,30 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     snapshotModeAction_->setCheckable(true);
     snapshotModeAction_->setShortcut(QKeySequence("Alt+S"));
     snapshotModeAction_->setStatusTip(tr("Switch to snapshot mode"));
-    connect(snapshotModeAction_, QAction::triggered, this, MainWindow::switchMode);
+    connect(snapshotModeAction_, QAction::triggered, this, switchMode);
 
     observationModeAction_->setIcon(QIcon(":/icons/O-blue-24.png"));
     observationModeAction_->setIconVisibleInMenu(false);
     observationModeAction_->setCheckable(true);
     observationModeAction_->setShortcut(QKeySequence("Alt+O"));
     observationModeAction_->setStatusTip(tr("Switch to observation mode"));
-    connect(observationModeAction_, QAction::triggered, this, MainWindow::switchMode);
+    connect(observationModeAction_, QAction::triggered, this, switchMode);
 
     sweepModeAction_->setIcon(QIcon(":/icons/W-blue-24.png"));
     sweepModeAction_->setIconVisibleInMenu(false);
     sweepModeAction_->setCheckable(true);
     sweepModeAction_->setShortcut(QKeySequence("Alt+W"));
     sweepModeAction_->setStatusTip(tr("Switch to wavelength sweeping mode"));
-    connect(sweepModeAction_, QAction::triggered, this, MainWindow::switchMode);
+    connect(sweepModeAction_, QAction::triggered, this, switchMode);
 
     auto cameraStatusAction = new QAction("&Camera status", this);
-    connect(cameraStatusAction, QAction::triggered, this, MainWindow::cameraStatus);
+    connect(cameraStatusAction, QAction::triggered, this, cameraStatus);
 
     auto releaseNotesAction = new QAction("&Release Notes", this);
-    connect(releaseNotesAction, QAction::triggered, this, MainWindow::releaseNotes);
+    connect(releaseNotesAction, QAction::triggered, this, releaseNotes);
 
     auto aboutAction = new QAction("&About", this);
-    connect(aboutAction, QAction::triggered, this, MainWindow::about);
+    connect(aboutAction, QAction::triggered, this, about);
 
     // -------------------------------------------------------------------------
     // Menus
@@ -144,37 +145,41 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     setWindowIcon(QIcon(":/icons/video-camera-64.png"));
     setFixedSize(sizeHint());
     snapshotModeAction_->setChecked(true);
-    instance_ = this;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    //snapshotPane_->persisteParams(); // TODO also for the other panes.
+    QMainWindow::closeEvent(event);
 }
 
 //------------------------------------------------------------------------------
 
 void MainWindow::newSession()
 {
-    qWarning("New session NOT IMPLEMENTED");
+    qWarning("New session NOT IMPLEMENTED"); //TODO
 }
 
 //------------------------------------------------------------------------------
 
 void MainWindow::loadSession()
 {
-    qWarning("Load session NOT IMPLEMENTED");
+    qWarning("Load session NOT IMPLEMENTED"); //TODO
 }
 
 //------------------------------------------------------------------------------
 
 bool MainWindow::saveSession()
 {
-    qWarning("Save session NOT IMPLEMENTED");
+    qWarning("Save session NOT IMPLEMENTED"); //TODO
     return true;
 }
-
 
 //------------------------------------------------------------------------------
 
 bool MainWindow::saveAsSession()
 {
-    qWarning("Save as session NOT IMPLEMENTED");
+    qWarning("Save as session NOT IMPLEMENTED"); //TODO
     return true;
 }
 
@@ -208,14 +213,12 @@ void MainWindow::configure()
     configurationDlg_->exec();
 }
 
-
 //------------------------------------------------------------------------------
 
 void MainWindow::cameraStatus()
 {
     qWarning("Save session NOT IMPLEMENTED");
 }
-
 
 //------------------------------------------------------------------------------
 
@@ -232,7 +235,6 @@ void MainWindow::about()
                 "KIND.</p>")
              );
 }
-
 
 //------------------------------------------------------------------------------
 
@@ -282,10 +284,6 @@ bool MainWindow::okToContinue()
     else
         return true;
 }
-
-//------------------------------------------------------------------------------
-
-MainWindow *MainWindow::instance_;
 
 //------------------------------------------------------------------------------
 

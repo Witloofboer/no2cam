@@ -39,19 +39,14 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     auto crystalBox = new QGroupBox(tr("Crystal parameters"));
     crystalBox->setLayout(crystalGrid);
 
-    connect(buttonBox_, QDialogButtonBox::accepted, this, QDialog::accept);
-    connect(buttonBox_, QDialogButtonBox::rejected, this, QDialog::reject);
-    connect(this, ConfigurationDlg::parametersUpdated,
-            core::singleton(), core::Core::setParameters);
+    connect(buttonBox_, QDialogButtonBox::accepted, this, accept);
+    connect(buttonBox_, QDialogButtonBox::rejected, this, reject);
+    connect(this, parametersUpdated, core::singleton(), core::Core::setParameters);
 
-    connect(cutAngle_, DoubleLineEdit::textEdited,
-            this, ConfigurationDlg::updateDlgBtns);
-    connect(incidentAngle_, DoubleLineEdit::textEdited,
-            this, ConfigurationDlg::updateDlgBtns);
-    connect(transHeight_, DoubleLineEdit::textEdited,
-            this, ConfigurationDlg::updateDlgBtns);
-    connect(transLength_, DoubleLineEdit::textEdited,
-            this, ConfigurationDlg::updateDlgBtns);
+    connect(cutAngle_, LineEdit::focusLost, this, updateDlgBtns);
+    connect(incidentAngle_, LineEdit::focusLost, this, updateDlgBtns);
+    connect(transHeight_, LineEdit::focusLost, this, updateDlgBtns);
+    connect(transLength_, LineEdit::focusLost, this, updateDlgBtns);
 
     auto layout = new QVBoxLayout;
     layout->addWidget(crystalBox);
@@ -60,10 +55,7 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
 
     // Initial population
     restoreParams();
-    cutAngle_->setValue(params_->alpha_deg);
-    incidentAngle_->setValue(params_->theta_deg);
-    transHeight_->setValue(params_->transHeight);
-    transLength_->setValue(params_->transLength);
+    pushParamsToGui();
     emit parametersUpdated(*params_);
 }
 
@@ -94,6 +86,8 @@ void ConfigurationDlg::display()
             persisteParams();
             emit parametersUpdated(*params_);
         }
+    } else {
+        pushParamsToGui();
     }
 }
 
@@ -119,7 +113,7 @@ static const char *transLengthLbl = "transducer length [mm]";
 
 void ConfigurationDlg::persisteParams() const
 {
-    qDebug("Persisting parameters");
+    qInfo("Persisting device parameters");
 
     QSettings settings;
 
@@ -135,7 +129,7 @@ void ConfigurationDlg::persisteParams() const
 
 void ConfigurationDlg::restoreParams()
 {
-    qDebug("Restoring parameters");
+    qInfo("Restoring device parameters");
     QSettings settings;
 
     settings.beginGroup("Crystal");
@@ -144,6 +138,16 @@ void ConfigurationDlg::restoreParams()
     params_->transHeight = settings.value(transHeightLbl, 10.0).toDouble();
     params_->transLength = settings.value(transLengthLbl, 15.0).toDouble();
     settings.endGroup();
+}
+
+//------------------------------------------------------------------------------
+
+void ConfigurationDlg::pushParamsToGui()
+{
+    cutAngle_->setValue(params_->alpha_deg);
+    incidentAngle_->setValue(params_->theta_deg);
+    transHeight_->setValue(params_->transHeight);
+    transLength_->setValue(params_->transLength);
 }
 
 //------------------------------------------------------------------------------

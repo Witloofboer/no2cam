@@ -9,6 +9,8 @@ class QString;
 
 namespace gui {
 
+class MainWindow;
+
 //------------------------------------------------------------------------------
 
 GUISHARED_EXPORT void init(const QString& version);

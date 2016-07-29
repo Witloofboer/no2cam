@@ -20,14 +20,21 @@ class SnapshotPane : public AbstractMainPane
     Q_OBJECT
 public:
     explicit SnapshotPane(QWidget *parent = 0);
+    void persisteParams() const;
 
 signals:
 
+public slots:
+    void recomputeParams();
+
 private slots:
-    void parameterModeSwitch();
+    void switchParamMode();
 
 private:
-    QRadioButton   *selectorBtn_;
+
+    void restoreParams();
+
+    QRadioButton   *wavelengthBtn_;
     DoubleLineEdit *wavelengthEdit_;
     DoubleLineEdit *frequencyEdit_;
     IntLineEdit    *powerEdit_;

@@ -1,6 +1,8 @@
 #include "tooling.h"
 
+#include <QCoreApplication>
 #include <QGridLayout>
+#include <QKeyEvent>
 #include <QLabel>
 #include <QLocale>
 #include <QRegExpValidator>
@@ -19,7 +21,7 @@ LineEdit::LineEdit(int length, const QString &regexp)
     static const QSizePolicy fixedSizePolicy_(QSizePolicy::Fixed,
                                               QSizePolicy::Fixed);
 
-    setAlignment(Qt::AlignRight);
+    setAlignment(Qt::AlignLeft);
     setFixedWidth(length * fontMetrics().width('0'));
     setSizePolicy(fixedSizePolicy_);
 
@@ -33,6 +35,27 @@ bool LineEdit::isValid()
     int pos = 0;
     QString value = text();
     return QValidator::Acceptable == validator()->validate(value, pos);
+}
+
+void LineEdit::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Return ||
+        event->key() == Qt::Key_Enter)
+    {
+        auto e = new QKeyEvent(QEvent::KeyPress, Qt::Key_Tab,
+                               event->modifiers(), "\t",
+                               event->isAutoRepeat(),
+                               event->count());
+        QCoreApplication::postEvent(this, e);
+    } else {
+        QLineEdit::keyPressEvent(event);
+    }
+}
+
+void LineEdit::focusOutEvent(QFocusEvent *event)
+{
+    QLineEdit::focusOutEvent(event);
+    emit focusLost();
 }
 
 

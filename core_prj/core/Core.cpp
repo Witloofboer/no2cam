@@ -36,14 +36,14 @@ void Core::setParameters(const CrystalParameters &params)
 
 void Core::stopDevices()
 {
-    qDebug("Stopping devices");
+    qInfo("Stopping devices");
 }
 
 //------------------------------------------------------------------------------
 
 void Core::moveToMainThread()
 {
-    qDebug("Moving core singleton to main thread");
+    qInfo("Moving core singleton to main thread");
     moveToThread(QCoreApplication::instance()->thread());
 }
 

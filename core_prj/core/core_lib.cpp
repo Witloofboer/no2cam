@@ -16,7 +16,7 @@ static Core *singleton_ = nullptr;
 
 void init()
 {
-    qDebug("Initialising core layer");
+    qInfo("Initialising core layer");
     thread_ = new QThread;
     singleton_ = new Core;
 
@@ -27,10 +27,10 @@ void init()
 
 void start()
 {
-    qDebug("Moving core singleton to core thread");
+    qInfo("Moving core singleton to core thread");
     singleton_->moveToThread(thread_);
 
-    qDebug("Starting core thread");
+    qInfo("Starting core thread");
     thread_->start();
 }
 
@@ -38,7 +38,7 @@ void start()
 
 void shutdown()
 {
-    qDebug("Shutting down core thread");
+    qInfo("Shutting down core thread");
     thread_->exit();
     thread_->wait();
 }
@@ -47,6 +47,7 @@ void shutdown()
 
 Core *singleton()
 {
+    Q_ASSERT(singleton_);
     return singleton_;
 }
 
@@ -54,7 +55,7 @@ Core *singleton()
 
 void finalise()
 {
-    qDebug("Finalising core layer");
+    qInfo("Finalising core layer");
     delete singleton_;
     delete thread_;
 

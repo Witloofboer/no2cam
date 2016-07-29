@@ -9,11 +9,13 @@
 //------------------------------------------------------------------------------
 
 class QAction;
+class QCloseEvent;
 class QStackedWidget;
 
 namespace gui {
 
 class ConfigurationDlg;
+class SnapshotPane;
 
 //------------------------------------------------------------------------------
 
@@ -24,9 +26,10 @@ class GUISHARED_EXPORT MainWindow : public QMainWindow
 public:
     MainWindow(const QString &version, QWidget *parent = 0);
 
-    static MainWindow *instance() {return instance_;}
+protected:
+    void closeEvent(QCloseEvent *event) override;
 
-private slots:
+    private slots:
     void newSession();
     void loadSession();
     bool saveSession();
@@ -51,7 +54,7 @@ private:
     ConfigurationDlg *configurationDlg_;
     QString version_;
 
-    static MainWindow *instance_;
+    SnapshotPane *snapshotPane_;
 };
 
 //------------------------------------------------------------------------------
