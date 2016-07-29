@@ -18,6 +18,7 @@ private slots:
     void frequency_power_data();
     void wavelength();
     void wavelength_data();
+    void persisteParameters();
 };
 
 //------------------------------------------------------------------------------

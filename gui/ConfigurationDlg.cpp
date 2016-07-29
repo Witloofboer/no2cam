@@ -54,7 +54,7 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     setLayout(layout);
 
     // Initial population
-    restoreParams();
+    params_->restore();
     pushParamsToGui();
     emit parametersUpdated(*params_);
 }
@@ -83,7 +83,7 @@ void ConfigurationDlg::display()
             params_->theta_deg = incidentAngle_->value();
             params_->transHeight = transHeight_->value();
             params_->transLength = transLength_->value();
-            persisteParams();
+            params_->persiste();
             emit parametersUpdated(*params_);
         }
     } else {
@@ -102,42 +102,6 @@ void ConfigurationDlg::updateDlgBtns()
             transLength_->isValid();
 
     buttonBox_->button(QDialogButtonBox::Ok)->setEnabled(enabled);
-}
-
-//------------------------------------------------------------------------------
-
-static const char *alphaLbl = "cut angle [deg]";
-static const char *thetaLbl = "incident angle [deg]";
-static const char *transHeightLbl = "transducer height [mm]";
-static const char *transLengthLbl = "transducer length [mm]";
-
-void ConfigurationDlg::persisteParams() const
-{
-    qInfo("Persisting device parameters");
-
-    QSettings settings;
-
-    settings.beginGroup("Crystal");
-    settings.setValue(alphaLbl, params_->alpha_deg);
-    settings.setValue(thetaLbl, params_->theta_deg);
-    settings.setValue(transHeightLbl, params_->transHeight);
-    settings.setValue(transLengthLbl, params_->transLength);
-    settings.endGroup();
-}
-
-//------------------------------------------------------------------------------
-
-void ConfigurationDlg::restoreParams()
-{
-    qInfo("Restoring device parameters");
-    QSettings settings;
-
-    settings.beginGroup("Crystal");
-    params_->alpha_deg = settings.value(alphaLbl, 7.65).toDouble();
-    params_->theta_deg = settings.value(thetaLbl, 10.1).toDouble();
-    params_->transHeight = settings.value(transHeightLbl, 10.0).toDouble();
-    params_->transLength = settings.value(transLengthLbl, 15.0).toDouble();
-    settings.endGroup();
 }
 
 //------------------------------------------------------------------------------

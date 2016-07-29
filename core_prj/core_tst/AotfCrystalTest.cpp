@@ -9,6 +9,8 @@ using namespace core;
 
 double f(double x) {return 1e-3*round(x*1e3);}
 
+//------------------------------------------------------------------------------
+
 void AotfCrystalTest::initTestCase()
 {
 }
@@ -16,6 +18,8 @@ void AotfCrystalTest::initTestCase()
 void AotfCrystalTest::cleanupTestCase()
 {
 }
+
+//------------------------------------------------------------------------------
 
 void AotfCrystalTest::frequency_power()
 {
@@ -34,6 +38,8 @@ void AotfCrystalTest::frequency_power()
     QCOMPARE(f(crystal.frequency(lambda, T)), f(freq));
     QCOMPARE(f(crystal.power(lambda, T)), f(power));
 }
+
+//------------------------------------------------------------------------------
 
 void AotfCrystalTest::frequency_power_data()
 {
@@ -55,6 +61,8 @@ void AotfCrystalTest::frequency_power_data()
     QTest::newRow("t_wide") << 450.0 << 21.0 << 7.5 << 10.0 << 10.0 << 11.0 << 142.123 << 132.971;
 }
 
+//------------------------------------------------------------------------------
+
 void AotfCrystalTest::wavelength()
 {
     QFETCH(double, lambda);
@@ -68,6 +76,8 @@ void AotfCrystalTest::wavelength()
     QCOMPARE(f(crystal.wavelength(freq, T)), f(lambda));
 }
 
+//------------------------------------------------------------------------------
+
 void AotfCrystalTest::wavelength_data()
 {
     QTest::addColumn<double>("lambda");
@@ -78,3 +88,18 @@ void AotfCrystalTest::wavelength_data()
     QTest::newRow("2") << 460.0 << 31.0;
     QTest::newRow("3") << 470.0 << 31.0;
 }
+
+//------------------------------------------------------------------------------
+
+void AotfCrystalTest::persisteParameters()
+{
+    CrystalParameters p_write = {1.0, 2.0, 3.0, 4.0};
+    CrystalParameters p_read;
+
+    p_write.persiste();
+    p_read.restore();
+
+    QVERIFY(p_write == p_read);
+}
+
+//------------------------------------------------------------------------------

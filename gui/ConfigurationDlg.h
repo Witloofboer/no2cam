@@ -35,8 +35,6 @@ signals:
     void parametersUpdated(const core::CrystalParameters& params);
 
 private:
-    void persisteParams() const;
-    void restoreParams();
     void pushParamsToGui();
 
     DoubleLineEdit *cutAngle_;       // Cut angle

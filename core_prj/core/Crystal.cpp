@@ -109,6 +109,42 @@ double Crystal::acousticParam(double lambda, double T, bool isFrequency) const
 
 //------------------------------------------------------------------------------
 
+static const char *alphaLbl = "cut angle [deg]";
+static const char *thetaLbl = "incident angle [deg]";
+static const char *transHeightLbl = "transducer height [mm]";
+static const char *transLengthLbl = "transducer length [mm]";
+
+void CrystalParameters::persiste() const
+{
+    qInfo("Persisting device parameters");
+
+    QSettings settings;
+
+    settings.beginGroup("Crystal");
+    settings.setValue(alphaLbl, alpha_deg);
+    settings.setValue(thetaLbl, theta_deg);
+    settings.setValue(transHeightLbl, transHeight);
+    settings.setValue(transLengthLbl, transLength);
+    settings.endGroup();
+}
+
+//------------------------------------------------------------------------------
+
+void CrystalParameters::restore()
+{
+    qInfo("Restoring device parameters");
+    QSettings settings;
+
+    settings.beginGroup("Crystal");
+    alpha_deg = settings.value(alphaLbl, 7.65).toDouble();
+    theta_deg = settings.value(thetaLbl, 10.1).toDouble();
+    transHeight = settings.value(transHeightLbl, 10.0).toDouble();
+    transLength = settings.value(transLengthLbl, 15.0).toDouble();
+    settings.endGroup();
+}
+
+//------------------------------------------------------------------------------
+
 bool operator==(const CrystalParameters& lhs,
                 const CrystalParameters& rhs)
 {
