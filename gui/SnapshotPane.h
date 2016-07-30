@@ -34,13 +34,13 @@ private:
 
     void restoreParams();
 
-    QRadioButton   *wavelengthBtn_;
-    DoubleLineEdit *wavelengthEdit_;
-    DoubleLineEdit *frequencyEdit_;
-    IntLineEdit    *powerEdit_;
-    IntLineEdit    *exposureEdit_;
-    IntLineEdit    *cooldownEdit_;
-    LineEdit       *sessionEdit_;
+    QRadioButton   *wavelengthBtn;
+    DoubleLineEdit *wavelengthEdit;
+    DoubleLineEdit *frequencyEdit;
+    IntLineEdit    *powerEdit;
+    IntLineEdit    *exposureEdit;
+    IntLineEdit    *cooldownEdit;
+    LineEdit       *sessionEdit;
 };
 
 //------------------------------------------------------------------------------

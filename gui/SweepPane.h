@@ -24,12 +24,12 @@ signals:
 public slots:
 
 private:
-    DoubleLineEdit *wavelength1Edit_;
-    DoubleLineEdit *wavelength2Edit_;
-    DoubleLineEdit *wavelengthIncEdit_;
-    IntLineEdit    *exposureEdit_;
-    IntLineEdit    *cooldownEdit_;
-    LineEdit       *sessionEdit_;
+    DoubleLineEdit *wavelength1Edit;
+    DoubleLineEdit *wavelength2Edit;
+    DoubleLineEdit *wavelengthIncEdit;
+    IntLineEdit    *exposureEdit;
+    IntLineEdit    *cooldownEdit;
+    LineEdit       *sessionEdit;
 };
 
 //------------------------------------------------------------------------------

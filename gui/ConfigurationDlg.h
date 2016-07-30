@@ -31,11 +31,11 @@ private slots:
 private:
     void pushParamsToGui();
 
-    DoubleLineEdit *cutAngle_;       // Cut angle
-    DoubleLineEdit *incidentAngle_;  // Incident angle
-    DoubleLineEdit *transHeight_;    // Transducer height
-    DoubleLineEdit *transLength_;    // Transducer length
-    QDialogButtonBox *buttonBox_;
+    DoubleLineEdit *cutAngle;       // Cut angle
+    DoubleLineEdit *incidentAngle;  // Incident angle
+    DoubleLineEdit *transHeight;    // Transducer height
+    DoubleLineEdit *transLength;    // Transducer length
+    QDialogButtonBox *buttonBox;
 
     core::Crystal crystal;
 

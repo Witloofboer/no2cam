@@ -102,7 +102,7 @@ void IntLineEdit::setValue(int value)
 DoubleLineEdit::DoubleLineEdit(int length, int nIntDgts, int nFracDgts)
     : LineEdit(length,
                QString("^\\d{1,%1}[.]\\d{0,%2}$").arg(nIntDgts).arg(nFracDgts))
-    , nFracDgts_(nFracDgts)
+    , nFracDgts(nFracDgts)
 {}
 
 //------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ double DoubleLineEdit::value()
 
 void DoubleLineEdit::setValue(double value)
 {
-     setText(locale().toString(value, 'f', nFracDgts_));
+     setText(locale().toString(value, 'f', nFracDgts));
 }
 
 

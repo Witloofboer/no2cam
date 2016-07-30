@@ -18,11 +18,11 @@ namespace gui {
 
 ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     : QDialog(parent)
-    , cutAngle_(new DoubleLineEdit(7, 2, 1))
-    , incidentAngle_(new DoubleLineEdit(7, 2, 1))
-    , transHeight_(new DoubleLineEdit(7, 2, 1))
-    , transLength_(new DoubleLineEdit(7, 2, 1))
-    , buttonBox_(new QDialogButtonBox(QDialogButtonBox::Ok |
+    , cutAngle(new DoubleLineEdit(7, 2, 1))
+    , incidentAngle(new DoubleLineEdit(7, 2, 1))
+    , transHeight(new DoubleLineEdit(7, 2, 1))
+    , transLength(new DoubleLineEdit(7, 2, 1))
+    , buttonBox(new QDialogButtonBox(QDialogButtonBox::Ok |
                                       QDialogButtonBox::Cancel))
     , crystal()
 {
@@ -31,24 +31,24 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     auto crystalGrid = new QGridLayout();
 
     int row = 0;
-    putInGrid(cutAngle_, crystalGrid, row++, "Cut angle", "[deg]");
-    putInGrid(incidentAngle_, crystalGrid, row++, "Incident angle", "[deg]");
-    putInGrid(transHeight_, crystalGrid, row++, "Transducer height", "[mm]");
-    putInGrid(transLength_, crystalGrid, row++, "Transducer length", "[mm]");
+    putInGrid(cutAngle, crystalGrid, row++, "Cut angle", "[deg]");
+    putInGrid(incidentAngle, crystalGrid, row++, "Incident angle", "[deg]");
+    putInGrid(transHeight, crystalGrid, row++, "Transducer height", "[mm]");
+    putInGrid(transLength, crystalGrid, row++, "Transducer length", "[mm]");
 
     auto crystalBox = new QGroupBox(tr("Crystal parameters"));
     crystalBox->setLayout(crystalGrid);
 
-    connect(buttonBox_, QDialogButtonBox::accepted, this, accept);
-    connect(buttonBox_, QDialogButtonBox::rejected, this, reject);
-    connect(cutAngle_, LineEdit::focusLost, this, updateDlgBtns);
-    connect(incidentAngle_, LineEdit::focusLost, this, updateDlgBtns);
-    connect(transHeight_, LineEdit::focusLost, this, updateDlgBtns);
-    connect(transLength_, LineEdit::focusLost, this, updateDlgBtns);
+    connect(buttonBox, QDialogButtonBox::accepted, this, accept);
+    connect(buttonBox, QDialogButtonBox::rejected, this, reject);
+    connect(cutAngle, LineEdit::focusLost, this, updateDlgBtns);
+    connect(incidentAngle, LineEdit::focusLost, this, updateDlgBtns);
+    connect(transHeight, LineEdit::focusLost, this, updateDlgBtns);
+    connect(transLength, LineEdit::focusLost, this, updateDlgBtns);
 
     auto layout = new QVBoxLayout;
     layout->addWidget(crystalBox);
-    layout->addWidget(buttonBox_);
+    layout->addWidget(buttonBox);
     setLayout(layout);
 
     // Initial population
@@ -64,15 +64,15 @@ void ConfigurationDlg::display()
 
     if (code == DialogCode::Accepted)
     {
-        if (crystal.cutAngle() != cutAngle_->value() ||
-            crystal.lightAngle() != incidentAngle_->value() ||
-            crystal.transHeight() != transHeight_->value() ||
-            crystal.transLength() != transLength_->value())
+        if (crystal.cutAngle() != cutAngle->value() ||
+            crystal.lightAngle() != incidentAngle->value() ||
+            crystal.transHeight() != transHeight->value() ||
+            crystal.transLength() != transLength->value())
         {
-            crystal.set(cutAngle_->value(),
-                        incidentAngle_->value(),
-                        transHeight_->value(),
-                        transLength_->value());
+            crystal.set(cutAngle->value(),
+                        incidentAngle->value(),
+                        transHeight->value(),
+                        transLength->value());
             crystal.persiste();
         }
     } else {
@@ -85,22 +85,22 @@ void ConfigurationDlg::display()
 void ConfigurationDlg::updateDlgBtns()
 {
     const bool enabled =
-            cutAngle_->isValid() &&
-            incidentAngle_->isValid() &&
-            transHeight_->isValid() &&
-            transLength_->isValid();
+            cutAngle->isValid() &&
+            incidentAngle->isValid() &&
+            transHeight->isValid() &&
+            transLength->isValid();
 
-    buttonBox_->button(QDialogButtonBox::Ok)->setEnabled(enabled);
+    buttonBox->button(QDialogButtonBox::Ok)->setEnabled(enabled);
 }
 
 //------------------------------------------------------------------------------
 
 void ConfigurationDlg::pushParamsToGui()
 {
-    cutAngle_->setValue(crystal.cutAngle());
-    incidentAngle_->setValue(crystal.lightAngle());
-    transHeight_->setValue(crystal.transHeight());
-    transLength_->setValue(crystal.transLength());
+    cutAngle->setValue(crystal.cutAngle());
+    incidentAngle->setValue(crystal.lightAngle());
+    transHeight->setValue(crystal.transHeight());
+    transLength->setValue(crystal.transLength());
 }
 
 //------------------------------------------------------------------------------

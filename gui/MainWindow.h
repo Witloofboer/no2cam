@@ -46,15 +46,15 @@ protected:
 private:
     bool okToContinue();
 
-    QStackedWidget *stackedWidget_;
-    QAction *snapshotModeAction_;
-    QAction *observationModeAction_;
-    QAction *sweepModeAction_;
+    QStackedWidget *stackedWidget;
+    QAction *snapshotModeAction;
+    QAction *observationModeAction;
+    QAction *sweepModeAction;
 
-    ConfigurationDlg *configurationDlg_;
-    QString version_;
+    ConfigurationDlg *configurationDlg;
+    QString version;
 
-    SnapshotPane *snapshotPane_;
+    SnapshotPane *snapshotPane;
 };
 
 //------------------------------------------------------------------------------

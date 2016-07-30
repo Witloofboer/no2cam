@@ -17,65 +17,65 @@ namespace gui {
 
 SnapshotPane::SnapshotPane(QWidget *parent)
     : AbstractMainPane(parent)
-    , wavelengthBtn_(new QRadioButton(tr("Optic")))
-    , wavelengthEdit_(new DoubleLineEdit)
-    , frequencyEdit_(new DoubleLineEdit(9, 3, 3))
-    , powerEdit_(new IntLineEdit(9, 4))
-    , exposureEdit_(new IntLineEdit)
-    , cooldownEdit_(new IntLineEdit)
-    , sessionEdit_(new LineEdit)
+    , wavelengthBtn(new QRadioButton(tr("Optic")))
+    , wavelengthEdit(new DoubleLineEdit)
+    , frequencyEdit(new DoubleLineEdit(9, 3, 3))
+    , powerEdit(new IntLineEdit(9, 4))
+    , exposureEdit(new IntLineEdit)
+    , cooldownEdit(new IntLineEdit)
+    , sessionEdit(new LineEdit)
 {
 
     // Optic/accoustic ---------------------------------------------------------
 
     auto modeLayout = new QVBoxLayout;
-    modeLayout->addWidget(wavelengthBtn_);
+    modeLayout->addWidget(wavelengthBtn);
     modeLayout->addWidget(new QRadioButton(tr("Acoustic")));
 
     auto modeBox = new QGroupBox(tr("Parameter mode"));
     modeBox->setLayout(modeLayout);
 
-    connect(wavelengthBtn_, QRadioButton::toggled, this, switchParamMode);
-    wavelengthBtn_->setChecked(true);
+    connect(wavelengthBtn, QRadioButton::toggled, this, switchParamMode);
+    wavelengthBtn->setChecked(true);
 
     // Parameter box ------------------------------------------------------------
 
     int row=0;
 
-    putInGrid(frequencyEdit_, paramBoxLayout_, row++, tr("Frequency"), "[MHz]");
-    putInGrid(powerEdit_, paramBoxLayout_, row++, tr("Power"), "[mW]");
-    putInGrid(wavelengthEdit_, paramBoxLayout_, row++, tr("Wavelength"), "[nm]");
-    putInGrid(exposureEdit_, paramBoxLayout_, row++, tr("Exposure"), "[ms]");
-    putInGrid(cooldownEdit_, paramBoxLayout_, row++, tr("Cooldown"), "[ms]");
+    putInGrid(frequencyEdit, paramBoxLayout, row++, tr("Frequency"), "[MHz]");
+    putInGrid(powerEdit, paramBoxLayout, row++, tr("Power"), "[mW]");
+    putInGrid(wavelengthEdit, paramBoxLayout, row++, tr("Wavelength"), "[nm]");
+    putInGrid(exposureEdit, paramBoxLayout, row++, tr("Exposure"), "[ms]");
+    putInGrid(cooldownEdit, paramBoxLayout, row++, tr("Cooldown"), "[ms]");
 
-    paramBoxLayout_->addWidget(new QLabel("Session:"), row, 0);
-    paramBoxLayout_->addWidget(sessionEdit_, row, 1, 1, 2);
+    paramBoxLayout->addWidget(new QLabel("Session:"), row, 0);
+    paramBoxLayout->addWidget(sessionEdit, row, 1, 1, 2);
     ++row;
 
     // Adapt the AbstractMainPane base
-    leftLayout_->insertWidget(0, modeBox);
-    snapshotBox_->setTitle(tr("Snapshot"));
+    leftLayout->insertWidget(0, modeBox);
+    snapshotBox->setTitle(tr("Snapshot"));
 
     // Connectors
-    connect(wavelengthEdit_, LineEdit::focusLost, this, recomputeParams);
-    connect(frequencyEdit_, LineEdit::focusLost, this, recomputeParams);
+    connect(wavelengthEdit, LineEdit::focusLost, this, recomputeParams);
+    connect(frequencyEdit, LineEdit::focusLost, this, recomputeParams);
 }
 
 //------------------------------------------------------------------------------
 
 void SnapshotPane::switchParamMode()
 {
-    if (wavelengthBtn_->isChecked())
+    if (wavelengthBtn->isChecked())
     {
-        wavelengthEdit_->setEnabled(true);
-        frequencyEdit_->setEnabled(false);
-        powerEdit_->setEnabled(false);
+        wavelengthEdit->setEnabled(true);
+        frequencyEdit->setEnabled(false);
+        powerEdit->setEnabled(false);
     }
     else
     {
-        wavelengthEdit_->setEnabled(false);
-        frequencyEdit_->setEnabled(true);
-        powerEdit_->setEnabled(true);
+        wavelengthEdit->setEnabled(false);
+        frequencyEdit->setEnabled(true);
+        powerEdit->setEnabled(true);
     }
 
     emit recomputeParams();
@@ -86,22 +86,22 @@ void SnapshotPane::switchParamMode()
 void SnapshotPane::recomputeParams()
 {
     //TODO Not fully implemented
-    if (wavelengthBtn_->isChecked())
+    if (wavelengthBtn->isChecked())
     {
-        if (wavelengthEdit_->isValid())
+        if (wavelengthEdit->isValid())
         {
-            frequencyEdit_->setText("xxx.xxx");
-            powerEdit_->setText("xxxx");
+            frequencyEdit->setText("xxx.xxx");
+            powerEdit->setText("xxxx");
         } else {
-            frequencyEdit_->setText("");
-            powerEdit_->setText("");
+            frequencyEdit->setText("");
+            powerEdit->setText("");
         }
     } else {
-        if (frequencyEdit_->isValid())
+        if (frequencyEdit->isValid())
         {
-            wavelengthEdit_->setText("xxx.x");
+            wavelengthEdit->setText("xxx.x");
         } else {
-            wavelengthEdit_->setText("");
+            wavelengthEdit->setText("");
         }
     }
 }
@@ -122,12 +122,12 @@ void SnapshotPane::persisteParams() const
     QSettings settings;
 
     settings.beginGroup("Snapshot");
-    settings.setValue(wavelengthModeLbl, wavelengthBtn_->isChecked());
-    settings.setValue(wavelengthLbl, wavelengthEdit_->value());
-    settings.setValue(frequencyLbl, frequencyEdit_->value());
-    settings.setValue(powerLbl, powerEdit_->value());
-    settings.setValue(exposureLbl, exposureEdit_->value());
-    settings.setValue(cooldownLbl, cooldownEdit_->value());
+    settings.setValue(wavelengthModeLbl, wavelengthBtn->isChecked());
+    settings.setValue(wavelengthLbl, wavelengthEdit->value());
+    settings.setValue(frequencyLbl, frequencyEdit->value());
+    settings.setValue(powerLbl, powerEdit->value());
+    settings.setValue(exposureLbl, exposureEdit->value());
+    settings.setValue(cooldownLbl, cooldownEdit->value());
     settings.endGroup();
 }
 
@@ -140,12 +140,12 @@ void SnapshotPane::restoreParams()
     QSettings settings;
 
     settings.beginGroup("Snapshot");
-    wavelengthBtn_->setChecked(settings.value(wavelengthModeLbl).toBool());
-    wavelengthEdit_->setValue(settings.value(wavelengthLbl).toDouble());
-    frequencyEdit_->setValue(settings.value(frequencyLbl).toDouble());
-    powerEdit_->setValue(settings.value(powerLbl).toDouble());
-    exposureEdit_->setValue(settings.value(exposureLbl).toInt());
-    cooldownEdit_->setValue(settings.value(cooldownLbl).toInt());
+    wavelengthBtn->setChecked(settings.value(wavelengthModeLbl).toBool());
+    wavelengthEdit->setValue(settings.value(wavelengthLbl).toDouble());
+    frequencyEdit->setValue(settings.value(frequencyLbl).toDouble());
+    powerEdit->setValue(settings.value(powerLbl).toDouble());
+    exposureEdit->setValue(settings.value(exposureLbl).toInt());
+    cooldownEdit->setValue(settings.value(cooldownLbl).toInt());
     settings.endGroup();
 
     emit recomputeParams();

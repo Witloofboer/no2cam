@@ -9,34 +9,34 @@ namespace gui {
 
 CameraButtonBox::CameraButtonBox(QWidget *parent)
     : QGroupBox(parent)
-    , takeOneBtn_(new QPushButton(QIcon(":/icons/media-one-32.png"), ""))
-    , burstBtn_(new QPushButton(QIcon(":/icons/media-burst-32.png"), ""))
-    , recordBtn_(new QPushButton(QIcon(":/icons/media-record-32.png"), ""))
-    , stopBtn_(new QPushButton(QIcon(":/icons/media-stop-32.png"), ""))
+    , takeOneBtn(new QPushButton(QIcon(":/icons/media-one-32.png"), ""))
+    , burstBtn(new QPushButton(QIcon(":/icons/media-burst-32.png"), ""))
+    , recordBtn(new QPushButton(QIcon(":/icons/media-record-32.png"), ""))
+    , stopBtn(new QPushButton(QIcon(":/icons/media-stop-32.png"), ""))
 {
-    takeOneBtn_->setCheckable(true);
-    takeOneBtn_->setFixedWidth(40);
-    connect(takeOneBtn_, QPushButton::clicked, this, CameraButtonBox::takeOneClicked);
+    takeOneBtn->setCheckable(true);
+    takeOneBtn->setFixedWidth(40);
+    connect(takeOneBtn, QPushButton::clicked, this, CameraButtonBox::takeOneClicked);
 
-    burstBtn_->setCheckable(true);
-    burstBtn_->setFixedWidth(40);
-    burstBtn_->setCheckable(true);
-    connect(burstBtn_, QPushButton::clicked, this, CameraButtonBox::burstClicked);
+    burstBtn->setCheckable(true);
+    burstBtn->setFixedWidth(40);
+    burstBtn->setCheckable(true);
+    connect(burstBtn, QPushButton::clicked, this, CameraButtonBox::burstClicked);
 
-    recordBtn_->setFixedWidth(40);
-    recordBtn_->setCheckable(true);
-    connect(recordBtn_, QPushButton::clicked, this, CameraButtonBox::recordClicked);
+    recordBtn->setFixedWidth(40);
+    recordBtn->setCheckable(true);
+    connect(recordBtn, QPushButton::clicked, this, CameraButtonBox::recordClicked);
 
-    stopBtn_->setFixedWidth(40);
+    stopBtn->setFixedWidth(40);
 
-    connect(stopBtn_, QPushButton::clicked, this, CameraButtonBox::stopClicked);
+    connect(stopBtn, QPushButton::clicked, this, CameraButtonBox::stopClicked);
 
     auto btnLayout = new QHBoxLayout;
     btnLayout->addStretch();
-    btnLayout->addWidget(takeOneBtn_);
-    btnLayout->addWidget(burstBtn_);
-    btnLayout->addWidget(recordBtn_);
-    btnLayout->addWidget(stopBtn_);
+    btnLayout->addWidget(takeOneBtn);
+    btnLayout->addWidget(burstBtn);
+    btnLayout->addWidget(recordBtn);
+    btnLayout->addWidget(stopBtn);
     btnLayout->addStretch();
 
     setLayout(btnLayout);
@@ -46,8 +46,8 @@ CameraButtonBox::CameraButtonBox(QWidget *parent)
 
 void CameraButtonBox::takeOneClicked()
 {
-    takeOneBtn_->setEnabled(false);
-    burstBtn_->setEnabled(false);
+    takeOneBtn->setEnabled(false);
+    burstBtn->setEnabled(false);
     emit clicked(kTakeOne);
 }
 
@@ -55,24 +55,24 @@ void CameraButtonBox::takeOneClicked()
 
 void CameraButtonBox::burstClicked()
 {
-    takeOneBtn_->setEnabled(false);
-    burstBtn_->setEnabled(false);
+    takeOneBtn->setEnabled(false);
+    burstBtn->setEnabled(false);
     emit clicked(kBurst);
 }
 
 void CameraButtonBox::recordClicked()
 {
-    emit clicked(recordBtn_->isChecked() ? kRecord : kEndRecord);
+    emit clicked(recordBtn->isChecked() ? kRecord : kEndRecord);
 }
 
 //------------------------------------------------------------------------------
 
 void CameraButtonBox::stopClicked()
 {
-    takeOneBtn_->setChecked(false);
-    takeOneBtn_->setEnabled(true);
-    burstBtn_->setChecked(false);
-    burstBtn_->setEnabled(true);
+    takeOneBtn->setChecked(false);
+    takeOneBtn->setEnabled(true);
+    burstBtn->setChecked(false);
+    burstBtn->setEnabled(true);
     emit clicked(kStop);
 }
 

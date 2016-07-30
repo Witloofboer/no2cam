@@ -12,29 +12,29 @@ namespace gui {
 
 ObservationPane::ObservationPane(QWidget *parent)
     : AbstractMainPane(parent)
-    , wavelength1Edit_(new DoubleLineEdit)
-    , wavelength2Edit_(new DoubleLineEdit)
-    , exposureEdit_(new IntLineEdit())
-    , snapPerObsEdit_(new IntLineEdit)
-    , cooldownEdit_(new IntLineEdit())
-    , sessionEdit_(new LineEdit)
+    , wavelength1Edit(new DoubleLineEdit)
+    , wavelength2Edit(new DoubleLineEdit)
+    , exposureEdit(new IntLineEdit())
+    , snapPerObsEdit(new IntLineEdit)
+    , cooldownEdit(new IntLineEdit())
+    , sessionEdit(new LineEdit)
 {
     // Parameter box -----------------------------------------------------------
 
     int row=0;
 
-    putInGrid(wavelength1Edit_, paramBoxLayout_, row++, tr("Wavelength 1"), "[nm]");
-    putInGrid(wavelength2Edit_, paramBoxLayout_, row++, tr("Wavelength 2"), "[nm]");
-    putInGrid(exposureEdit_, paramBoxLayout_, row++, tr("Exposure"), "[ms]");
-    putInGrid(snapPerObsEdit_, paramBoxLayout_, row++, tr("Snapshots/obs"), "");
-    putInGrid(cooldownEdit_, paramBoxLayout_, row++, tr("Cooldown/obs"), "[ms]");
+    putInGrid(wavelength1Edit, paramBoxLayout, row++, tr("Wavelength 1"), "[nm]");
+    putInGrid(wavelength2Edit, paramBoxLayout, row++, tr("Wavelength 2"), "[nm]");
+    putInGrid(exposureEdit, paramBoxLayout, row++, tr("Exposure"), "[ms]");
+    putInGrid(snapPerObsEdit, paramBoxLayout, row++, tr("Snapshots/obs"), "");
+    putInGrid(cooldownEdit, paramBoxLayout, row++, tr("Cooldown/obs"), "[ms]");
 
-    paramBoxLayout_->addWidget(new QLabel("Session:"), row, 0);
-    paramBoxLayout_->addWidget(sessionEdit_, row, 1, 1, 2);
+    paramBoxLayout->addWidget(new QLabel("Session:"), row, 0);
+    paramBoxLayout->addWidget(sessionEdit, row, 1, 1, 2);
     ++row;
 
     // Adapt the AbstractMainPane base
-    snapshotBox_->setTitle(tr("Observation"));
+    snapshotBox->setTitle(tr("Observation"));
 }
 
 //------------------------------------------------------------------------------

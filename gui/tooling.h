@@ -63,7 +63,7 @@ public:
     double value();
 
 private:
-    int nFracDgts_;
+    int nFracDgts;
 };
 
 

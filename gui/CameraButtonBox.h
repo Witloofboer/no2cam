@@ -31,10 +31,10 @@ private slots:
     void stopClicked();
 
 private:
-    QPushButton *takeOneBtn_;
-    QPushButton *burstBtn_;
-    QPushButton *recordBtn_;
-    QPushButton *stopBtn_;
+    QPushButton *takeOneBtn;
+    QPushButton *burstBtn;
+    QPushButton *recordBtn;
+    QPushButton *stopBtn;
 };
 
 //------------------------------------------------------------------------------

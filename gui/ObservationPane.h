@@ -22,12 +22,12 @@ public:
 signals:
 
 private:
-    DoubleLineEdit *wavelength1Edit_;
-    DoubleLineEdit *wavelength2Edit_;
-    IntLineEdit    *exposureEdit_;
-    IntLineEdit    *snapPerObsEdit_;
-    IntLineEdit    *cooldownEdit_;
-    LineEdit       *sessionEdit_;
+    DoubleLineEdit *wavelength1Edit;
+    DoubleLineEdit *wavelength2Edit;
+    IntLineEdit    *exposureEdit;
+    IntLineEdit    *snapPerObsEdit;
+    IntLineEdit    *cooldownEdit;
+    LineEdit       *sessionEdit;
 };
 
 //------------------------------------------------------------------------------

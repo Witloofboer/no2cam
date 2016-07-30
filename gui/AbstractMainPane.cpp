@@ -11,15 +11,15 @@ namespace gui {
 
 AbstractMainPane::AbstractMainPane(QWidget *parent)
     : QWidget(parent)
-    , leftLayout_(new QVBoxLayout)
-    , paramBoxLayout_(new QGridLayout)
-    , snapshotBox_(new QGroupBox)
+    , leftLayout(new QVBoxLayout)
+    , paramBoxLayout(new QGridLayout)
+    , snapshotBox(new QGroupBox)
 {
     // Parameter box -----------------------------------------------------------
 
     auto parameterBox = new QGroupBox(tr("Parameters"));
-    parameterBox->setLayout(paramBoxLayout_);
-    paramBoxLayout_->setColumnMinimumWidth(0, 75);
+    parameterBox->setLayout(paramBoxLayout);
+    paramBoxLayout->setColumnMinimumWidth(0, 75);
 
     // Intensity datagram ------------------------------------------------------
 
@@ -32,10 +32,10 @@ AbstractMainPane::AbstractMainPane(QWidget *parent)
 
     // Left Layout -------------------------------------------------------------
 
-    leftLayout_->addWidget(parameterBox);
-    leftLayout_->addWidget(datagramBox);
-    leftLayout_->addStretch();
-    leftLayout_->addWidget(cameraButtonBox);
+    leftLayout->addWidget(parameterBox);
+    leftLayout->addWidget(datagramBox);
+    leftLayout->addStretch();
+    leftLayout->addWidget(cameraButtonBox);
 
 
     // Snapshot image ----------------------------------------------------------
@@ -49,20 +49,20 @@ AbstractMainPane::AbstractMainPane(QWidget *parent)
     snapshotLayout->addWidget(snapshotLbl);
     snapshotLayout->addStretch();
 
-    snapshotBox_->setLayout(snapshotLayout);
+    snapshotBox->setLayout(snapshotLayout);
 
 
     // Right layout ------------------------------------------------------------
 
     auto rightLayout = new QVBoxLayout;
     rightLayout->addStretch();
-    rightLayout->addWidget(snapshotBox_);
+    rightLayout->addWidget(snapshotBox);
     rightLayout->addStretch();
 
     // Main layout -------------------------------------------------------------
 
     auto mainLayout = new QHBoxLayout;
-    mainLayout->addLayout(leftLayout_);
+    mainLayout->addLayout(leftLayout);
     mainLayout->addLayout(rightLayout);
 
     setLayout(mainLayout);
