@@ -24,7 +24,7 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     , transLength(new DoubleLineEdit(7, 2, 1))
     , buttonBox(new QDialogButtonBox(QDialogButtonBox::Ok |
                                       QDialogButtonBox::Cancel))
-    , crystal()
+    , myCrystal()
 {
     setWindowTitle(tr("Configuration"));
 
@@ -52,7 +52,7 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     setLayout(layout);
 
     // Initial population
-    crystal.restore();
+    myCrystal.restore();
     pushParamsToGui();
 }
 
@@ -60,20 +60,21 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
 
 void ConfigurationDlg::display()
 {
-    auto code = QDialog::exec();
+    auto code = exec();
 
     if (code == DialogCode::Accepted)
     {
-        if (crystal.cutAngle() != cutAngle->value() ||
-            crystal.lightAngle() != incidentAngle->value() ||
-            crystal.transHeight() != transHeight->value() ||
-            crystal.transLength() != transLength->value())
+        if (myCrystal.cutAngle() != cutAngle->value() ||
+            myCrystal.lightAngle() != incidentAngle->value() ||
+            myCrystal.transHeight() != transHeight->value() ||
+            myCrystal.transLength() != transLength->value())
         {
-            crystal.set(cutAngle->value(),
+            myCrystal.set(cutAngle->value(),
                         incidentAngle->value(),
                         transHeight->value(),
                         transLength->value());
-            crystal.persiste();
+            myCrystal.persiste();
+            emit parametersUpdated();
         }
     } else {
         pushParamsToGui();
@@ -97,10 +98,10 @@ void ConfigurationDlg::updateDlgBtns()
 
 void ConfigurationDlg::pushParamsToGui()
 {
-    cutAngle->setValue(crystal.cutAngle());
-    incidentAngle->setValue(crystal.lightAngle());
-    transHeight->setValue(crystal.transHeight());
-    transLength->setValue(crystal.transLength());
+    cutAngle->setValue(myCrystal.cutAngle());
+    incidentAngle->setValue(myCrystal.lightAngle());
+    transHeight->setValue(myCrystal.transHeight());
+    transLength->setValue(myCrystal.transLength());
 }
 
 //------------------------------------------------------------------------------

@@ -28,7 +28,7 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     , sweepModeAction(new QAction("Sweep over &wavelength", this))
     , configurationDlg(new ConfigurationDlg(this))
     , version(version)
-    , snapshotPane(new SnapshotPane)
+    , snapshotPane(new SnapshotPane(configurationDlg))
 {
     // -------------------------------------------------------------------------
     // Central widget
@@ -145,11 +145,13 @@ MainWindow::MainWindow(const QString &version, QWidget *parent)
     setWindowIcon(QIcon(":/icons/video-camera-64.png"));
     setFixedSize(sizeHint());
     snapshotModeAction->setChecked(true);
+    connect(configurationDlg, ConfigurationDlg::parametersUpdated,
+            snapshotPane, SnapshotPane::refreshParameters);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    //snapshotPane_->persisteParams(); // TODO also for the other panes.
+    snapshotPane->persiste(); // TODO also for the other panes.
     QMainWindow::closeEvent(event);
 }
 

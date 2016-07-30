@@ -120,6 +120,8 @@ void Crystal::persiste() const
     settings.setValue(thetaLbl, theta_deg);
     settings.setValue(transHeightLbl, tH);
     settings.setValue(transLengthLbl, tL);
+
+    settings.endGroup();
 }
 
 //------------------------------------------------------------------------------

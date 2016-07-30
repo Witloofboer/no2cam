@@ -9,6 +9,7 @@ class QRadioButton;
 
 namespace gui {
 
+class ConfigurationDlg;
 class DoubleLineEdit;
 class IntLineEdit;
 class LineEdit;
@@ -19,22 +20,23 @@ class SnapshotPane : public AbstractMainPane
 {
     Q_OBJECT
 public:
-    explicit SnapshotPane(QWidget *parent = 0);
-    void persisteParams() const;
+    explicit SnapshotPane(ConfigurationDlg * configurationDlg);
+    void persiste() const;
 
 signals:
 
 public slots:
-    void recomputeParams();
+    void refreshParameters();
 
 private slots:
     void switchParamMode();
 
 private:
 
-    void restoreParams();
-
+    void restore();
+    ConfigurationDlg *configurationDlg;
     QRadioButton   *wavelengthBtn;
+    QRadioButton   *acousticBtn;
     DoubleLineEdit *wavelengthEdit;
     DoubleLineEdit *frequencyEdit;
     IntLineEdit    *powerEdit;

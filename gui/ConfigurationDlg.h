@@ -21,6 +21,10 @@ class ConfigurationDlg : public QDialog
 
 public:
     ConfigurationDlg(QWidget *parent=0);
+    const core::Crystal &Crystal() {return myCrystal; }
+
+signals:
+    void parametersUpdated();
 
 public slots:
     void display();
@@ -37,8 +41,7 @@ private:
     DoubleLineEdit *transLength;    // Transducer length
     QDialogButtonBox *buttonBox;
 
-    core::Crystal crystal;
-
+    core::Crystal myCrystal;
 };
 
 //------------------------------------------------------------------------------

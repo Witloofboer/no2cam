@@ -9,15 +9,19 @@
 
 #include "gui_lib.h"
 #include "tooling.h"
+#include "ConfigurationDlg.h"
 #include "MainWindow.h"
+#include "../core/Core.h"
 
 namespace gui {
 
 //------------------------------------------------------------------------------
 
-SnapshotPane::SnapshotPane(QWidget *parent)
-    : AbstractMainPane(parent)
+SnapshotPane::SnapshotPane(ConfigurationDlg *configurationDlg)
+    : AbstractMainPane()
+    , configurationDlg(configurationDlg)
     , wavelengthBtn(new QRadioButton(tr("Optic")))
+    , acousticBtn(new QRadioButton(tr("Acoustic")))
     , wavelengthEdit(new DoubleLineEdit)
     , frequencyEdit(new DoubleLineEdit(9, 3, 3))
     , powerEdit(new IntLineEdit(9, 4))
@@ -25,18 +29,16 @@ SnapshotPane::SnapshotPane(QWidget *parent)
     , cooldownEdit(new IntLineEdit)
     , sessionEdit(new LineEdit)
 {
-
     // Optic/accoustic ---------------------------------------------------------
 
     auto modeLayout = new QVBoxLayout;
     modeLayout->addWidget(wavelengthBtn);
-    modeLayout->addWidget(new QRadioButton(tr("Acoustic")));
+    modeLayout->addWidget(acousticBtn);
 
     auto modeBox = new QGroupBox(tr("Parameter mode"));
     modeBox->setLayout(modeLayout);
 
     connect(wavelengthBtn, QRadioButton::toggled, this, switchParamMode);
-    wavelengthBtn->setChecked(true);
 
     // Parameter box ------------------------------------------------------------
 
@@ -57,8 +59,12 @@ SnapshotPane::SnapshotPane(QWidget *parent)
     snapshotBox->setTitle(tr("Snapshot"));
 
     // Connectors
-    connect(wavelengthEdit, LineEdit::focusLost, this, recomputeParams);
-    connect(frequencyEdit, LineEdit::focusLost, this, recomputeParams);
+    connect(wavelengthEdit, LineEdit::focusLost, this, refreshParameters);
+    connect(frequencyEdit, LineEdit::focusLost, this, refreshParameters);
+
+    // Restoring
+    restore();
+    switchParamMode();
 }
 
 //------------------------------------------------------------------------------
@@ -78,20 +84,21 @@ void SnapshotPane::switchParamMode()
         powerEdit->setEnabled(true);
     }
 
-    emit recomputeParams();
+    emit refreshParameters();
 }
 
 //------------------------------------------------------------------------------
 
-void SnapshotPane::recomputeParams()
+void SnapshotPane::refreshParameters()
 {
-    //TODO Not fully implemented
+    const core::Crystal &crystal = configurationDlg->Crystal();
+
     if (wavelengthBtn->isChecked())
     {
         if (wavelengthEdit->isValid())
         {
-            frequencyEdit->setText("xxx.xxx");
-            powerEdit->setText("xxxx");
+            frequencyEdit->setValue(crystal.frequency(wavelengthEdit->value(), 20)); //TODO temperature
+            powerEdit->setValue(crystal.power(wavelengthEdit->value(), 20)); //TODO temperature
         } else {
             frequencyEdit->setText("");
             powerEdit->setText("");
@@ -99,7 +106,7 @@ void SnapshotPane::recomputeParams()
     } else {
         if (frequencyEdit->isValid())
         {
-            wavelengthEdit->setText("xxx.x");
+            wavelengthEdit->setValue(crystal.wavelength(frequencyEdit->value(), 20)); //TODO temperature
         } else {
             wavelengthEdit->setText("");
         }
@@ -115,7 +122,7 @@ static const char *powerLbl = "power [mW]";
 static const char *exposureLbl = "exposure [ms]";
 static const char *cooldownLbl = "cooldown [ms]";
 
-void SnapshotPane::persisteParams() const
+void SnapshotPane::persiste() const
 {
     qInfo("Persisting snapshot parameters");
 
@@ -123,32 +130,41 @@ void SnapshotPane::persisteParams() const
 
     settings.beginGroup("Snapshot");
     settings.setValue(wavelengthModeLbl, wavelengthBtn->isChecked());
-    settings.setValue(wavelengthLbl, wavelengthEdit->value());
-    settings.setValue(frequencyLbl, frequencyEdit->value());
-    settings.setValue(powerLbl, powerEdit->value());
-    settings.setValue(exposureLbl, exposureEdit->value());
-    settings.setValue(cooldownLbl, cooldownEdit->value());
+    if (wavelengthEdit->isValid())
+        settings.setValue(wavelengthLbl, wavelengthEdit->text());
+    if (frequencyEdit->isValid())
+        settings.setValue(frequencyLbl, frequencyEdit->text());
+    if (powerEdit->isValid())
+        settings.setValue(powerLbl, powerEdit->text());
+    if (exposureEdit->isValid())
+        settings.setValue(exposureLbl, exposureEdit->text());
+    if (cooldownEdit->isValid())
+        settings.setValue(cooldownLbl, cooldownEdit->text());
     settings.endGroup();
 }
 
 //------------------------------------------------------------------------------
 
-void SnapshotPane::restoreParams()
+void SnapshotPane::restore()
 {
-    qInfo("Retreiving snapshot parameters");
+    qInfo("Restoring snapshot parameters");
 
     QSettings settings;
 
     settings.beginGroup("Snapshot");
-    wavelengthBtn->setChecked(settings.value(wavelengthModeLbl).toBool());
-    wavelengthEdit->setValue(settings.value(wavelengthLbl).toDouble());
-    frequencyEdit->setValue(settings.value(frequencyLbl).toDouble());
-    powerEdit->setValue(settings.value(powerLbl).toDouble());
-    exposureEdit->setValue(settings.value(exposureLbl).toInt());
-    cooldownEdit->setValue(settings.value(cooldownLbl).toInt());
+    if (settings.value(wavelengthModeLbl, true).toBool())
+        wavelengthBtn->setChecked(true);
+    else
+        acousticBtn->setChecked(true);
+
+    wavelengthEdit->setText(settings.value(wavelengthLbl).toString());
+    frequencyEdit->setText(settings.value(frequencyLbl).toString());
+    powerEdit->setText(settings.value(powerLbl).toString());
+    exposureEdit->setText(settings.value(exposureLbl).toString());
+    cooldownEdit->setText(settings.value(cooldownLbl).toString());
     settings.endGroup();
 
-    emit recomputeParams();
+    emit refreshParameters();
 }
 
 //------------------------------------------------------------------------------
