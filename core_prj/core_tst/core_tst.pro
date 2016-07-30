@@ -15,13 +15,13 @@ OBJECTS_DIR = ../../obj
 DESTDIR=../../bin
 
 SOURCES += \
-    AotfCrystalTest.cpp \
     CoreTest.cpp \
-    core_tst.cpp
+    core_tst.cpp \
+    CrystalTest.cpp
 
 HEADERS += \
-    AotfCrystalTest.h \
-    CoreTest.h
+    CoreTest.h \
+    CrystalTest.h
 
 INCLUDEPATH += $$PWD/../core
 DEPENDPATH += $$PWD/../core

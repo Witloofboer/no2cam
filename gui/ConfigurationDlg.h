@@ -3,13 +3,11 @@
 
 #include <QDialog>
 
+#include "Crystal.h"
+
 //------------------------------------------------------------------------------
 
 class QDialogButtonBox;
-
-namespace core {
-    class CrystalParameters;
-}
 
 namespace gui {
 
@@ -23,16 +21,12 @@ class ConfigurationDlg : public QDialog
 
 public:
     ConfigurationDlg(QWidget *parent=0);
-    ~ConfigurationDlg();
 
 public slots:
     void display();
 
 private slots:
     void updateDlgBtns();
-
-signals:
-    void parametersUpdated(const core::CrystalParameters& params);
 
 private:
     void pushParamsToGui();
@@ -41,9 +35,10 @@ private:
     DoubleLineEdit *incidentAngle_;  // Incident angle
     DoubleLineEdit *transHeight_;    // Transducer height
     DoubleLineEdit *transLength_;    // Transducer length
-
-    core::CrystalParameters *params_;
     QDialogButtonBox *buttonBox_;
+
+    core::Crystal crystal;
+
 };
 
 //------------------------------------------------------------------------------

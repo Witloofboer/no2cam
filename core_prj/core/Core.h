@@ -10,7 +10,6 @@
 namespace core {
 
 class Crystal;
-class CrystalParameters;
 class CoreThread;
 
 //------------------------------------------------------------------------------
@@ -24,17 +23,7 @@ class CORESHARED_EXPORT Core : public QObject
 {
     Q_OBJECT
 
-
-public:
-    Core();
-    virtual ~Core();
-
 public slots:
-    /**
-     * Sets the parameters.
-     */
-    void setParameters(const CrystalParameters& params);
-
     /**
       * Requests the stop of all the devices.
       */
@@ -44,9 +33,6 @@ public slots:
      * Requests the instance to move to the main thread.
      */
     void moveToMainThread();
-
-private:
-    Crystal* crystal_;
 };
 
 //------------------------------------------------------------------------------

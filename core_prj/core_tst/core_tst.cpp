@@ -2,7 +2,7 @@
 
 #include <QSettings>
 
-#include "AotfCrystalTest.h"
+#include "CrystalTest.h"
 #include "CoreTest.h"
 
 int main(int argc, char *argv[])

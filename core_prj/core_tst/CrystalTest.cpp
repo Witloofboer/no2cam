@@ -3,7 +3,7 @@
 
 #include "../core/Crystal.h"
 
-#include "AotfCrystalTest.h"
+#include "CrystalTest.h"
 
 using namespace core;
 
@@ -33,7 +33,7 @@ void AotfCrystalTest::frequency_power()
     QFETCH(double, power);
 
     Crystal crystal;
-    crystal.setParameters({alpha, theta, Ht, Lt});
+    crystal.set(alpha, theta, Ht, Lt);
 
     QCOMPARE(f(crystal.frequency(lambda, T)), f(freq));
     QCOMPARE(f(crystal.power(lambda, T)), f(power));
@@ -69,7 +69,7 @@ void AotfCrystalTest::wavelength()
     QFETCH(double, T);
 
     Crystal crystal;
-    crystal.setParameters({7.65, 10.1, 10.0, 15.0});
+    crystal.set(7.65, 10.1, 10.0, 15.0);
 
     const double freq = crystal.frequency(lambda, T);
 
@@ -93,13 +93,15 @@ void AotfCrystalTest::wavelength_data()
 
 void AotfCrystalTest::persisteParameters()
 {
-    CrystalParameters p_write = {1.0, 2.0, 3.0, 4.0};
-    CrystalParameters p_read;
 
-    p_write.persiste();
-    p_read.restore();
+    Crystal c1;
+    c1.set(1.0, 2.0, 3.0, 4.0);
+    c1.persiste();
 
-    QVERIFY(p_write == p_read);
+    Crystal c2;
+    c2.restore();
+
+    QVERIFY(c1 == c2);
 }
 
 //------------------------------------------------------------------------------

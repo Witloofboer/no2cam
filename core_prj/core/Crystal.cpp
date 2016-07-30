@@ -12,16 +12,29 @@ namespace core {
 
 //------------------------------------------------------------------------------
 
-Crystal::Crystal(QObject *parent)
-    : QObject(parent)
-{}
-
-//------------------------------------------------------------------------------
-
-void Crystal::setParameters(const CrystalParameters &params)
+void Crystal::set(double cutAngle,
+                  double incidentAngle,
+                  double transHeight,
+                  double transLength)
 {
-    qInfo("Setting crystal parameters");
-    crystalParams = params;
+    alpha_deg = cutAngle;
+    theta_deg = incidentAngle;
+    tH = transHeight;
+    tL = transLength;
+    alpha = cutAngle * pi / 180.0;
+    theta = theta_deg * pi / 180.0;
+    sina = sin(alpha);
+    cosa = cos(alpha);
+    sint = sin(theta);
+    cost = cos(theta);
+    sinat = sin(alpha+theta);
+    cosat = cos(alpha+theta);
+    sinaa = sin(2*alpha);
+    sin2a = pow2(sina);
+    cos2a = pow2(cosa);
+    cos2t = pow2(cost);
+    sin2at = pow2(sinat);
+    cos2at = pow2(cosat);
 }
 
 //------------------------------------------------------------------------------
@@ -51,24 +64,6 @@ const double p44 = -0.044;  // Photo-elastic coefficient []
 
 double Crystal::acousticParam(double lambda, double T, bool isFrequency) const
 {
-    const double alpha  = crystalParams.alpha_deg * pi / 180.0; // alpha (rad)
-    const double theta  = crystalParams.theta_deg * pi / 180.0; // theta (rad)
-    const double sina   = sin(alpha);                     // sin(alpha)
-    const double cosa   = cos(alpha);                     // cos(alpha)
-    const double sint   = sin(theta);                     // sin(thetha)
-    const double cost   = cos(theta);                     // cos(thetha)
-    const double sinat  = sin(alpha+theta);               // sin(alpha+thetha)
-    const double cosat  = cos(alpha+theta);               // cos(alpha+thetha)
-    const double sinaa  = sin(2*alpha);                   // sin(2*alpha)
-    const double sin2a  = pow2(sina);                     // sin²(alpha)
-    const double cos2a  = pow2(cosa);                     // cos²(alpha)
-    const double cos2t  = pow2(cost);;                    // cos²(theta)
-    const double sin2at = pow2(sinat);                    // sin²(alpha+theta)
-    const double cos2at = pow2(cosat);                    // cos²(alpha+theta)
-
-    const double &length = crystalParams.transLength;
-    const double &height = crystalParams.transHeight;
-
     const double c11 = (5.620-0.00148*T)*1e10;
     const double c12 = (5.120-0.00178*T)*1e10;
     const double c44 = (2.675-0.00020*T)*1e10;
@@ -103,7 +98,7 @@ double Crystal::acousticParam(double lambda, double T, bool isFrequency) const
     const double M_2 = pow((ni*n0T/sqrt(V2)),3) * pow2(p) / rho;
     // Acousti-optic figure of merit
 
-    return 5e-10*height*ni/(length*n0T*M_2)*pow2(l*cos(psi-theta)/cos(psi));
+    return 5e-10*tH*ni/(tL*n0T*M_2)*pow2(l*cos(psi-theta)/cos(psi));
     // Acoustic power [mW]
 }
 
@@ -114,44 +109,43 @@ static const char *thetaLbl = "incident angle [deg]";
 static const char *transHeightLbl = "transducer height [mm]";
 static const char *transLengthLbl = "transducer length [mm]";
 
-void CrystalParameters::persiste() const
+void Crystal::persiste() const
 {
-    qInfo("Persisting device parameters");
+    qInfo("Persisting crystal");
 
     QSettings settings;
 
     settings.beginGroup("Crystal");
     settings.setValue(alphaLbl, alpha_deg);
     settings.setValue(thetaLbl, theta_deg);
-    settings.setValue(transHeightLbl, transHeight);
-    settings.setValue(transLengthLbl, transLength);
-    settings.endGroup();
+    settings.setValue(transHeightLbl, tH);
+    settings.setValue(transLengthLbl, tL);
 }
 
 //------------------------------------------------------------------------------
 
-void CrystalParameters::restore()
+void Crystal::restore()
 {
-    qInfo("Restoring device parameters");
+    qInfo("Restoring crystal");
+
     QSettings settings;
 
     settings.beginGroup("Crystal");
-    alpha_deg = settings.value(alphaLbl, 7.65).toDouble();
-    theta_deg = settings.value(thetaLbl, 10.1).toDouble();
-    transHeight = settings.value(transHeightLbl, 10.0).toDouble();
-    transLength = settings.value(transLengthLbl, 15.0).toDouble();
-    settings.endGroup();
+    set(settings.value(alphaLbl, 7.65).toDouble(),
+        settings.value(thetaLbl, 10.1).toDouble(),
+        settings.value(transHeightLbl, 10.0).toDouble(),
+        settings.value(transLengthLbl, 15.0).toDouble());
 }
 
 //------------------------------------------------------------------------------
 
-bool operator==(const CrystalParameters& lhs,
-                const CrystalParameters& rhs)
+bool operator==(const Crystal& lhs,
+                const Crystal& rhs)
 {
     return  lhs.alpha_deg == rhs.alpha_deg &&
             lhs.theta_deg == rhs.theta_deg &&
-            lhs.transHeight == rhs.transHeight &&
-            lhs.transLength == rhs.transLength;
+            lhs.tH == rhs.tH &&
+            lhs.tL == rhs.tL;
 }
 
 //------------------------------------------------------------------------------

@@ -22,9 +22,9 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     , incidentAngle_(new DoubleLineEdit(7, 2, 1))
     , transHeight_(new DoubleLineEdit(7, 2, 1))
     , transLength_(new DoubleLineEdit(7, 2, 1))
-    , params_(new core::CrystalParameters)
     , buttonBox_(new QDialogButtonBox(QDialogButtonBox::Ok |
                                       QDialogButtonBox::Cancel))
+    , crystal()
 {
     setWindowTitle(tr("Configuration"));
 
@@ -41,8 +41,6 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
 
     connect(buttonBox_, QDialogButtonBox::accepted, this, accept);
     connect(buttonBox_, QDialogButtonBox::rejected, this, reject);
-    connect(this, parametersUpdated, core::singleton(), core::Core::setParameters);
-
     connect(cutAngle_, LineEdit::focusLost, this, updateDlgBtns);
     connect(incidentAngle_, LineEdit::focusLost, this, updateDlgBtns);
     connect(transHeight_, LineEdit::focusLost, this, updateDlgBtns);
@@ -54,16 +52,8 @@ ConfigurationDlg::ConfigurationDlg(QWidget *parent)
     setLayout(layout);
 
     // Initial population
-    params_->restore();
+    crystal.restore();
     pushParamsToGui();
-    emit parametersUpdated(*params_);
-}
-
-//------------------------------------------------------------------------------
-
-ConfigurationDlg::~ConfigurationDlg()
-{
-    delete params_;
 }
 
 //------------------------------------------------------------------------------
@@ -74,17 +64,16 @@ void ConfigurationDlg::display()
 
     if (code == DialogCode::Accepted)
     {
-        if (params_->alpha_deg != cutAngle_->value() ||
-            params_->theta_deg != incidentAngle_->value() ||
-            params_->transHeight != transHeight_->value() ||
-            params_->transLength != transLength_->value())
+        if (crystal.cutAngle() != cutAngle_->value() ||
+            crystal.lightAngle() != incidentAngle_->value() ||
+            crystal.transHeight() != transHeight_->value() ||
+            crystal.transLength() != transLength_->value())
         {
-            params_->alpha_deg = cutAngle_->value();
-            params_->theta_deg = incidentAngle_->value();
-            params_->transHeight = transHeight_->value();
-            params_->transLength = transLength_->value();
-            params_->persiste();
-            emit parametersUpdated(*params_);
+            crystal.set(cutAngle_->value(),
+                        incidentAngle_->value(),
+                        transHeight_->value(),
+                        transLength_->value());
+            crystal.persiste();
         }
     } else {
         pushParamsToGui();
@@ -108,10 +97,10 @@ void ConfigurationDlg::updateDlgBtns()
 
 void ConfigurationDlg::pushParamsToGui()
 {
-    cutAngle_->setValue(params_->alpha_deg);
-    incidentAngle_->setValue(params_->theta_deg);
-    transHeight_->setValue(params_->transHeight);
-    transLength_->setValue(params_->transLength);
+    cutAngle_->setValue(crystal.cutAngle());
+    incidentAngle_->setValue(crystal.lightAngle());
+    transHeight_->setValue(crystal.transHeight());
+    transLength_->setValue(crystal.transLength());
 }
 
 //------------------------------------------------------------------------------
