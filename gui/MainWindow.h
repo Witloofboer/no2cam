@@ -10,12 +10,15 @@
 
 class QAction;
 class QCloseEvent;
+class QShowEvent;
 class QStackedWidget;
 
 namespace gui {
 
 class ConfigurationDlg;
 class SnapshotPane;
+class ObservationPane;
+class SweepPane;
 
 //------------------------------------------------------------------------------
 
@@ -29,7 +32,7 @@ public:
 protected:
     void closeEvent(QCloseEvent *event) override;
 
-    private slots:
+private slots:
     void newSession();
     void loadSession();
     bool saveSession();
@@ -37,11 +40,13 @@ protected:
 
     void switchMode();
     void configure();
-
     void cameraStatus();
 
     void releaseNotes();
     void about();
+
+private slots:
+    void displayConfigurationDlg();
 
 private:
     bool okToContinue();
@@ -55,6 +60,8 @@ private:
     QString version;
 
     SnapshotPane *snapshotPane;
+    ObservationPane *observationPane;
+    SweepPane *sweepPane;
 };
 
 //------------------------------------------------------------------------------

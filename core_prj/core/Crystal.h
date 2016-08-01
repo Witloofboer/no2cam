@@ -32,10 +32,10 @@ public:
               double transHeight,
               double transLength);
 
-     double cutAngle() {return alpha_deg;}
-     double lightAngle() {return theta_deg;}
-     double transHeight() {return tH;}
-     double transLength() {return tL;}
+     double cutAngle() const {return alpha_deg;}
+     double lightAngle() const {return theta_deg;}
+     double transHeight() const {return tH;}
+     double transLength() const {return tL;}
 
     /**
      * Returns the acoustic frequency matching an optical wavelength at a given
@@ -66,19 +66,6 @@ public:
      * @return     the matching optical wavelength [nm]
      */
     double wavelength(double freq, double T) const;
-
-    /**
-     * The crystal parameters.
-     */
-
-    void persiste() const;
-    void restore();
-
-    friend bool operator==(const Crystal& lhs,
-                           const Crystal& rhs);
-
-    friend bool operator!=(const Crystal& lhs,
-                           const Crystal& rhs);
 
 private:
     double acousticParam(double lambda, double T, bool isFrequency) const;

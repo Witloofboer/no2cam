@@ -9,17 +9,15 @@
 
 #include "gui_lib.h"
 #include "tooling.h"
-#include "ConfigurationDlg.h"
 #include "MainWindow.h"
-#include "../core/Core.h"
+#include "../core/Crystal.h"
 
 namespace gui {
 
 //------------------------------------------------------------------------------
 
-SnapshotPane::SnapshotPane(ConfigurationDlg *configurationDlg)
-    : AbstractMainPane()
-    , configurationDlg(configurationDlg)
+SnapshotPane::SnapshotPane(const core::Crystal& crystal)
+    : AbstractMainPane(crystal)
     , wavelengthBtn(new QRadioButton(tr("Optic")))
     , acousticBtn(new QRadioButton(tr("Acoustic")))
     , wavelengthEdit(new DoubleLineEdit)
@@ -91,8 +89,6 @@ void SnapshotPane::switchParamMode()
 
 void SnapshotPane::refreshParameters()
 {
-    const core::Crystal &crystal = configurationDlg->Crystal();
-
     if (wavelengthBtn->isChecked())
     {
         if (wavelengthEdit->isValid())

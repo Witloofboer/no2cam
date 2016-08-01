@@ -21,7 +21,7 @@ MainWindow *singleton_ = nullptr;
 void init(const QString& version)
 {
     QCoreApplication::setOrganizationName("BIRA-IASB");
-    QCoreApplication::setApplicationName("NO2_Cam");
+    QCoreApplication::setApplicationName("NO2 Camera Command Interface");
     gui_init_resource();
     singleton_ = new gui::MainWindow(version);
     singleton_->show();

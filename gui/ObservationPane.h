@@ -1,9 +1,13 @@
-#ifndef OBSERVATIONWIDGET_H
-#define OBSERVATIONWIDGET_H
+#ifndef OBSERVATIONPANE_H
+#define OBSERVATIONPANE_H
 
 #include "AbstractMainPane.h"
 
 //------------------------------------------------------------------------------
+
+namespace core {
+class Crystal;
+}
 
 namespace gui {
 
@@ -17,7 +21,7 @@ class ObservationPane : public AbstractMainPane
 {
     Q_OBJECT
 public:
-    explicit ObservationPane(QWidget *parent = 0);
+    explicit ObservationPane(const core::Crystal& crystal);
 
 signals:
 
@@ -34,4 +38,4 @@ private:
 
 }
 
-#endif // OBSERVATIONWIDGET_H
+#endif // OBSERVATIONPANE_H

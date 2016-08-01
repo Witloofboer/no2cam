@@ -10,8 +10,8 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-ObservationPane::ObservationPane(QWidget *parent)
-    : AbstractMainPane(parent)
+ObservationPane::ObservationPane(const core::Crystal &crystal)
+    : AbstractMainPane(crystal)
     , wavelength1Edit(new DoubleLineEdit)
     , wavelength2Edit(new DoubleLineEdit)
     , exposureEdit(new IntLineEdit())

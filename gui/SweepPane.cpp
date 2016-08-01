@@ -10,8 +10,8 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-SweepingPane::SweepingPane(QWidget *parent)
-    : AbstractMainPane(parent)
+SweepPane::SweepPane(const core::Crystal &crystal)
+    : AbstractMainPane(crystal)
     , wavelength1Edit(new DoubleLineEdit)
     , wavelength2Edit(new DoubleLineEdit)
     , wavelengthIncEdit(new DoubleLineEdit)

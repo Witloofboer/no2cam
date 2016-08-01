@@ -10,6 +10,12 @@ class QGroupBox;
 class QLabel;
 class QVBoxLayout;
 
+namespace core {
+
+class Crystal;
+
+}
+
 namespace gui {
 
 //------------------------------------------------------------------------------
@@ -18,7 +24,7 @@ class AbstractMainPane : public QWidget
 {
     Q_OBJECT
 public:
-    explicit AbstractMainPane(QWidget *parent = 0);
+    explicit AbstractMainPane(const core::Crystal& crystal);
 
 signals:
 
@@ -28,6 +34,7 @@ protected:
     QVBoxLayout *leftLayout;
     QGridLayout *paramBoxLayout;
     QGroupBox   *snapshotBox;
+    const core::Crystal &crystal;
 };
 
 //------------------------------------------------------------------------------

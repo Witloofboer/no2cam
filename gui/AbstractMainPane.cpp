@@ -9,11 +9,12 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-AbstractMainPane::AbstractMainPane(QWidget *parent)
-    : QWidget(parent)
+AbstractMainPane::AbstractMainPane(const core::Crystal& crystal)
+    : QWidget()
     , leftLayout(new QVBoxLayout)
     , paramBoxLayout(new QGridLayout)
     , snapshotBox(new QGroupBox)
+    , crystal(crystal)
 {
     // Parameter box -----------------------------------------------------------
 

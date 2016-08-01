@@ -1,5 +1,5 @@
-#ifndef SWEEPWIDGET_H
-#define SWEEPWIDGET_H
+#ifndef SWEEPPANE_H
+#define SWEEPPANE_H
 
 #include "AbstractMainPane.h"
 
@@ -13,11 +13,11 @@ class LineEdit;
 
 //------------------------------------------------------------------------------
 
-class SweepingPane : public AbstractMainPane
+class SweepPane : public AbstractMainPane
 {
     Q_OBJECT
 public:
-    explicit SweepingPane(QWidget *parent = 0);
+    explicit SweepPane(const core::Crystal &crystal);
 
 signals:
 
@@ -36,4 +36,4 @@ private:
 
 }
 
-#endif // SWEEPWIDGET_H
+#endif // SWEEPPANE_H

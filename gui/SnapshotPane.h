@@ -1,5 +1,5 @@
-#ifndef SNAPSHOTWIDGET_H
-#define SNAPSHOTWIDGET_H
+#ifndef SNAPSHOTPANE_H
+#define SNAPSHOTPANE_H
 
 #include "AbstractMainPane.h"
 
@@ -7,9 +7,12 @@
 
 class QRadioButton;
 
+namespace core {
+class Crystal;
+}
+
 namespace gui {
 
-class ConfigurationDlg;
 class DoubleLineEdit;
 class IntLineEdit;
 class LineEdit;
@@ -20,7 +23,7 @@ class SnapshotPane : public AbstractMainPane
 {
     Q_OBJECT
 public:
-    explicit SnapshotPane(ConfigurationDlg * configurationDlg);
+    explicit SnapshotPane(const core::Crystal& crystal);
     void persiste() const;
 
 signals:
@@ -34,7 +37,6 @@ private slots:
 private:
 
     void restore();
-    ConfigurationDlg *configurationDlg;
     QRadioButton   *wavelengthBtn;
     QRadioButton   *acousticBtn;
     DoubleLineEdit *wavelengthEdit;
@@ -49,4 +51,4 @@ private:
 
 }
 
-#endif // SNAPSHOTWIDGET_H
+#endif // SNAPSHOTPANE_H

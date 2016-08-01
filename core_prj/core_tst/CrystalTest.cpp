@@ -90,18 +90,3 @@ void AotfCrystalTest::wavelength_data()
 }
 
 //------------------------------------------------------------------------------
-
-void AotfCrystalTest::persisteParameters()
-{
-
-    Crystal c1;
-    c1.set(1.0, 2.0, 3.0, 4.0);
-    c1.persiste();
-
-    Crystal c2;
-    c2.restore();
-
-    QVERIFY(c1 == c2);
-}
-
-//------------------------------------------------------------------------------

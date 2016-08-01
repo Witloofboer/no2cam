@@ -37,20 +37,7 @@ bool LineEdit::isValid()
     return QValidator::Acceptable == validator()->validate(value, pos);
 }
 
-void LineEdit::keyPressEvent(QKeyEvent *event)
-{
-    if (event->key() == Qt::Key_Return ||
-        event->key() == Qt::Key_Enter)
-    {
-        auto e = new QKeyEvent(QEvent::KeyPress, Qt::Key_Tab,
-                               event->modifiers(), "\t",
-                               event->isAutoRepeat(),
-                               event->count());
-        QCoreApplication::postEvent(this, e);
-    } else {
-        QLineEdit::keyPressEvent(event);
-    }
-}
+//------------------------------------------------------------------------------
 
 void LineEdit::focusOutEvent(QFocusEvent *event)
 {
@@ -131,7 +118,6 @@ void DoubleLineEdit::setValue(double value)
 {
      setText(locale().toString(value, 'f', nFracDgts));
 }
-
 
 //------------------------------------------------------------------------------
 
