@@ -23,16 +23,44 @@ class CORESHARED_EXPORT Core : public QObject
 {
     Q_OBJECT
 
+signals:
+    /**
+     * Emitted once the requested operation is done.
+     */
+    void done();
+
 public slots:
+    /**
+     * Requests snapshotting
+     * @param wavelength optical wavelength [nm]
+     * @param frequency acoustic frequency [MHz]
+     * @param power acoustic power [mW]
+     * @param exposure exposure time [s]
+     * @param cooldown cooldown time [s]
+     * @param burst single snapshot or burst mode flag
+     * @param session name used to prepend record files. No recording if empty.
+     * @param crystal crystal used
+     */
+    void snapshot(double wavelength,
+                  double frequency,
+                  double power,
+                  double exposure,
+                  double cooldown,
+                  bool burst,
+                  const QString& session,
+                  const Crystal& crystal);
+
     /**
       * Requests the stop of all the devices.
       */
-    void stopDevices();
+    void stop();
 
     /**
      * Requests the instance to move to the main thread.
      */
     void moveToMainThread();
+
+    void doneImpl();
 };
 
 //------------------------------------------------------------------------------

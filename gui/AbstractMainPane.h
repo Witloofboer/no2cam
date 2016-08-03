@@ -18,6 +18,8 @@ class Crystal;
 
 namespace gui {
 
+class CameraButtonBox;
+
 //------------------------------------------------------------------------------
 
 class AbstractMainPane : public QWidget
@@ -34,6 +36,8 @@ protected:
     QVBoxLayout *leftLayout;
     QGridLayout *paramBoxLayout;
     QGroupBox   *snapshotBox;
+    CameraButtonBox *cameraButtonBox;
+
     const core::Crystal &crystal;
 };
 

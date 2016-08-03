@@ -19,22 +19,32 @@ class CameraButtonBox : public QGroupBox
 public:
     explicit CameraButtonBox(QWidget *parent = 0);
 
-    enum Event {kTakeOne, kBurst, kRecord, kEndRecord, kStop};
+    enum Event {kTakeOne, kBurst, kStop};
 
 signals:
-    void clicked(Event event);
+    void play(bool burst, bool record);
+    void stop();
 
-private slots:
-    void takeOneClicked();
-    void burstClicked();
-    void recordClicked();
-    void stopClicked();
+public slots:
+    void done();
+    void setButtons(bool playEnabled, bool recordEnabled);
 
 private:
-    QPushButton *takeOneBtn;
+    void refreshBtnStatus();
+
+private slots:
+    void singleClicked();
+    void burstClicked();
+
+private:
+    QPushButton *singleBtn;
     QPushButton *burstBtn;
     QPushButton *recordBtn;
     QPushButton *stopBtn;
+
+    bool applicationReady;
+    bool playEnabled;
+    bool recordEnabled;
 };
 
 //------------------------------------------------------------------------------

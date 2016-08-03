@@ -14,6 +14,7 @@ AbstractMainPane::AbstractMainPane(const core::Crystal& crystal)
     , leftLayout(new QVBoxLayout)
     , paramBoxLayout(new QGridLayout)
     , snapshotBox(new QGroupBox)
+    , cameraButtonBox(new CameraButtonBox)
     , crystal(crystal)
 {
     // Parameter box -----------------------------------------------------------
@@ -22,13 +23,10 @@ AbstractMainPane::AbstractMainPane(const core::Crystal& crystal)
     parameterBox->setLayout(paramBoxLayout);
     paramBoxLayout->setColumnMinimumWidth(0, 75);
 
+
     // Intensity datagram ------------------------------------------------------
 
     auto datagramBox = new DatagramBox;
-
-    // Button box --------------------------------------------------------------
-
-    auto cameraButtonBox = new CameraButtonBox;
 
 
     // Left Layout -------------------------------------------------------------

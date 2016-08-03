@@ -22,7 +22,7 @@ public:
     bool isValid();
 
 signals:
-    void focusLost();
+    void focusLost(); // TODO: used?
 
 protected:
     virtual void focusOutEvent(QFocusEvent *event) override;

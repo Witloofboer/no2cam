@@ -7,6 +7,7 @@
 inline double pow2(double x) { return x*x; }
 
 static const double pi = 2*asin(1.0);
+static int _1 = qRegisterMetaType<core::Crystal>("core::Crystal");
 
 namespace core {
 

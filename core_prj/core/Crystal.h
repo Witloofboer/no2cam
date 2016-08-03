@@ -1,6 +1,8 @@
 #ifndef CRYSTAL_H
 #define CRYSTAL_H
 
+#include <QMetaType>
+
 #include "core_global.h"
 
 namespace core {
@@ -128,5 +130,7 @@ bool operator!=(const Crystal& lhs,
 //------------------------------------------------------------------------------
 
 }
+
+Q_DECLARE_METATYPE(core::Crystal)
 
 #endif // CRYSTAL_H

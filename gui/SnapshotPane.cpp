@@ -9,8 +9,11 @@
 
 #include "gui_lib.h"
 #include "tooling.h"
+#include "CameraButtonBox.h"
 #include "MainWindow.h"
 #include "../core/Crystal.h"
+#include "../core/Core.h"
+#include "../core/core_lib.h"
 
 namespace gui {
 
@@ -60,6 +63,21 @@ SnapshotPane::SnapshotPane(const core::Crystal& crystal)
     connect(wavelengthEdit, LineEdit::focusLost, this, refreshParameters);
     connect(frequencyEdit, LineEdit::focusLost, this, refreshParameters);
 
+    connect(wavelengthBtn, QRadioButton::toggled, this, refreshButtonsStatus);
+    connect(frequencyEdit, LineEdit::textChanged, this, refreshButtonsStatus);
+    connect(powerEdit, LineEdit::textChanged, this, refreshButtonsStatus);
+    connect(wavelengthEdit, LineEdit::textChanged, this, refreshButtonsStatus);
+    connect(frequencyEdit, LineEdit::textChanged, this, refreshButtonsStatus);
+    connect(exposureEdit, LineEdit::textChanged, this, refreshButtonsStatus);
+    connect(cooldownEdit, LineEdit::textChanged, this, refreshButtonsStatus);
+    connect(sessionEdit, LineEdit::textChanged, this, refreshButtonsStatus);
+
+    connect(cameraButtonBox, CameraButtonBox::play, this, snapshotRequested);
+    connect(cameraButtonBox, CameraButtonBox::stop, this, stop);
+
+    connect(this, snapshot, core::singleton(), core::Core::snapshot);
+    connect(this, stop, core::singleton(), core::Core::stop);
+
     // Restoring
     restore();
     switchParamMode();
@@ -82,7 +100,20 @@ void SnapshotPane::switchParamMode()
         powerEdit->setEnabled(true);
     }
 
-    emit refreshParameters();
+    refreshParameters();
+}
+
+//------------------------------------------------------------------------------
+
+void SnapshotPane::refreshButtonsStatus()
+{
+    bool playEnabled = frequencyEdit->isValid() &&
+                       powerEdit->isValid() &&
+                       exposureEdit->isValid() &&
+                       cooldownEdit->isValid();
+    bool recordEnabled = !sessionEdit->text().isEmpty();
+
+    cameraButtonBox->setButtons(playEnabled, recordEnabled);
 }
 
 //------------------------------------------------------------------------------
@@ -107,6 +138,19 @@ void SnapshotPane::refreshParameters()
             wavelengthEdit->setText("");
         }
     }
+}
+
+//------------------------------------------------------------------------------
+
+void SnapshotPane::snapshotRequested(bool burst, bool record)
+{
+     emit snapshot(wavelengthEdit->value(),
+                   frequencyEdit->value(),
+                   powerEdit->value(),
+                   exposureEdit->value(),
+                   cooldownEdit->value(),
+                   burst,
+                   record ? sessionEdit->text() : "", crystal);
 }
 
 //------------------------------------------------------------------------------
@@ -160,7 +204,8 @@ void SnapshotPane::restore()
     cooldownEdit->setText(settings.value(cooldownLbl).toString());
     settings.endGroup();
 
-    emit refreshParameters();
+    refreshParameters();
+    refreshButtonsStatus();
 }
 
 //------------------------------------------------------------------------------

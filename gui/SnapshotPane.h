@@ -11,6 +11,8 @@ namespace core {
 class Crystal;
 }
 
+#include "CameraButtonBox.h"
+
 namespace gui {
 
 class DoubleLineEdit;
@@ -27,15 +29,25 @@ public:
     void persiste() const;
 
 signals:
+    void snapshot(double wavelength,
+                  double frequency,
+                  double power,
+                  double exposure,
+                  double cooldown,
+                  bool burst,
+                  const QString& session,
+                  const core::Crystal& crystal);
+    void stop();
 
 public slots:
     void refreshParameters();
 
 private slots:
     void switchParamMode();
+    void refreshButtonsStatus();
+    void snapshotRequested(bool burst, bool record);
 
 private:
-
     void restore();
     QRadioButton   *wavelengthBtn;
     QRadioButton   *acousticBtn;
