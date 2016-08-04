@@ -34,10 +34,10 @@ public:
               double transHeight,
               double transLength);
 
-     double cutAngle() const {return alpha_deg;}
-     double lightAngle() const {return theta_deg;}
-     double transHeight() const {return tH;}
-     double transLength() const {return tL;}
+     double cutAngle() const {return _alphaDeg;}
+     double lightAngle() const {return _thetaDeg;}
+     double transHeight() const {return _h;}
+     double transLength() const {return _l;}
 
     /**
      * Returns the acoustic frequency matching an optical wavelength at a given
@@ -72,24 +72,24 @@ public:
 private:
     double acousticParam(double lambda, double T, bool isFrequency) const;
 
-    double alpha_deg;   // crystal cut-angle [rad]
-    double theta_deg;   // light incident angle [rad]
-    double tH; // transducer height [mm]
-    double tL; // transducer length [mm]
-    double alpha; // alpha (rad)
-    double theta; // theta (rad)
-    double sina;  // sin(alpha)
-    double cosa;  // cos(alpha)
-    double sint;  // sin(thetha)
-    double cost;  // cos(thetha)
-    double sinat; // sin(alpha+thetha)
-    double cosat; // cos(alpha+thetha)
-    double sinaa; // sin(2*alpha)
-    double sin2a; // sin²(alpha)
-    double cos2a; // cos²(alpha)
-    double cos2t; // cos²(theta)
-    double sin2at; // sin²(alpha+theta)
-    double cos2at; // cos²(alpha+theta)
+    double _alphaDeg;   // crystal cut-angle [rad]
+    double _thetaDeg;   // light incident angle [rad]
+    double _h; // transducer height [mm]
+    double _l; // transducer length [mm]
+    double _alpha; // alpha (rad)
+    double _theta; // theta (rad)
+    double _sina;  // sin(alpha)
+    double _cosa;  // cos(alpha)
+    double _sint;  // sin(thetha)
+    double _cost;  // cos(thetha)
+    double _sinat; // sin(alpha+thetha)
+    double _cosat; // cos(alpha+thetha)
+    double _sinaa; // sin(2*alpha)
+    double _sin2a; // sin²(alpha)
+    double _cos2a; // cos²(alpha)
+    double _cos2t; // cos²(theta)
+    double _sin2at; // sin²(alpha+theta)
+    double _cos2at; // cos²(alpha+theta)
 };
 
 //------------------------------------------------------------------------------

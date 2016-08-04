@@ -27,7 +27,7 @@ signals:
     /**
      * Emitted once the requested operation is done.
      */
-    void done();
+    void ready();
 
 public slots:
     /**
@@ -53,7 +53,7 @@ public slots:
     /**
       * Requests the stop of all the devices.
       */
-    void stop();
+    void stopRequested();
 
     /**
      * Requests the instance to move to the main thread.

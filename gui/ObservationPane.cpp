@@ -12,29 +12,29 @@ namespace gui {
 
 ObservationPane::ObservationPane(const core::Crystal &crystal)
     : AbstractMainPane(crystal)
-    , wavelength1Edit(new DoubleLineEdit)
-    , wavelength2Edit(new DoubleLineEdit)
-    , exposureEdit(new IntLineEdit())
-    , snapPerObsEdit(new IntLineEdit)
-    , cooldownEdit(new IntLineEdit())
-    , sessionEdit(new LineEdit)
+    , _wavelength1Edit(new DoubleLineEdit)
+    , _wavelength2Edit(new DoubleLineEdit)
+    , _exposureEdit(new IntLineEdit())
+    , _snapPerObsEdit(new IntLineEdit)
+    , _cooldownEdit(new IntLineEdit())
+    , _sessionEdit(new LineEdit)
 {
     // Parameter box -----------------------------------------------------------
 
     int row=0;
 
-    putInGrid(wavelength1Edit, paramBoxLayout, row++, tr("Wavelength 1"), "[nm]");
-    putInGrid(wavelength2Edit, paramBoxLayout, row++, tr("Wavelength 2"), "[nm]");
-    putInGrid(exposureEdit, paramBoxLayout, row++, tr("Exposure"), "[ms]");
-    putInGrid(snapPerObsEdit, paramBoxLayout, row++, tr("Snapshots/obs"), "");
-    putInGrid(cooldownEdit, paramBoxLayout, row++, tr("Cooldown/obs"), "[ms]");
+    putInGrid(_wavelength1Edit, _paramBoxLayout, row++, tr("Wavelength 1"), "[nm]");
+    putInGrid(_wavelength2Edit, _paramBoxLayout, row++, tr("Wavelength 2"), "[nm]");
+    putInGrid(_exposureEdit, _paramBoxLayout, row++, tr("Exposure"), "[ms]");
+    putInGrid(_snapPerObsEdit, _paramBoxLayout, row++, tr("Snapshots/obs"), "");
+    putInGrid(_cooldownEdit, _paramBoxLayout, row++, tr("Cooldown/obs"), "[ms]");
 
-    paramBoxLayout->addWidget(new QLabel("Session:"), row, 0);
-    paramBoxLayout->addWidget(sessionEdit, row, 1, 1, 2);
+    _paramBoxLayout->addWidget(new QLabel("Session:"), row, 0);
+    _paramBoxLayout->addWidget(_sessionEdit, row, 1, 1, 2);
     ++row;
 
     // Adapt the AbstractMainPane base
-    snapshotBox->setTitle(tr("Observation"));
+    _snapshotBox->setTitle(tr("Observation"));
 }
 
 //------------------------------------------------------------------------------

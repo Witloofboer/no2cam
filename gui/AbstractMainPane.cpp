@@ -2,7 +2,7 @@
 #include <QVBoxLayout>
 
 #include "AbstractMainPane.h"
-#include "CameraButtonBox.h"
+#include "CameraBtnBox.h"
 #include "DatagramBox.h"
 
 namespace gui {
@@ -11,17 +11,17 @@ namespace gui {
 
 AbstractMainPane::AbstractMainPane(const core::Crystal& crystal)
     : QWidget()
-    , leftLayout(new QVBoxLayout)
-    , paramBoxLayout(new QGridLayout)
-    , snapshotBox(new QGroupBox)
-    , cameraButtonBox(new CameraButtonBox)
-    , crystal(crystal)
+    , _leftLayout(new QVBoxLayout)
+    , _paramBoxLayout(new QGridLayout)
+    , _snapshotBox(new QGroupBox)
+    , _cameraBtnBox(new CameraBtnBox)
+    , _crystal(crystal)
 {
     // Parameter box -----------------------------------------------------------
 
     auto parameterBox = new QGroupBox(tr("Parameters"));
-    parameterBox->setLayout(paramBoxLayout);
-    paramBoxLayout->setColumnMinimumWidth(0, 75);
+    parameterBox->setLayout(_paramBoxLayout);
+    _paramBoxLayout->setColumnMinimumWidth(0, 75);
 
 
     // Intensity datagram ------------------------------------------------------
@@ -31,10 +31,10 @@ AbstractMainPane::AbstractMainPane(const core::Crystal& crystal)
 
     // Left Layout -------------------------------------------------------------
 
-    leftLayout->addWidget(parameterBox);
-    leftLayout->addWidget(datagramBox);
-    leftLayout->addStretch();
-    leftLayout->addWidget(cameraButtonBox);
+    _leftLayout->addWidget(parameterBox);
+    _leftLayout->addWidget(datagramBox);
+    _leftLayout->addStretch();
+    _leftLayout->addWidget(_cameraBtnBox);
 
 
     // Snapshot image ----------------------------------------------------------
@@ -48,20 +48,20 @@ AbstractMainPane::AbstractMainPane(const core::Crystal& crystal)
     snapshotLayout->addWidget(snapshotLbl);
     snapshotLayout->addStretch();
 
-    snapshotBox->setLayout(snapshotLayout);
+    _snapshotBox->setLayout(snapshotLayout);
 
 
     // Right layout ------------------------------------------------------------
 
     auto rightLayout = new QVBoxLayout;
     rightLayout->addStretch();
-    rightLayout->addWidget(snapshotBox);
+    rightLayout->addWidget(_snapshotBox);
     rightLayout->addStretch();
 
     // Main layout -------------------------------------------------------------
 
     auto mainLayout = new QHBoxLayout;
-    mainLayout->addLayout(leftLayout);
+    mainLayout->addLayout(_leftLayout);
     mainLayout->addLayout(rightLayout);
 
     setLayout(mainLayout);

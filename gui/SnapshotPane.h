@@ -11,7 +11,7 @@ namespace core {
 class Crystal;
 }
 
-#include "CameraButtonBox.h"
+#include "CameraBtnBox.h"
 
 namespace gui {
 
@@ -36,27 +36,26 @@ signals:
                   double cooldown,
                   bool burst,
                   const QString& session,
-                  const core::Crystal& crystal);
-    void stop();
+                  const core::Crystal& _crystal);
 
 public slots:
-    void refreshParameters();
+    void recomputeParams();
 
 private slots:
-    void switchParamMode();
-    void refreshButtonsStatus();
-    void snapshotRequested(bool burst, bool record);
+    void switchMode();
+    void refreshBtns();
+    void start(bool burst, bool record);
 
 private:
     void restore();
-    QRadioButton   *wavelengthBtn;
-    QRadioButton   *acousticBtn;
-    DoubleLineEdit *wavelengthEdit;
-    DoubleLineEdit *frequencyEdit;
-    IntLineEdit    *powerEdit;
-    IntLineEdit    *exposureEdit;
-    IntLineEdit    *cooldownEdit;
-    LineEdit       *sessionEdit;
+    QRadioButton   *_wavelengthBtn;
+    QRadioButton   *_acousticBtn;
+    DoubleLineEdit *_wavelengthEdit;
+    DoubleLineEdit *_frequencyEdit;
+    IntLineEdit    *_powerEdit;
+    IntLineEdit    *_exposureEdit;
+    IntLineEdit    *_cooldownEdit;
+    LineEdit       *_sessionEdit;
 };
 
 //------------------------------------------------------------------------------

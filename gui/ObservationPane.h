@@ -23,15 +23,13 @@ class ObservationPane : public AbstractMainPane
 public:
     explicit ObservationPane(const core::Crystal& crystal);
 
-signals:
-
 private:
-    DoubleLineEdit *wavelength1Edit;
-    DoubleLineEdit *wavelength2Edit;
-    IntLineEdit    *exposureEdit;
-    IntLineEdit    *snapPerObsEdit;
-    IntLineEdit    *cooldownEdit;
-    LineEdit       *sessionEdit;
+    DoubleLineEdit *_wavelength1Edit;
+    DoubleLineEdit *_wavelength2Edit;
+    IntLineEdit    *_exposureEdit;
+    IntLineEdit    *_snapPerObsEdit;
+    IntLineEdit    *_cooldownEdit;
+    LineEdit       *_sessionEdit;
 };
 
 //------------------------------------------------------------------------------

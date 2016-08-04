@@ -30,10 +30,10 @@ void Core::snapshot(double wavelength, double frequency, double power,
 
 //------------------------------------------------------------------------------
 
-void Core::stop()
+void Core::stopRequested()
 {
     qInfo("Stopping devices");
-    emit done(); // todo
+    emit ready(); // todo
 }
 
 //------------------------------------------------------------------------------
@@ -48,8 +48,8 @@ void Core::moveToMainThread()
 
 void Core::doneImpl()
 {
-    stop();
-    emit done();
+    stopRequested();
+    emit ready();
 }
 
 //------------------------------------------------------------------------------

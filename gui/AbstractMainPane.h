@@ -18,7 +18,7 @@ class Crystal;
 
 namespace gui {
 
-class CameraButtonBox;
+class CameraBtnBox;
 
 //------------------------------------------------------------------------------
 
@@ -33,12 +33,12 @@ signals:
 public slots:
 
 protected:
-    QVBoxLayout *leftLayout;
-    QGridLayout *paramBoxLayout;
-    QGroupBox   *snapshotBox;
-    CameraButtonBox *cameraButtonBox;
+    QVBoxLayout *_leftLayout;
+    QGridLayout *_paramBoxLayout;
+    QGroupBox   *_snapshotBox;
+    CameraBtnBox *_cameraBtnBox;
 
-    const core::Crystal &crystal;
+    const core::Crystal &_crystal;
 };
 
 //------------------------------------------------------------------------------

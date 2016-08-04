@@ -12,27 +12,27 @@ namespace gui {
 
 SweepPane::SweepPane(const core::Crystal &crystal)
     : AbstractMainPane(crystal)
-    , wavelength1Edit(new DoubleLineEdit)
-    , wavelength2Edit(new DoubleLineEdit)
-    , wavelengthIncEdit(new DoubleLineEdit)
-    , exposureEdit(new IntLineEdit)
-    , cooldownEdit(new IntLineEdit)
-    , sessionEdit(new LineEdit)
+    , _wavelength1Edit(new DoubleLineEdit)
+    , _wavelength2Edit(new DoubleLineEdit)
+    , _wavelengthIncEdit(new DoubleLineEdit)
+    , _exposureEdit(new IntLineEdit)
+    , _cooldownEdit(new IntLineEdit)
+    , _sessionEdit(new LineEdit)
 {
     // Parameter box -----------------------------------------------------------
     int row=0;
-    putInGrid(wavelength1Edit, paramBoxLayout, row++, tr("Wavelength 1"), "[nm]");
-    putInGrid(wavelength2Edit, paramBoxLayout, row++, tr("Wavelength 2"), "[nm]");
-    putInGrid(wavelengthIncEdit, paramBoxLayout, row++, tr("Increment"), "[nm]");
-    putInGrid(exposureEdit, paramBoxLayout, row++, tr("Exposure"), "[ms]");
-    putInGrid(cooldownEdit, paramBoxLayout, row++, tr("Cooldown"), "[ms]");
+    putInGrid(_wavelength1Edit, _paramBoxLayout, row++, tr("Wavelength 1"), "[nm]");
+    putInGrid(_wavelength2Edit, _paramBoxLayout, row++, tr("Wavelength 2"), "[nm]");
+    putInGrid(_wavelengthIncEdit, _paramBoxLayout, row++, tr("Increment"), "[nm]");
+    putInGrid(_exposureEdit, _paramBoxLayout, row++, tr("Exposure"), "[ms]");
+    putInGrid(_cooldownEdit, _paramBoxLayout, row++, tr("Cooldown"), "[ms]");
 
-    paramBoxLayout->addWidget(new QLabel("Session:"), row, 0);
-    paramBoxLayout->addWidget(sessionEdit, row, 1, 1, 2);
+    _paramBoxLayout->addWidget(new QLabel("Session:"), row, 0);
+    _paramBoxLayout->addWidget(_sessionEdit, row, 1, 1, 2);
     ++row;
 
     // Adapt the AbstractMainPane base instance
-    snapshotBox->setTitle(tr("Snapshot (Sweep mode)"));
+    _snapshotBox->setTitle(tr("Snapshot (Sweep mode)"));
 }
 
 //------------------------------------------------------------------------------

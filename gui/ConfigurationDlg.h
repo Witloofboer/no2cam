@@ -22,7 +22,7 @@ class ConfigurationDlg : public QDialog
 
 public:
     ConfigurationDlg(MainWindow *mainWindow);
-    const core::Crystal &refCrystal() const {return crystal;}
+    const core::Crystal &refCrystal() const {return _crystal;}
     void persiste() const;
     bool isValid() const;
 
@@ -40,14 +40,14 @@ private slots:
 private:
     void restore();
 
-    MainWindow *mainWindow;
-    DoubleLineEdit *cutAngleEdit;    // Cut angle
-    DoubleLineEdit *incidentEdit;    // Incident angle
-    DoubleLineEdit *transHeightEdit; // Transducer height
-    DoubleLineEdit *transLengthEdit; // Transducer length
-    QDialogButtonBox *buttonBox;
+    MainWindow *_mainWindow;
+    DoubleLineEdit *_cutAngleEdit;    // Cut angle
+    DoubleLineEdit *_incidentEdit;    // Incident angle
+    DoubleLineEdit *_heightEdit; // Transducer height
+    DoubleLineEdit *_lengthEdit; // Transducer length
+    QDialogButtonBox *_buttonBox;
 
-    core::Crystal crystal;
+    core::Crystal _crystal;
 };
 
 //------------------------------------------------------------------------------

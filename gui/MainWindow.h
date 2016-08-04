@@ -27,7 +27,7 @@ class GUISHARED_EXPORT MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(const QString &version, QWidget *parent = 0);
+    MainWindow(const QString &_version);
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -51,17 +51,17 @@ private slots:
 private:
     bool okToContinue();
 
-    QStackedWidget *stackedWidget;
-    QAction *snapshotModeAction;
-    QAction *observationModeAction;
-    QAction *sweepModeAction;
+    QStackedWidget *_stackedWdgt;
+    QAction *_snapshotModeActn;
+    QAction *_observationModeActn;
+    QAction *_sweepModeActn;
 
-    ConfigurationDlg *configurationDlg;
-    QString version;
+    ConfigurationDlg *_configurationDlg;
+    QString _version;
 
-    SnapshotPane *snapshotPane;
-    ObservationPane *observationPane;
-    SweepPane *sweepPane;
+    SnapshotPane *_snapshotPane;
+    ObservationPane *_observationPane;
+    SweepPane *_sweepPane;
 };
 
 //------------------------------------------------------------------------------
