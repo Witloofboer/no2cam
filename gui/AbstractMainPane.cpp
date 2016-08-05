@@ -10,12 +10,12 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-AbstractMainPane::AbstractMainPane(const core::Crystal& crystal)
+AbstractMainPane::AbstractMainPane(MainWindow *mainWindow, const core::Crystal& crystal)
     : QWidget()
     , _leftLayout(new QVBoxLayout)
     , _paramBoxLayout(new QGridLayout)
     , _snapshotBox(new QGroupBox)
-    , _cameraBtnBox(new CameraBtnBox)
+    , _cameraBtnBox(new CameraBtnBox(mainWindow))
     , _sessionEdit(new LineEdit)
     , _crystal(crystal)
 {
@@ -71,6 +71,13 @@ AbstractMainPane::AbstractMainPane(const core::Crystal& crystal)
     // Connections
     connect(_sessionEdit, LineEdit::textChanged, this, refreshBtns);
     connect(_cameraBtnBox, CameraBtnBox::start, this, start);
+}
+
+//------------------------------------------------------------------------------
+
+void AbstractMainPane::updateState(bool isAppReady)
+{
+    _cameraBtnBox->updateState(isAppReady);
 }
 
 //------------------------------------------------------------------------------

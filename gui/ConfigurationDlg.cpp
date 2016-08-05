@@ -10,10 +10,7 @@
 #include <QVBoxLayout>
 
 #include "core/Crystal.h"
-#include "core/Core.h"
-#include "core/core_lib.h"
 #include "MainWindow.h"
-#include "gui_lib.h"
 #include "tooling.h"
 
 namespace gui {

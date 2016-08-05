@@ -2,6 +2,7 @@
 #define OBSERVATIONPANE_H
 
 #include "AbstractMainPane.h"
+#include "../core/Core.h"
 
 //------------------------------------------------------------------------------
 
@@ -9,6 +10,7 @@ namespace gui {
 
 class IntLineEdit;
 class DoubleLineEdit;
+class MainWindow;
 
 //------------------------------------------------------------------------------
 
@@ -16,7 +18,7 @@ class ObservationPane : public AbstractMainPane
 {
     Q_OBJECT
 public:
-    explicit ObservationPane(const core::Crystal& crystal);
+    explicit ObservationPane(MainWindow *mainWindow, const core::Crystal& crystal);
     void persiste() const;
 
 signals:

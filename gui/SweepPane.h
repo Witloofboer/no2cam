@@ -16,7 +16,7 @@ class SweepPane : public AbstractMainPane
 {
     Q_OBJECT
 public:
-    explicit SweepPane(const core::Crystal &crystal);
+    explicit SweepPane(MainWindow *mainWindow, const core::Crystal &crystal);
     void persiste() const;
 
 signals:

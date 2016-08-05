@@ -20,6 +20,7 @@ namespace gui {
 
 class CameraBtnBox;
 class LineEdit;
+class MainWindow;
 
 //------------------------------------------------------------------------------
 
@@ -27,7 +28,9 @@ class AbstractMainPane : public QWidget
 {
     Q_OBJECT
 public:
-    explicit AbstractMainPane(const core::Crystal& crystal);
+    explicit AbstractMainPane(MainWindow* mainWindow,
+                              const core::Crystal& crystal);
+    void updateState(bool isAppReady);
 
 protected slots:
     void refreshBtns();
@@ -44,8 +47,6 @@ protected:
     LineEdit     *_sessionEdit;
 
     const core::Crystal &_crystal;
-
-
 };
 
 //------------------------------------------------------------------------------

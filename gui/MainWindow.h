@@ -13,6 +13,10 @@ class QCloseEvent;
 class QShowEvent;
 class QStackedWidget;
 
+namespace core {
+class Core;
+}
+
 namespace gui {
 
 class ConfigurationDlg;
@@ -27,7 +31,15 @@ class GUISHARED_EXPORT MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(const QString &_version);
+    MainWindow(core::Core *coreSingleton,
+               const QString &_version);
+
+signals:
+    void start(bool burst, bool record);
+    void stop();
+
+public slots:
+    void updateState(bool isAppReady);
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -46,8 +58,6 @@ private slots:
     void about();
 
 private slots:
-    void coreReady();
-    void coreBusy();
     void displayConfigurationDlg();
 
 private:
@@ -57,6 +67,7 @@ private:
     QAction *_snapshotModeActn;
     QAction *_observationModeActn;
     QAction *_sweepModeActn;
+    QAction *_configParamActn;
 
     ConfigurationDlg *_configDlg;
     QString _version;

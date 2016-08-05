@@ -21,17 +21,20 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-MainWindow::MainWindow(const QString &version)
+MainWindow::MainWindow(core::Core *coreSingleton,
+                       const QString &version)
     : QMainWindow()
     , _stackedWdgt(new QStackedWidget)
     , _snapshotModeActn(new QAction("Take &snapshots", this))
     , _observationModeActn(new QAction("Make &observations", this))
     , _sweepModeActn(new QAction("Sweep over &wavelength", this))
+    , _configParamActn(new QAction("&Configure", this))
     , _configDlg(new ConfigurationDlg(this))
     , _version(version)
-    , _snapshotPane(new SnapshotPane(_configDlg->refCrystal()))
-    , _observationPane(new ObservationPane(_configDlg->refCrystal()))
-    , _sweepPane(new SweepPane(_configDlg->refCrystal()))
+    , _snapshotPane(new SnapshotPane(this, _configDlg->refCrystal()))
+    , _observationPane(new ObservationPane(this, _configDlg->refCrystal()))
+    , _sweepPane(new SweepPane(this, _configDlg->refCrystal()))
+
 {
     // -------------------------------------------------------------------------
     // Central widget
@@ -56,12 +59,11 @@ MainWindow::MainWindow(const QString &version)
     connect(saveAction, QAction::triggered, this, saveSession);
     connect(saveAsAction, QAction::triggered, this, saveAsSession);
 
-    auto configureAction = new QAction("&Configure", this);
-    configureAction->setIcon(QIcon(":/icons/C-gold-24.png"));
-    configureAction->setIconVisibleInMenu(false);
-    configureAction->setShortcut(QKeySequence("Alt+C"));
-    configureAction->setStatusTip(tr("Switch to configuration mode"));
-    connect(configureAction, QAction::triggered, _configDlg, ConfigurationDlg::display);
+    _configParamActn->setIcon(QIcon(":/icons/C-gold-24.png"));
+    _configParamActn->setIconVisibleInMenu(false);
+    _configParamActn->setShortcut(QKeySequence("Alt+C"));
+    _configParamActn->setStatusTip(tr("Switch to configuration mode"));
+    connect(_configParamActn, QAction::triggered, _configDlg, ConfigurationDlg::display);
 
     auto exitAction = new QAction("E&xit", this);
     exitAction->setShortcut(QKeySequence("Alt+F4"));
@@ -113,7 +115,7 @@ MainWindow::MainWindow(const QString &version)
     fileMenu->addAction(saveAction);
     fileMenu->addAction(saveAsAction);
     fileMenu->addSeparator();
-    fileMenu->addAction(configureAction);
+    fileMenu->addAction(_configParamActn);
     fileMenu->addSeparator();
     fileMenu->addAction(exitAction);
 
@@ -138,7 +140,7 @@ MainWindow::MainWindow(const QString &version)
     toolBar->addAction(_observationModeActn);
     toolBar->addAction(_sweepModeActn);
     toolBar->addSeparator();
-    toolBar->addAction(configureAction);
+    toolBar->addAction(_configParamActn);
 
     // -------------------------------------------------------------------------
     // Varia
@@ -153,6 +155,30 @@ MainWindow::MainWindow(const QString &version)
             _snapshotPane, SnapshotPane::recomputeParams);
     if (!_configDlg->isValid())
         QTimer::singleShot(0, this, displayConfigurationDlg);
+
+    connect(coreSingleton, core::Core::ready, this, updateState);
+
+    connect(_snapshotPane, SnapshotPane::snapshotRequested,
+            coreSingleton, core::Core::startSnapshot);
+    connect(_observationPane, ObservationPane::observationRequested,
+            coreSingleton, core::Core::startObservation);
+    connect(_sweepPane, SweepPane::sweepRequested,
+            coreSingleton, core::Core::startSweep);
+
+    connect(this, stop, coreSingleton, core::Core::stop);
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::updateState(bool isAppReady)
+{
+    _snapshotModeActn->setEnabled(isAppReady);
+    _observationModeActn->setEnabled(isAppReady);
+    _sweepModeActn->setEnabled(isAppReady);
+    _configParamActn->setEnabled(isAppReady);
+    _snapshotPane->updateState(isAppReady);
+    _observationPane->updateState(isAppReady);
+    _sweepPane->updateState(isAppReady);
 }
 
 //------------------------------------------------------------------------------
@@ -261,20 +287,6 @@ void MainWindow::about()
             + tr("<p>This program is provided AS IS, with NO WARRANTY OF ANY "
                  "KIND.</p>")
               );
-}
-
-//------------------------------------------------------------------------------
-
-void MainWindow::coreReady()
-{
-    //TODO
-}
-
-//------------------------------------------------------------------------------
-
-void MainWindow::coreBusy()
-{
-    //TODO
 }
 
 //------------------------------------------------------------------------------

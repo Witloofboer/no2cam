@@ -7,20 +7,19 @@
 #include <QRadioButton>
 #include <QSettings>
 
-#include "gui_lib.h"
 #include "tooling.h"
 #include "CameraBtnBox.h"
 #include "MainWindow.h"
 #include "../core/Crystal.h"
 #include "../core/Core.h"
-#include "../core/core_lib.h"
 
 namespace gui {
 
 //------------------------------------------------------------------------------
 
-SnapshotPane::SnapshotPane(const core::Crystal& crystal)
-    : AbstractMainPane(crystal)
+SnapshotPane::SnapshotPane(MainWindow* mainWindow,
+                           const core::Crystal& crystal)
+    : AbstractMainPane(mainWindow, crystal)
     , _wavelengthBtn(new QRadioButton(tr("Optic")))
     , _acousticBtn(new QRadioButton(tr("Acoustic")))
     , _wavelengthEdit(new DoubleLineEdit)
@@ -69,9 +68,6 @@ SnapshotPane::SnapshotPane(const core::Crystal& crystal)
     connect(_frequencyEdit, LineEdit::textChanged, this, refreshBtns);
     connect(_exposureEdit, LineEdit::textChanged, this, refreshBtns);
     connect(_cooldownEdit, LineEdit::textChanged, this, refreshBtns);
-
-    connect(this, snapshotRequested,
-            core::singleton(), core::Core::startSnapshot);
 
     // Restoring
     restore();

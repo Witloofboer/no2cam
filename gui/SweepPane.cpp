@@ -7,14 +7,14 @@
 
 #include "tooling.h"
 #include "../core/Core.h"
-#include "../core/core_lib.h"
 
 namespace gui {
 
 //------------------------------------------------------------------------------
 
-SweepPane::SweepPane(const core::Crystal &crystal)
-    : AbstractMainPane(crystal)
+SweepPane::SweepPane(MainWindow* mainWindow,
+                     const core::Crystal &crystal)
+    : AbstractMainPane(mainWindow, crystal)
     , _wavelength1Edit(new DoubleLineEdit)
     , _wavelength2Edit(new DoubleLineEdit)
     , _wavelengthStepEdit(new DoubleLineEdit)
@@ -42,8 +42,6 @@ SweepPane::SweepPane(const core::Crystal &crystal)
     connect(_wavelengthStepEdit, LineEdit::textChanged, this, refreshBtns);
     connect(_exposureEdit, LineEdit::textChanged, this, refreshBtns);
     connect(_cooldownEdit, LineEdit::textChanged, this, refreshBtns);
-
-    connect(this, sweepRequested, core::singleton(), core::Core::startSweep);
 
     restore();
 }

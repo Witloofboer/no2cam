@@ -6,20 +6,19 @@
 #include <QSettings>
 
 #include "tooling.h"
-#include "../core/Core.h"
-#include "../core/core_lib.h"
 
 namespace gui {
 
 //------------------------------------------------------------------------------
 
-ObservationPane::ObservationPane(const core::Crystal &crystal)
-    : AbstractMainPane(crystal)
+ObservationPane::ObservationPane(MainWindow* mainWindow,
+                                 const core::Crystal &crystal)
+    : AbstractMainPane(mainWindow, crystal)
     , _wavelength1Edit(new DoubleLineEdit)
     , _wavelength2Edit(new DoubleLineEdit)
-    , _exposureEdit(new IntLineEdit())
+    , _exposureEdit(new IntLineEdit)
     , _snapPerObsEdit(new IntLineEdit)
-    , _cooldownEdit(new IntLineEdit())
+    , _cooldownEdit(new IntLineEdit)
 {
     // Parameter box -----------------------------------------------------------
 
@@ -44,9 +43,6 @@ ObservationPane::ObservationPane(const core::Crystal &crystal)
     connect(_exposureEdit, LineEdit::textChanged, this, refreshBtns);
     connect(_snapPerObsEdit, LineEdit::textChanged, this, refreshBtns);
     connect(_cooldownEdit, LineEdit::textChanged, this, refreshBtns);
-
-    connect(this, observationRequested,
-            core::singleton(), core::Core::startObservation);
 
     restore();
 }

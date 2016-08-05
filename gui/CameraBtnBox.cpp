@@ -3,20 +3,22 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 
-#include "../core/core_lib.h"
 #include "../core/Core.h"
+
+#include "MainWindow.h"
 
 namespace gui {
 
 //------------------------------------------------------------------------------
 
-CameraBtnBox::CameraBtnBox()
+CameraBtnBox::CameraBtnBox(MainWindow *mainWindow)
     : QGroupBox()
+    , _mainWindow(mainWindow)
     , _singleBtn(new QPushButton(QIcon(":/icons/media-one-32.png"), ""))
     , _burstBtn(new QPushButton(QIcon(":/icons/media-burst-32.png"), ""))
     , _recordBtn(new QPushButton(QIcon(":/icons/media-record-32.png"), ""))
     , _stopBtn(new QPushButton(QIcon(":/icons/media-stop-32.png"), ""))
-    , _coreReady(true)
+    , _isAppReady(true)
     , _playEnabled(false)
     , _recordEnabled(false)
 {
@@ -35,7 +37,6 @@ CameraBtnBox::CameraBtnBox()
     _recordBtn->setEnabled(false);
     _stopBtn->setFixedWidth(40);
 
-
     auto btnLayout = new QHBoxLayout;
     btnLayout->addStretch();
     btnLayout->addWidget(_singleBtn);
@@ -46,17 +47,15 @@ CameraBtnBox::CameraBtnBox()
 
     setLayout(btnLayout);
 
-    connect(_stopBtn, QPushButton::clicked, core::singleton(), core::Core::stopRequested);
-    connect(core::singleton(), core::Core::ready, this, coreReady);
+    connect(this, start, mainWindow, MainWindow::start);
+    connect(_stopBtn, QPushButton::clicked, mainWindow, MainWindow::stop);
 }
 
 //------------------------------------------------------------------------------
 
-void CameraBtnBox::coreReady()
+void CameraBtnBox::updateState(bool isAppReady)
 {
-    _coreReady = true;
-    _singleBtn->setChecked(false);
-    _burstBtn->setChecked(false);
+    _isAppReady = isAppReady;
     refreshBtns();
 }
 
@@ -73,17 +72,22 @@ void CameraBtnBox::enableBtns(bool playEnabled, bool recordEnabled)
 
 void CameraBtnBox::refreshBtns()
 {
-    _singleBtn->setEnabled(_coreReady & _playEnabled);
+    _singleBtn->setEnabled(_isAppReady & _playEnabled);
     _burstBtn->setEnabled(_singleBtn->isEnabled());
-    _recordBtn->setEnabled(_coreReady & _recordEnabled);
+    _recordBtn->setEnabled(_isAppReady & _recordEnabled);
+    if (_isAppReady)
+    {
+        _singleBtn->setChecked(false);
+        _burstBtn->setChecked(false);
+    }
+
 }
 
 //------------------------------------------------------------------------------
 
 void CameraBtnBox::singleClicked()
 {
-    _coreReady = false;
-    refreshBtns();
+    _mainWindow->updateState(false);
     emit start(false, _recordBtn->isChecked());
 }
 
@@ -91,8 +95,7 @@ void CameraBtnBox::singleClicked()
 
 void CameraBtnBox::burstClicked()
 {
-    _coreReady = false;
-    refreshBtns();
+    _mainWindow->updateState(false);
     emit start(true, _recordBtn->isChecked());
 }
 

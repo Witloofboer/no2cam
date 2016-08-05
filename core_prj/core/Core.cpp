@@ -81,17 +81,17 @@ void Core::startSweep(double wavelength1,
 
 //------------------------------------------------------------------------------
 
-void Core::stopRequested()
+void Core::stop()
 {
     qInfo("Stopping devices");
-    emit ready(); // todo
+    emit ready(true); // todo
 }
 
 //------------------------------------------------------------------------------
 
 void Core::moveToMainThread()
 {
-    qInfo("Moving core singleton to main thread");
+    qInfo("Moving core layer back to main thread");
     moveToThread(QCoreApplication::instance()->thread());
 }
 
@@ -99,8 +99,8 @@ void Core::moveToMainThread()
 
 void Core::doneImpl()
 {
-    stopRequested();
-    emit ready();
+    stop();
+    emit ready(true);
 }
 
 //------------------------------------------------------------------------------

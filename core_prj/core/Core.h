@@ -24,10 +24,7 @@ class CORESHARED_EXPORT Core : public QObject
     Q_OBJECT
 
 signals:
-    /**
-     * Emitted once the requested operation is done.
-     */
-    void ready();
+    void ready(bool isReady);
 
 public slots:
     /**
@@ -95,7 +92,7 @@ public slots:
     /**
       * Requests the stop of all the devices.
       */
-    void stopRequested();
+    void stop();
 
     /**
      * Requests the instance to move to the main thread.

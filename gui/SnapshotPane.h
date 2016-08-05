@@ -18,7 +18,8 @@ class SnapshotPane : public AbstractMainPane
 {
     Q_OBJECT
 public:
-    explicit SnapshotPane(const core::Crystal& crystal);
+    explicit SnapshotPane(MainWindow* mainWindow,
+                          const core::Crystal& crystal);
     void persiste() const;
 
 signals:
