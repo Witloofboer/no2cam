@@ -28,7 +28,6 @@ SnapshotPane::SnapshotPane(const core::Crystal& crystal)
     , _powerEdit(new IntLineEdit(9, 4))
     , _exposureEdit(new IntLineEdit)
     , _cooldownEdit(new IntLineEdit)
-    , _sessionEdit(new LineEdit)
 {
     // Optic/accoustic ---------------------------------------------------------
 
@@ -70,10 +69,9 @@ SnapshotPane::SnapshotPane(const core::Crystal& crystal)
     connect(_frequencyEdit, LineEdit::textChanged, this, refreshBtns);
     connect(_exposureEdit, LineEdit::textChanged, this, refreshBtns);
     connect(_cooldownEdit, LineEdit::textChanged, this, refreshBtns);
-    connect(_sessionEdit, LineEdit::textChanged, this, refreshBtns);
 
-    connect(_cameraBtnBox, CameraBtnBox::start, this, start);
-    connect(this, snapshot, core::singleton(), core::Core::snapshot);
+    connect(this, snapshotRequested,
+            core::singleton(), core::Core::startSnapshot);
 
     // Restoring
     restore();
@@ -102,19 +100,6 @@ void SnapshotPane::switchMode()
 
 //------------------------------------------------------------------------------
 
-void SnapshotPane::refreshBtns()
-{
-    bool playEnabled = _frequencyEdit->isValid() &&
-                       _powerEdit->isValid() &&
-                       _exposureEdit->isValid() &&
-                       _cooldownEdit->isValid();
-    bool recordEnabled = !_sessionEdit->text().isEmpty();
-
-    _cameraBtnBox->enableBtns(playEnabled, recordEnabled);
-}
-
-//------------------------------------------------------------------------------
-
 void SnapshotPane::recomputeParams()
 {
     if (_wavelengthBtn->isChecked())
@@ -139,15 +124,26 @@ void SnapshotPane::recomputeParams()
 
 //------------------------------------------------------------------------------
 
+bool SnapshotPane::areParametersValid() const
+{
+    return _frequencyEdit->isValid() &&
+           _powerEdit->isValid() &&
+           _exposureEdit->isValid() &&
+           _cooldownEdit->isValid();
+}
+
+//------------------------------------------------------------------------------
+
 void SnapshotPane::start(bool burst, bool record)
 {
-     emit snapshot(_wavelengthEdit->value(),
-                   _frequencyEdit->value(),
-                   _powerEdit->value(),
-                   _exposureEdit->value(),
-                   _cooldownEdit->value(),
-                   burst,
-                   record ? _sessionEdit->text() : "", _crystal);
+     emit snapshotRequested(_wavelengthEdit->value(),
+                            _frequencyEdit->value(),
+                            _powerEdit->value(),
+                            _exposureEdit->value(),
+                            _cooldownEdit->value(),
+                            burst,
+                            record ? _sessionEdit->text() : "",
+                            _crystal);
 }
 
 //------------------------------------------------------------------------------

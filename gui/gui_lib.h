@@ -16,6 +16,9 @@ class MainWindow;
 GUISHARED_EXPORT void init(const QString& version);
 GUISHARED_EXPORT void finalise();
 
+MainWindow *mainWindow();
+
+
 //------------------------------------------------------------------------------
 
 }

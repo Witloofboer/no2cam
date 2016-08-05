@@ -9,7 +9,6 @@ namespace gui {
 
 class DoubleLineEdit;
 class IntLineEdit;
-class LineEdit;
 
 //------------------------------------------------------------------------------
 
@@ -18,18 +17,32 @@ class SweepPane : public AbstractMainPane
     Q_OBJECT
 public:
     explicit SweepPane(const core::Crystal &crystal);
+    void persiste() const;
 
 signals:
+    void sweepRequested(double wavelength1,
+               double wavelength2,
+               double wavelengthStep,
+               double exposure,
+               double cooldown,
+               bool burst,
+               const QString& session,
+               const core::Crystal& crystal);
 
-public slots:
+protected slots:
+    void start(bool burst, bool record) override;
+
+protected:
+    bool areParametersValid() const override;
 
 private:
+    void restore();
+
     DoubleLineEdit *_wavelength1Edit;
     DoubleLineEdit *_wavelength2Edit;
-    DoubleLineEdit *_wavelengthIncEdit;
+    DoubleLineEdit *_wavelengthStepEdit;
     IntLineEdit    *_exposureEdit;
     IntLineEdit    *_cooldownEdit;
-    LineEdit       *_sessionEdit;
 };
 
 //------------------------------------------------------------------------------

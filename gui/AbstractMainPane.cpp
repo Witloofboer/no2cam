@@ -4,6 +4,7 @@
 #include "AbstractMainPane.h"
 #include "CameraBtnBox.h"
 #include "DatagramBox.h"
+#include "tooling.h"
 
 namespace gui {
 
@@ -15,6 +16,7 @@ AbstractMainPane::AbstractMainPane(const core::Crystal& crystal)
     , _paramBoxLayout(new QGridLayout)
     , _snapshotBox(new QGroupBox)
     , _cameraBtnBox(new CameraBtnBox)
+    , _sessionEdit(new LineEdit)
     , _crystal(crystal)
 {
     // Parameter box -----------------------------------------------------------
@@ -65,6 +67,18 @@ AbstractMainPane::AbstractMainPane(const core::Crystal& crystal)
     mainLayout->addLayout(rightLayout);
 
     setLayout(mainLayout);
+
+    // Connections
+    connect(_sessionEdit, LineEdit::textChanged, this, refreshBtns);
+    connect(_cameraBtnBox, CameraBtnBox::start, this, start);
+}
+
+//------------------------------------------------------------------------------
+
+void AbstractMainPane::refreshBtns()
+{
+    _cameraBtnBox->enableBtns(areParametersValid(),
+                              !_sessionEdit->text().isEmpty());
 }
 
 //------------------------------------------------------------------------------

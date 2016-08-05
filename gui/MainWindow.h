@@ -46,6 +46,8 @@ private slots:
     void about();
 
 private slots:
+    void coreReady();
+    void coreBusy();
     void displayConfigurationDlg();
 
 private:
@@ -56,7 +58,7 @@ private:
     QAction *_observationModeActn;
     QAction *_sweepModeActn;
 
-    ConfigurationDlg *_configurationDlg;
+    ConfigurationDlg *_configDlg;
     QString _version;
 
     SnapshotPane *_snapshotPane;

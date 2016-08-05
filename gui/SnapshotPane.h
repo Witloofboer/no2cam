@@ -7,17 +7,10 @@
 
 class QRadioButton;
 
-namespace core {
-class Crystal;
-}
-
-#include "CameraBtnBox.h"
-
 namespace gui {
 
 class DoubleLineEdit;
 class IntLineEdit;
-class LineEdit;
 
 //------------------------------------------------------------------------------
 
@@ -29,25 +22,29 @@ public:
     void persiste() const;
 
 signals:
-    void snapshot(double wavelength,
-                  double frequency,
-                  double power,
-                  double exposure,
-                  double cooldown,
-                  bool burst,
-                  const QString& session,
-                  const core::Crystal& _crystal);
-
+    void snapshotRequested(double wavelength,
+                           double frequency,
+                           double power,
+                           double exposure,
+                           double cooldown,
+                           bool burst,
+                           const QString& session,
+                           const core::Crystal& _crystal);
 public slots:
     void recomputeParams();
 
+protected slots:
+    void start(bool burst, bool record) override;
+
+protected:
+    bool areParametersValid() const override;
+
 private slots:
     void switchMode();
-    void refreshBtns();
-    void start(bool burst, bool record);
 
 private:
     void restore();
+
     QRadioButton   *_wavelengthBtn;
     QRadioButton   *_acousticBtn;
     DoubleLineEdit *_wavelengthEdit;
@@ -55,7 +52,6 @@ private:
     IntLineEdit    *_powerEdit;
     IntLineEdit    *_exposureEdit;
     IntLineEdit    *_cooldownEdit;
-    LineEdit       *_sessionEdit;
 };
 
 //------------------------------------------------------------------------------

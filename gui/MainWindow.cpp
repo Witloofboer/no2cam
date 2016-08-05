@@ -27,11 +27,11 @@ MainWindow::MainWindow(const QString &version)
     , _snapshotModeActn(new QAction("Take &snapshots", this))
     , _observationModeActn(new QAction("Make &observations", this))
     , _sweepModeActn(new QAction("Sweep over &wavelength", this))
-    , _configurationDlg(new ConfigurationDlg(this))
+    , _configDlg(new ConfigurationDlg(this))
     , _version(version)
-    , _snapshotPane(new SnapshotPane(_configurationDlg->refCrystal()))
-    , _observationPane(new ObservationPane(_configurationDlg->refCrystal()))
-    , _sweepPane(new SweepPane(_configurationDlg->refCrystal()))
+    , _snapshotPane(new SnapshotPane(_configDlg->refCrystal()))
+    , _observationPane(new ObservationPane(_configDlg->refCrystal()))
+    , _sweepPane(new SweepPane(_configDlg->refCrystal()))
 {
     // -------------------------------------------------------------------------
     // Central widget
@@ -61,7 +61,7 @@ MainWindow::MainWindow(const QString &version)
     configureAction->setIconVisibleInMenu(false);
     configureAction->setShortcut(QKeySequence("Alt+C"));
     configureAction->setStatusTip(tr("Switch to configuration mode"));
-    connect(configureAction, QAction::triggered, _configurationDlg, ConfigurationDlg::display);
+    connect(configureAction, QAction::triggered, _configDlg, ConfigurationDlg::display);
 
     auto exitAction = new QAction("E&xit", this);
     exitAction->setShortcut(QKeySequence("Alt+F4"));
@@ -149,9 +149,9 @@ MainWindow::MainWindow(const QString &version)
     setFixedSize(sizeHint());
     _snapshotModeActn->setChecked(true);
 
-    connect(_configurationDlg, ConfigurationDlg::crystalUpdated,
+    connect(_configDlg, ConfigurationDlg::crystalUpdated,
             _snapshotPane, SnapshotPane::recomputeParams);
-    if (!_configurationDlg->isValid())
+    if (!_configDlg->isValid())
         QTimer::singleShot(0, this, displayConfigurationDlg);
 }
 
@@ -166,15 +166,17 @@ void MainWindow::displayConfigurationDlg()
           tr("<p>No valid configuration was found from a previous usage.</p>"
           "<p>Therefore, you need to provide the parameters to use the application.</p>")
         , QMessageBox::Ok);
-    _configurationDlg->display(true);
+    _configDlg->display(true);
 }
 
 //------------------------------------------------------------------------------
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    _configurationDlg->persiste();
-    _snapshotPane->persiste(); // TODO also for the other panes.
+    _configDlg->persiste();
+    _snapshotPane->persiste();
+    _observationPane->persiste();
+    _sweepPane->persiste();
     QMainWindow::closeEvent(event);
 }
 
@@ -227,7 +229,7 @@ void MainWindow::switchMode()
     }
     else
     {
-        _configurationDlg->exec();
+        _configDlg->exec();
     }
 }
 
@@ -235,7 +237,7 @@ void MainWindow::switchMode()
 
 void MainWindow::configure()
 {
-    _configurationDlg->exec();
+    _configDlg->exec();
 }
 
 //------------------------------------------------------------------------------
@@ -258,7 +260,21 @@ void MainWindow::about()
             + tr("<p>Copyright 2016 BIRA-IASB</p>")
             + tr("<p>This program is provided AS IS, with NO WARRANTY OF ANY "
                  "KIND.</p>")
-             );
+              );
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::coreReady()
+{
+    //TODO
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::coreBusy()
+{
+    //TODO
 }
 
 //------------------------------------------------------------------------------

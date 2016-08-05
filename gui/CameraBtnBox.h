@@ -24,13 +24,14 @@ signals:
     void stop();
 
 public slots:
-    void coreReady();
+
     void enableBtns(bool playEnabled, bool recordEnabled);
 
 private:
     void refreshBtns();
 
 private slots:
+    void coreReady();
     void singleClicked();
     void burstClicked();
 

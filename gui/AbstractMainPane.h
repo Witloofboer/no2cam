@@ -19,6 +19,7 @@ class Crystal;
 namespace gui {
 
 class CameraBtnBox;
+class LineEdit;
 
 //------------------------------------------------------------------------------
 
@@ -28,17 +29,23 @@ class AbstractMainPane : public QWidget
 public:
     explicit AbstractMainPane(const core::Crystal& crystal);
 
-signals:
-
-public slots:
+protected slots:
+    void refreshBtns();
+    virtual void start(bool burst, bool record) =0;
 
 protected:
-    QVBoxLayout *_leftLayout;
-    QGridLayout *_paramBoxLayout;
-    QGroupBox   *_snapshotBox;
+
+    virtual bool areParametersValid() const =0;
+
+    QVBoxLayout  *_leftLayout;
+    QGridLayout  *_paramBoxLayout;
+    QGroupBox    *_snapshotBox;
     CameraBtnBox *_cameraBtnBox;
+    LineEdit     *_sessionEdit;
 
     const core::Crystal &_crystal;
+
+
 };
 
 //------------------------------------------------------------------------------

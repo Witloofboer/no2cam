@@ -31,7 +31,8 @@ signals:
 
 public slots:
     /**
-     * Requests snapshotting
+     * Initiate a snapshoting session.
+     *
      * @param wavelength optical wavelength [nm]
      * @param frequency acoustic frequency [MHz]
      * @param power acoustic power [mW]
@@ -41,14 +42,55 @@ public slots:
      * @param session name used to prepend record files. No recording if empty.
      * @param crystal crystal used
      */
-    void snapshot(double wavelength,
-                  double frequency,
-                  double power,
-                  double exposure,
-                  double cooldown,
-                  bool burst,
-                  const QString& session,
-                  const Crystal& crystal);
+    void startSnapshot(double wavelength,
+                       double frequency,
+                       double power,
+                       double exposure,
+                       double cooldown,
+                       bool burst,
+                       const QString& session,
+                       const Crystal& crystal);
+
+    /**
+     * Initiate an observation
+     * @param wavelength1 first of the two wavelengths [nm]
+     * @param wavelength2 second of the two wavelengths [nm]
+     * @param exposure exposure time [s]
+     * @param snapshotPerObs number of snapshots composing a single observation
+     * @param cooldown cooldown time [s]
+     * @param burst single snapshot or burst mode flag
+     * @param session name used to prepend record files. No recording if empty.
+     * @param crystal crystal used
+     */
+    void startObservation(double wavelength1,
+                          double wavelength2,
+                          double exposure,
+                          int snapshotPerObs,
+                          double cooldown,
+                          bool burst,
+                          const QString& session,
+                          const core::Crystal& crystal);
+
+
+    /**
+     * Initiate a sweep session.
+     * @param wavelength1 initial wavelength [nm]
+     * @param wavelength2 final wavelength [nm]
+     * @param wavelengthStep wavelength step [nm]
+     * @param exposure exposure time [s]
+     * @param cooldown cooldown time [s]
+     * @param burst single snapshot or burst mode flag
+     * @param session name used to prepend record files. No recording if empty.
+     * @param crystal crystal used
+     */
+    void startSweep(double wavelength1,
+                    double wavelength2,
+                    double wavelengthStep,
+                    double exposure,
+                    double cooldown,
+                    bool burst,
+                    const QString& session,
+                    const Crystal& crystal);
 
     /**
       * Requests the stop of all the devices.

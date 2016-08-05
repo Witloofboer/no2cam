@@ -69,7 +69,6 @@ void CameraBtnBox::enableBtns(bool playEnabled, bool recordEnabled)
     refreshBtns();
 }
 
-
 //------------------------------------------------------------------------------
 
 void CameraBtnBox::refreshBtns()
