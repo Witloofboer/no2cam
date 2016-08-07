@@ -16,9 +16,15 @@ OBJECTS_DIR=../obj
 DESTDIR=../bin
 
 SOURCES += \
-    mockup.cpp
+    mockup.cpp \
+    MockCamera.cpp
 
-HEADERS  +=
+HEADERS  += \
+    MockCamera.h
+
+
+RESOURCES += \
+    camera.qrc
 
 FORMS    +=
 
