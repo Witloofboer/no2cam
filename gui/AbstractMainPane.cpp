@@ -10,14 +10,13 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-AbstractMainPane::AbstractMainPane(MainWindow *mainWindow, const core::Crystal& crystal)
+AbstractMainPane::AbstractMainPane(MainWindow *mainWindow)
     : QWidget()
     , _leftLayout(new QVBoxLayout)
     , _paramBoxLayout(new QGridLayout)
     , _snapshotBox(new QGroupBox)
     , _cameraBtnBox(new CameraBtnBox(mainWindow))
     , _sessionEdit(new LineEdit)
-    , _crystal(crystal)
 {
     // Parameter box -----------------------------------------------------------
 

@@ -16,7 +16,7 @@ class SweepPane : public AbstractMainPane
 {
     Q_OBJECT
 public:
-    explicit SweepPane(MainWindow *mainWindow, const core::Crystal &crystal);
+    explicit SweepPane(MainWindow *mainWindow);
     void persiste() const;
 
 signals:
@@ -26,8 +26,7 @@ signals:
                double exposure,
                double cooldown,
                bool burst,
-               const QString& session,
-               const core::Crystal& crystal);
+               const QString& session);
 
 protected slots:
     void start(bool burst, bool record) override;

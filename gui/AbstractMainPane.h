@@ -10,12 +10,6 @@ class QGroupBox;
 class QLabel;
 class QVBoxLayout;
 
-namespace core {
-
-class Crystal;
-
-}
-
 namespace gui {
 
 class CameraBtnBox;
@@ -28,8 +22,7 @@ class AbstractMainPane : public QWidget
 {
     Q_OBJECT
 public:
-    explicit AbstractMainPane(MainWindow* mainWindow,
-                              const core::Crystal& crystal);
+    explicit AbstractMainPane(MainWindow* mainWindow);
     void updateState(bool isAppReady);
 
 protected slots:
@@ -45,8 +38,6 @@ protected:
     QGroupBox    *_snapshotBox;
     CameraBtnBox *_cameraBtnBox;
     LineEdit     *_sessionEdit;
-
-    const core::Crystal &_crystal;
 };
 
 //------------------------------------------------------------------------------

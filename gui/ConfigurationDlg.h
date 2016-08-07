@@ -21,8 +21,7 @@ class ConfigurationDlg : public QDialog
     Q_OBJECT
 
 public:
-    ConfigurationDlg(MainWindow *mainWindow);
-    const core::Crystal &refCrystal() const {return _crystal;}
+    ConfigurationDlg(MainWindow *mainWindow, core::Crystal *crystal);
     void persiste() const;
     bool isValid() const;
 
@@ -47,7 +46,7 @@ private:
     DoubleLineEdit *_lengthEdit; // Transducer length
     QDialogButtonBox *_buttonBox;
 
-    core::Crystal _crystal;
+    core::Crystal *_crystal;
 };
 
 //------------------------------------------------------------------------------

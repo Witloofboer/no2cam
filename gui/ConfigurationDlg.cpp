@@ -17,7 +17,8 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-ConfigurationDlg::ConfigurationDlg(MainWindow* mainWindow)
+ConfigurationDlg::ConfigurationDlg(MainWindow* mainWindow,
+                                   core::Crystal *crystal)
     : QDialog(mainWindow)
     , _mainWindow(mainWindow)
     , _cutAngleEdit(new DoubleLineEdit(7, 2, 1))
@@ -27,7 +28,7 @@ ConfigurationDlg::ConfigurationDlg(MainWindow* mainWindow)
     , _buttonBox(new QDialogButtonBox(QDialogButtonBox::Ok |
                                       QDialogButtonBox::Cancel |
                                       QDialogButtonBox::Abort))
-    , _crystal()
+    , _crystal(crystal)
 {
     setWindowTitle(tr("Configuration"));
 
@@ -155,10 +156,10 @@ bool ConfigurationDlg::isValid() const
 
 void ConfigurationDlg::pushToGui()
 {
-    _cutAngleEdit->setValue(_crystal.cutAngle());
-    _incidentEdit->setValue(_crystal.lightAngle());
-    _heightEdit->setValue(_crystal.transHeight());
-    _lengthEdit->setValue(_crystal.transLength());
+    _cutAngleEdit->setValue(_crystal->cutAngle());
+    _incidentEdit->setValue(_crystal->lightAngle());
+    _heightEdit->setValue(_crystal->transHeight());
+    _lengthEdit->setValue(_crystal->transLength());
 }
 
 //------------------------------------------------------------------------------
@@ -167,10 +168,10 @@ void ConfigurationDlg::pushToCrystal()
 {
     Q_ASSERT(isValid());
 
-    _crystal.set(_cutAngleEdit->value(),
-                _incidentEdit->value(),
-                _heightEdit->value(),
-                _lengthEdit->value());
+    _crystal->set(_cutAngleEdit->value(),
+                  _incidentEdit->value(),
+                  _heightEdit->value(),
+                  _lengthEdit->value());
 }
 
 //------------------------------------------------------------------------------

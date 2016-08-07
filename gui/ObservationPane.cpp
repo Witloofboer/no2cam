@@ -11,9 +11,8 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-ObservationPane::ObservationPane(MainWindow* mainWindow,
-                                 const core::Crystal &crystal)
-    : AbstractMainPane(mainWindow, crystal)
+ObservationPane::ObservationPane(MainWindow* mainWindow)
+    : AbstractMainPane(mainWindow)
     , _wavelength1Edit(new DoubleLineEdit)
     , _wavelength2Edit(new DoubleLineEdit)
     , _exposureEdit(new IntLineEdit)
@@ -57,8 +56,7 @@ void ObservationPane::start(bool burst, bool record)
                                _snapPerObsEdit->value(),
                                _cooldownEdit->value(),
                                burst,
-                               record ? _sessionEdit->text() : "",
-                               _crystal);
+                               record ? _sessionEdit->text() : "");
 }
 
 //------------------------------------------------------------------------------

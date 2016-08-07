@@ -21,7 +21,8 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-MainWindow::MainWindow(core::Core *coreSingleton,
+MainWindow::MainWindow(core::Crystal *crystal,
+                       core::Core *coreInstance,
                        const QString &version)
     : QMainWindow()
     , _stackedWdgt(new QStackedWidget)
@@ -29,12 +30,11 @@ MainWindow::MainWindow(core::Core *coreSingleton,
     , _observationModeActn(new QAction("Make &observations", this))
     , _sweepModeActn(new QAction("Sweep over &wavelength", this))
     , _configParamActn(new QAction("&Configure", this))
-    , _configDlg(new ConfigurationDlg(this))
+    , _configDlg(new ConfigurationDlg(this, crystal))
     , _version(version)
-    , _snapshotPane(new SnapshotPane(this, _configDlg->refCrystal()))
-    , _observationPane(new ObservationPane(this, _configDlg->refCrystal()))
-    , _sweepPane(new SweepPane(this, _configDlg->refCrystal()))
-
+    , _snapshotPane(new SnapshotPane(this, crystal))
+    , _observationPane(new ObservationPane(this))
+    , _sweepPane(new SweepPane(this))
 {
     // -------------------------------------------------------------------------
     // Central widget
@@ -156,16 +156,16 @@ MainWindow::MainWindow(core::Core *coreSingleton,
     if (!_configDlg->isValid())
         QTimer::singleShot(0, this, displayConfigurationDlg);
 
-    connect(coreSingleton, core::Core::ready, this, updateState);
+    connect(coreInstance, core::Core::ready, this, updateState);
 
     connect(_snapshotPane, SnapshotPane::snapshotRequested,
-            coreSingleton, core::Core::startSnapshot);
+            coreInstance, core::Core::startSnapshot);
     connect(_observationPane, ObservationPane::observationRequested,
-            coreSingleton, core::Core::startObservation);
+            coreInstance, core::Core::startObservation);
     connect(_sweepPane, SweepPane::sweepRequested,
-            coreSingleton, core::Core::startSweep);
+            coreInstance, core::Core::startSweep);
 
-    connect(this, stop, coreSingleton, core::Core::stop);
+    connect(this, stop, coreInstance, core::Core::stop);
 }
 
 //------------------------------------------------------------------------------

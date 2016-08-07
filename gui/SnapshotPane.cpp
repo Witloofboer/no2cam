@@ -18,8 +18,9 @@ namespace gui {
 //------------------------------------------------------------------------------
 
 SnapshotPane::SnapshotPane(MainWindow* mainWindow,
-                           const core::Crystal& crystal)
-    : AbstractMainPane(mainWindow, crystal)
+                           const core::Crystal *crystal)
+    : AbstractMainPane(mainWindow)
+    , _crystal(crystal)
     , _wavelengthBtn(new QRadioButton(tr("Optic")))
     , _acousticBtn(new QRadioButton(tr("Acoustic")))
     , _wavelengthEdit(new DoubleLineEdit)
@@ -102,8 +103,8 @@ void SnapshotPane::recomputeParams()
     {
         if (_wavelengthEdit->isValid())
         {
-            _frequencyEdit->setValue(_crystal.frequency(_wavelengthEdit->value(), 20)); //TODO temperature
-            _powerEdit->setValue(_crystal.power(_wavelengthEdit->value(), 20)); //TODO temperature
+            _frequencyEdit->setValue(_crystal->frequency(_wavelengthEdit->value(), 20)); //TODO temperature
+            _powerEdit->setValue(_crystal->power(_wavelengthEdit->value(), 20)); //TODO temperature
         } else {
             _frequencyEdit->setText("");
             _powerEdit->setText("");
@@ -111,7 +112,7 @@ void SnapshotPane::recomputeParams()
     } else {
         if (_frequencyEdit->isValid())
         {
-            _wavelengthEdit->setValue(_crystal.wavelength(_frequencyEdit->value(), 20)); //TODO temperature
+            _wavelengthEdit->setValue(_crystal->wavelength(_frequencyEdit->value(), 20)); //TODO temperature
         } else {
             _wavelengthEdit->setText("");
         }
@@ -138,8 +139,7 @@ void SnapshotPane::start(bool burst, bool record)
                             _exposureEdit->value(),
                             _cooldownEdit->value(),
                             burst,
-                            record ? _sessionEdit->text() : "",
-                            _crystal);
+                            record ? _sessionEdit->text() : "");
 }
 
 //------------------------------------------------------------------------------

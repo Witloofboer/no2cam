@@ -12,9 +12,8 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-SweepPane::SweepPane(MainWindow* mainWindow,
-                     const core::Crystal &crystal)
-    : AbstractMainPane(mainWindow, crystal)
+SweepPane::SweepPane(MainWindow* mainWindow)
+    : AbstractMainPane(mainWindow)
     , _wavelength1Edit(new DoubleLineEdit)
     , _wavelength2Edit(new DoubleLineEdit)
     , _wavelengthStepEdit(new DoubleLineEdit)
@@ -56,9 +55,7 @@ void SweepPane::start(bool burst, bool record)
                         _exposureEdit->value(),
                         _cooldownEdit->value(),
                         burst,
-                        record ? _sessionEdit->text() : "",
-                        _crystal);
-
+                        record ? _sessionEdit->text() : "");
 }
 
 //------------------------------------------------------------------------------

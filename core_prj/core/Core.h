@@ -23,6 +23,9 @@ class CORESHARED_EXPORT Core : public QObject
 {
     Q_OBJECT
 
+public:
+    Core(const Crystal *crystal);
+
 signals:
     void ready(bool isReady);
 
@@ -45,8 +48,7 @@ public slots:
                        double exposure,
                        double cooldown,
                        bool burst,
-                       const QString& session,
-                       const Crystal& crystal);
+                       const QString& session);
 
     /**
      * Initiate an observation
@@ -65,8 +67,7 @@ public slots:
                           int snapshotPerObs,
                           double cooldown,
                           bool burst,
-                          const QString& session,
-                          const core::Crystal& crystal);
+                          const QString& session);
 
 
     /**
@@ -86,8 +87,7 @@ public slots:
                     double exposure,
                     double cooldown,
                     bool burst,
-                    const QString& session,
-                    const Crystal& crystal);
+                    const QString& session);
 
     /**
       * Requests the stop of all the devices.
@@ -99,7 +99,10 @@ public slots:
      */
     void moveToMainThread();
 
+
+private:
     void doneImpl();
+    const Crystal *_crystal;
 };
 
 //------------------------------------------------------------------------------

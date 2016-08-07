@@ -18,7 +18,7 @@ class ObservationPane : public AbstractMainPane
 {
     Q_OBJECT
 public:
-    explicit ObservationPane(MainWindow *mainWindow, const core::Crystal& crystal);
+    explicit ObservationPane(MainWindow *mainWindow);
     void persiste() const;
 
 signals:
@@ -28,8 +28,7 @@ signals:
                  int snapshotPerObs,
                  double cooldown,
                  bool burst,
-                 const QString& session,
-                 const core::Crystal& crystal);
+                 const QString& session);
 
 protected slots:
     void start(bool burst, bool record) override;

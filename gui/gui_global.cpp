@@ -4,6 +4,7 @@
 #include <QThread>
 
 #include "MainWindow.h"
+#include "../core/Crystal.h"
 #include "../core/Core.h"
 
 //------------------------------------------------------------------------------
@@ -11,9 +12,10 @@
 using namespace gui;
 using namespace core;
 
-static QThread *coreThr_ = nullptr;
-static Core *coreLayer_ = nullptr;
-static MainWindow *mainWindow_ = nullptr;
+static QThread *_coreThr = nullptr;
+static Crystal *_crystal = nullptr;
+static Core *_coreLayer = nullptr;
+static MainWindow *_mainWindow = nullptr;
 
 
 //------------------------------------------------------------------------------
@@ -26,13 +28,15 @@ void init(const char *version)
     QCoreApplication::setApplicationName("NO2 Camera Command Interface");
     Q_INIT_RESOURCE(resources);
 
-    coreThr_ = new QThread;
-    coreLayer_ = new Core;
-    mainWindow_ = new gui::MainWindow(coreLayer_, version);
-    mainWindow_->show();
 
-    QObject::connect(coreThr_, QThread::finished,
-                     coreLayer_, Core::moveToMainThread);
+    _coreThr = new QThread;
+    _crystal = new Crystal;
+    _coreLayer = new Core(_crystal);
+    _mainWindow = new gui::MainWindow(_crystal, _coreLayer, version);
+    _mainWindow->show();
+
+    QObject::connect(_coreThr, QThread::finished,
+                     _coreLayer, Core::moveToMainThread);
 }
 
 //------------------------------------------------------------------------------
@@ -40,10 +44,10 @@ void init(const char *version)
 void start()
 {
     qInfo("Moving core layer to core thread");
-    coreLayer_->moveToThread(coreThr_);
+    _coreLayer->moveToThread(_coreThr);
 
     qInfo("Starting core thread");
-    coreThr_->start();
+    _coreThr->start();
 }
 
 //------------------------------------------------------------------------------
@@ -51,8 +55,8 @@ void start()
 void shutdown()
 {
     qInfo("Shutting down core thread");
-    coreThr_->exit();
-    coreThr_->wait();
+    _coreThr->exit();
+    _coreThr->wait();
 }
 
 //------------------------------------------------------------------------------
@@ -61,15 +65,16 @@ void finalise()
 {
     qInfo("Finalisation");
 
-    delete mainWindow_;
-    mainWindow_ = nullptr;
+    delete _mainWindow;
+    _mainWindow = nullptr;
 
-    delete coreLayer_;
-    delete coreThr_;
+    delete _coreLayer;
+    delete _coreThr;
+    delete _crystal;
 
-    coreLayer_ = nullptr;
-    coreThr_ = nullptr;
-
+    _coreLayer = nullptr;
+    _coreThr = nullptr;
+    _crystal = nullptr;
 }
 
 //------------------------------------------------------------------------------

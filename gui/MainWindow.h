@@ -15,6 +15,7 @@ class QStackedWidget;
 
 namespace core {
 class Core;
+class Crystal;
 }
 
 namespace gui {
@@ -31,7 +32,8 @@ class GUISHARED_EXPORT MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(core::Core *coreSingleton,
+    MainWindow(core::Crystal *crystal,
+               core::Core *coreObj,
                const QString &_version);
 
 signals:

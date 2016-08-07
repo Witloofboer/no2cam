@@ -11,17 +11,21 @@ namespace core {
 
 //------------------------------------------------------------------------------
 
+Core::Core(const Crystal *crystal)
+    : QObject()
+    , _crystal(crystal)
+{}
+
+//------------------------------------------------------------------------------
+
 void Core::startSnapshot(double wavelength,
                          double frequency,
                          double power,
                          double exposure,
                          double cooldown,
                          bool burst,
-                         const QString& session,
-                         const Crystal& crystal)
+                         const QString& session)
 {
-    Q_UNUSED(crystal);
-
     QByteArray s = session.toLatin1();
 
     qInfo("Snapshot: wl=%.1f nm, fq=%.1f MHz, pwr=%.1f mW, expo=%.1f ms, "
@@ -41,11 +45,8 @@ void Core::startObservation(double wavelength1,
                             int snapshotPerObs,
                             double cooldown,
                             bool burst,
-                            const QString &session,
-                            const Crystal &crystal)
+                            const QString &session)
 {
-    Q_UNUSED(crystal);
-
     QByteArray s = session.toLatin1();
 
     qInfo("Observation: wl1=%.1f nm, wl2=%.1f nm, expo=%.1f ms, s/obs=%d, "
@@ -63,11 +64,8 @@ void Core::startSweep(double wavelength1,
                       double exposure,
                       double cooldown,
                       bool burst,
-                      const QString &session,
-                      const Crystal &crystal)
+                      const QString &session)
 {
-    Q_UNUSED(crystal);
-
     QByteArray s = session.toLatin1();
 
     qInfo("Sweep: wl1=%.1f nm, wl2=%.1f nm, step=%.1f nm, expo=%.1f ms, "
