@@ -9,8 +9,7 @@ public:
     MockCamera();
 
 private:
-    int _index;
-    qreal _images[3][3][2048][2048];
+    qreal _images[9][2048][2048];
 };
 
 #endif // MOCKCAMERA_H
