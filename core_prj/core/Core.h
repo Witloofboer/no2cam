@@ -5,10 +5,13 @@
 
 #include "core_global.h"
 
+class QTimer;
+
 //------------------------------------------------------------------------------
 
 namespace core {
 
+class AbstractCamera;
 class Crystal;
 class CoreThread;
 
@@ -24,7 +27,7 @@ class CORESHARED_EXPORT Core : public QObject
     Q_OBJECT
 
 public:
-    Core(const Crystal *crystal);
+    Core(const Crystal *crystal, AbstractCamera *camera);
 
 signals:
     void ready(bool isReady);
@@ -99,10 +102,28 @@ public slots:
      */
     void moveToMainThread();
 
+    void processSnapshot();
+
+private slots:
+    void continueAfterCooldown();
 
 private:
-    void doneImpl();
+    enum Mode {_kReady, _kSnapshotting, _kObserving, _kSweeping};
+
+    void cooldown();
+
+    QTimer *_cooldownTmr;
     const Crystal *_crystal;
+    AbstractCamera *_camera;
+    Mode _mode;
+    bool _bursting;
+
+    double _wavelengths[2];
+    int _wavelengthIx;
+    int _snapshotCount;
+    int _snapshotPerObs;
+    double _wavelength;
+    double _wavelengthStep;
 };
 
 //------------------------------------------------------------------------------

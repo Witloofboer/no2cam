@@ -3,13 +3,28 @@
 
 #include <QtGlobal>
 
-class MockCamera
+class QTimer;
+
+#include "AbstractCamera.h"
+
+class MockCamera: public core::AbstractCamera
 {
+    Q_OBJECT
+
 public:
     MockCamera();
 
+    void takeSnapshot() override;
+    void stop() override;
+
+    int snapshot[2048][2048];
+
+private slots:
+    void snapshotRdyImpl();
+
 private:
-    qreal _images[9][2048][2048];
+    QTimer *_timer;
+    double _scene[2048][2048];
 };
 
 #endif // MOCKCAMERA_H

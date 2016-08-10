@@ -3,6 +3,10 @@
 
 #include <QtCore/qglobal.h>
 
+namespace core {
+    class AbstractCamera;
+}
+
 //------------------------------------------------------------------------------
 
 #if defined(GUI_LIBRARY)
@@ -13,7 +17,15 @@
 
 //------------------------------------------------------------------------------
 
-GUISHARED_EXPORT void init(const char *version);
+/**
+ * Initialise the Core layer.
+ *
+ * @param version
+ *
+ *@param camera the camera to use. The core layer takes ownership of the camera
+ *    as the Core singleton becomes the camera's parent.
+ */
+GUISHARED_EXPORT void init(const char *version, core::AbstractCamera *camera);
 GUISHARED_EXPORT void start();
 GUISHARED_EXPORT void shutdown();
 GUISHARED_EXPORT void finalise();

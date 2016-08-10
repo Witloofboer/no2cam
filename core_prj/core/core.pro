@@ -17,12 +17,14 @@ DESTDIR=../../bin
 
 SOURCES += \
     Core.cpp \
-    Crystal.cpp
+    Crystal.cpp \
+    AbstractCamera.cpp
 
 HEADERS += \
     core_global.h \
     Core.h \
-    Crystal.h
+    Crystal.h \
+    AbstractCamera.h
 
 unix {
     target.path = /usr/lib

@@ -2,23 +2,55 @@
 
 #include <QColor>
 #include <QImage>
+#include <QTimer>
+
+//------------------------------------------------------------------------------
 
 MockCamera::MockCamera()
+    : AbstractCamera()
+    , snapshot{0}
+    , _timer(new QTimer(this))
 {
-    QString imageId(":/images/camera%1.jpg");
+    _timer->setSingleShot(true);
+    connect(_timer, QTimer::timeout, this, snapshotRdyImpl);
 
-    for(int img=0; img<3; ++img)
+    QImage image(":/scene.jpg");
+
+    for (int i=0; i<2048; ++i)
+        for (int j=0; j<2048; ++j)
+        {
+            _scene[i][j] = qGray(image.pixel(i, j))/255.0;
+        }
+}
+
+//------------------------------------------------------------------------------
+
+void MockCamera::takeSnapshot()
+{
+    for (int i=0; i<2048; ++i)
+        for (int j=0; j<2048; ++j)
+        {
+            snapshot[i][j] = (_exposure*_scene[i][j])/1000.0;
+        }
+    _timer->start(_exposure);
+}
+
+//------------------------------------------------------------------------------
+
+void MockCamera::stop()
+{
+    if (_timer->isActive())
     {
-        QImage image(imageId.arg(img+1));
-
-        for (int i=0; i<2048; ++i)
-            for (int j=0; j<2048; ++j)
-                {
-                    QColor c(image.pixelColor(i, j));
-                    _images[3*img+0][i][j] = c.redF();
-                    _images[3*img+1][i][j] = c.greenF();
-                    _images[3*img+2][i][j] = c.blueF();
-                }
+        qInfo("Stopping camera");
+        _timer->stop();
     }
 }
 
+//------------------------------------------------------------------------------
+
+void MockCamera::snapshotRdyImpl()
+{
+    emit snapshotAvailable();
+}
+
+//------------------------------------------------------------------------------

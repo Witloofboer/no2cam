@@ -24,7 +24,7 @@ HEADERS  += \
 
 
 RESOURCES += \
-    camera.qrc
+    scene.qrc
 
 FORMS    +=
 

@@ -6,6 +6,7 @@
 #include "MainWindow.h"
 #include "../core/Crystal.h"
 #include "../core/Core.h"
+#include "../core/AbstractCamera.h"
 
 //------------------------------------------------------------------------------
 
@@ -20,7 +21,7 @@ static MainWindow *_mainWindow = nullptr;
 
 //------------------------------------------------------------------------------
 
-void init(const char *version)
+void init(const char *version, core::AbstractCamera *camera)
 {
     qInfo("Initialisation");
 
@@ -28,10 +29,9 @@ void init(const char *version)
     QCoreApplication::setApplicationName("NO2 Camera Command Interface");
     Q_INIT_RESOURCE(resources);
 
-
     _coreThr = new QThread;
     _crystal = new Crystal;
-    _coreLayer = new Core(_crystal);
+    _coreLayer = new Core(_crystal, camera);
     _mainWindow = new gui::MainWindow(_crystal, _coreLayer, version);
     _mainWindow->show();
 
@@ -67,6 +67,7 @@ void finalise()
 
     delete _mainWindow;
     _mainWindow = nullptr;
+
 
     delete _coreLayer;
     delete _coreThr;
