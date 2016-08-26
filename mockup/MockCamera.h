@@ -5,7 +5,7 @@
 
 class QTimer;
 
-#include "AbstractCamera.h"
+#include "core/AbstractCamera.h"
 
 class MockCamera: public core::AbstractCamera
 {

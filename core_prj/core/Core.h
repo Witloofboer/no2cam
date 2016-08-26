@@ -12,6 +12,8 @@ class QTimer;
 namespace core {
 
 class AbstractCamera;
+class AbstractGenerator;
+class AbstractDriver;
 class Crystal;
 class CoreThread;
 
@@ -27,7 +29,10 @@ class CORESHARED_EXPORT Core : public QObject
     Q_OBJECT
 
 public:
-    Core(const Crystal *crystal, AbstractCamera *camera);
+    Core(const Crystal *crystal,
+         AbstractCamera *camera,
+         AbstractGenerator *generator,
+         AbstractDriver *driver);
 
 signals:
     void ready(bool isReady);
@@ -39,11 +44,12 @@ public slots:
      * @param wavelength optical wavelength [nm]
      * @param frequency acoustic frequency [MHz]
      * @param power acoustic power [mW]
-     * @param exposure exposure time [s]
-     * @param cooldown cooldown time [s]
+     * @param exposure exposure time [ms]
+     * @param cooldown cooldown time [ms]
      * @param burst single snapshot or burst mode flag
+     * @param relaxTime duration needed by electronic boards to relax to a new
+     *        set-point.
      * @param session name used to prepend record files. No recording if empty.
-     * @param crystal crystal used
      */
     void startSnapshot(double wavelength,
                        double frequency,
@@ -51,6 +57,7 @@ public slots:
                        double exposure,
                        double cooldown,
                        bool burst,
+                       double relaxTime,
                        const QString& session);
 
     /**
@@ -61,8 +68,9 @@ public slots:
      * @param snapshotPerObs number of snapshots composing a single observation
      * @param cooldown cooldown time [s]
      * @param burst single snapshot or burst mode flag
+     * @param relaxTime duration needed by electronic boards to relax to a new
+     *        set-point.
      * @param session name used to prepend record files. No recording if empty.
-     * @param crystal crystal used
      */
     void startObservation(double wavelength1,
                           double wavelength2,
@@ -70,6 +78,7 @@ public slots:
                           int snapshotPerObs,
                           double cooldown,
                           bool burst,
+                          double relaxTime,
                           const QString& session);
 
 
@@ -82,6 +91,8 @@ public slots:
      * @param cooldown cooldown time [s]
      * @param burst single snapshot or burst mode flag
      * @param session name used to prepend record files. No recording if empty.
+     * @param relaxTime duration needed by electronic boards to relax to a new
+     *        set-point.
      * @param crystal crystal used
      */
     void startSweep(double wavelength1,
@@ -90,6 +101,7 @@ public slots:
                     double exposure,
                     double cooldown,
                     bool burst,
+                    double relaxTime,
                     const QString& session);
 
     /**
@@ -102,28 +114,56 @@ public slots:
      */
     void moveToMainThread();
 
-    void processSnapshot();
+    void postSnapshotProcess();
 
 private slots:
-    void continueAfterCooldown();
+    void setAcousticWave();
 
 private:
     enum Mode {_kReady, _kSnapshotting, _kObserving, _kSweeping};
 
     void cooldown();
 
-    QTimer *_cooldownTmr;
+    QTimer *_cooldownT;
+    QTimer *_relaxT;
+
     const Crystal *_crystal;
     AbstractCamera *_camera;
+    AbstractGenerator *_generator;
+    AbstractDriver *_driver;
+
     Mode _mode;
     bool _bursting;
 
-    double _wavelengths[2];
-    int _wavelengthIx;
-    int _snapshotCount;
-    int _snapshotPerObs;
-    double _wavelength;
-    double _wavelengthStep;
+    struct SnapshotParams
+    {
+        double power;
+    };
+
+    struct ObservationParams
+    {
+        double wavelengths[2];
+        int wavelengthIx;
+        int snapshotCount;
+        int snapshotPerObs;
+    };
+
+    struct SweepParams
+    {
+        double minWavelength;
+        double maxWavelength;
+        double wavelength;
+        double wavelengthStep;
+    };
+
+    union {
+        SnapshotParams snap;
+        ObservationParams obs;
+        SweepParams sweep;
+    } _p; // parameters
+
+    };
+
 };
 
 //------------------------------------------------------------------------------

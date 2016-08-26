@@ -12,19 +12,27 @@ namespace core {
 
 //------------------------------------------------------------------------------
 
-Core::Core(const Crystal *crystal, AbstractCamera *camera)
+Core::Core(const Crystal *crystal,
+           AbstractCamera *camera,
+           AbstractGenerator *generator,
+           AbstractDriver *driver)
     : QObject()
-    , _cooldownTmr(new QTimer(this))
+    , _cooldownT(new QTimer(this))
+    , _relaxT(new QTimer(this))
     , _crystal(crystal)
     , _camera(camera)
+    , _generator(generator)
+    , _driver(driver)
     , _mode(_kReady)
     , _bursting(false)
 {
     camera->setParent(this);
-    _cooldownTmr->setSingleShot(true);
+    _cooldownT->setSingleShot(true);
+    _relaxT->setSingleShot(true);
 
-    connect(_cooldownTmr, QTimer::timeout, this, continueAfterCooldown);
-    connect(_camera, AbstractCamera::snapshotAvailable, this, processSnapshot);
+    connect(_cooldownT, QTimer::timeout, this, setAcousticWave);
+    connect(_relaxT, QTimer::timeout, _camera, takeSnapshot);
+    connect(_camera, AbstractCamera::snapshotAvailable, this, postSnapshotProcess);
 }
 
 //------------------------------------------------------------------------------
@@ -35,6 +43,7 @@ void Core::startSnapshot(double wavelength,
                          double exposure,
                          double cooldown,
                          bool burst,
+                         double relaxTime,
                          const QString& session)
 {
     QByteArray s = session.toLatin1();
@@ -46,11 +55,13 @@ void Core::startSnapshot(double wavelength,
 
     _mode = _kSnapshotting;
     _bursting = burst;
-    _cooldownTmr->setInterval(cooldown);
+    _cooldownT->setInterval(cooldown);
+    _relaxT->setInterval(relaxTime);
     _camera->setExposure(exposure);
+    _generator->setFrequency(frequency);
+    _p.snap.power = power;
 
-    // TODO set frequency and power
-    continueAfterCooldown();
+    setAcousticWave();
 }
 
 //------------------------------------------------------------------------------
@@ -61,6 +72,7 @@ void Core::startObservation(double wavelength1,
                             int snapshotPerObs,
                             double cooldown,
                             bool burst,
+                            double relaxTime,
                             const QString &session)
 {
     QByteArray s = session.toLatin1();
@@ -72,16 +84,16 @@ void Core::startObservation(double wavelength1,
 
     _mode = _kObserving;
     _bursting = burst;
-    _cooldownTmr->setInterval(cooldown);
+    _cooldownT->setInterval(cooldown);
+    _relaxT->setInterval(relaxTime);
     _camera->setExposure(exposure);
-    _wavelengths[0] = wavelength1;
-    _wavelengths[1] = wavelength2;
-    _wavelengthIx = 0;
-    _snapshotCount = 0;
-    _snapshotPerObs = snapshotPerObs;
+    _p.obs.wavelengths[0] = wavelength1;
+    _p.obs.wavelengths[1] = wavelength2;
+    _p.obs.wavelengthIx = 0;
+    _p.obs.snapshotCount = 0;
+    _p.obs.snapshotPerObs = snapshotPerObs;
 
-    // TODO set frequency and power
-    continueAfterCooldown();
+    setAcousticWave();
 }
 
 
@@ -93,6 +105,7 @@ void Core::startSweep(double wavelength1,
                       double exposure,
                       double cooldown,
                       bool burst,
+                      double relaxTime,
                       const QString &session)
 {
     QByteArray s = session.toLatin1();
@@ -104,15 +117,16 @@ void Core::startSweep(double wavelength1,
 
     _mode = _kSweeping;
     _bursting = burst;
-    _cooldownTmr->setInterval(cooldown);
+    _cooldownT->setInterval(cooldown);
+    _relaxT->setInterval(relaxTime);
     _camera->setExposure(exposure);
-    _wavelengths[0] = wavelength1;
-    _wavelengths[1] = wavelength2;
-    _wavelength = wavelength1;
-    _wavelengthStep = wavelengthStep;
+    _p.sweep.minWavelength = wavelength1;
+    _p.sweep.maxWavelength = wavelength2;
+    _p.sweep.wavelength = wavelength1;
+    _p.sweep.wavelengthStep = wavelengthStep;
 
     // TODO set frequency and power
-    continueAfterCooldown();
+    setAcousticWave();
 }
 
 //------------------------------------------------------------------------------
@@ -121,7 +135,7 @@ void Core::stop() // Todo
 {
     qInfo("Stopping all devices");
     _camera->stop();
-    _cooldownTmr->stop();
+    _cooldownT->stop();
     _mode = _kReady;
 
     emit ready(true);
@@ -137,9 +151,36 @@ void Core::moveToMainThread()
 
 //------------------------------------------------------------------------------
 
-void Core::processSnapshot()
+void Core::setAcousticWave()
 {
-    qInfo("Processing snapshot");
+    switch(_mode)
+    {
+    case _kReady:
+        break;
+
+    case _kSnapshotting:
+        _driver->setPower(_p.snap.power);
+        break;
+
+    case _kObserving:
+        // TODO set frequency
+        // TODO set power
+        break;
+
+    case _kSweeping:
+        // TODO set frequency
+        // TODO set power
+        break;
+    }
+
+    _relaxT->start();
+}
+
+//------------------------------------------------------------------------------
+
+void Core::postSnapshotProcess()
+{
+    bool continueAquisition = _bursting;
 
     switch(_mode)
     {
@@ -147,89 +188,38 @@ void Core::processSnapshot()
         break;
 
     case _kSnapshotting:
-        // TODO process
-        if (_bursting)
-        {
-            cooldown();
-        } else {
-            stop();
-        }
         break;
 
     case _kObserving:
-        // TODO process
-
         ++_snapshotCount;
         _wavelengthIx = 1 - _wavelengthIx;
 
-        if (_bursting || _snapshotCount < 2*_snapshotPerObs)
-        {
-            if (_snapshotCount == 2*_snapshotPerObs)
-            {
-                _snapshotPerObs = 0;
-            }
+        continueAquisition |= _p.obs.snapshotCount < 2*_p.obs.snapshotPerObs;
 
-            cooldown();
-        } else {
-            stop();
+        if (_p.obs.snapshotCount == 2*_p.obs.snapshotPerObs)
+        {
+            _p.obs.snapshotPerObs = 0;
         }
         break;
 
     case _kSweeping:
-        if (_bursting || _wavelength < _wavelengths[1])
-        {
-            if (_wavelength < _wavelengths[1])
-            {
-                _wavelength += _wavelengthStep;
-            } else {
-                _wavelength = _wavelengths[0];
-            }
+        continueAquisition |= _p.sweep.wavelength < _p.sweep.maxWavelength;
 
-            cooldown();
+        if (_p.sweep.wavelength < _p.sweep.maxWavelength)
+        {
+            _p.sweep.wavelength += _p.sweep.wavelengthStep;
         } else {
-            stop();
+            _p.sweep.wavelength = _p.sweep.minWavelength;
         }
         break;
     }
-}
 
-//------------------------------------------------------------------------------
-
-void Core::cooldown() // Todo
-{
-    qInfo("Cooling down");
-    // TODO reduce power
-    _cooldownTmr->start();
-}
-
-//------------------------------------------------------------------------------
-
-void Core::continueAfterCooldown()
-{
-    // TODO set power
-    switch(_mode)
+    if (continueAquisition)
     {
-    case _kReady:
-        break;
-
-    case _kSnapshotting:
-        qInfo("Snapshotting");
-        _camera->takeSnapshot();
-        break;
-
-    case _kObserving:
-        qInfo("Snapshotting at %f nm", _wavelengths[_wavelengthIx]);
-        // TODO set frequency
-        // TODO set power
-        _camera->takeSnapshot();
-        break;
-
-    case _kSweeping:
-        qInfo("Sweeping at %f nm", _wavelength);
-        // TODO set frequency
-        // TODO set power
-        _camera->takeSnapshot();
-        break;
+        _driver->cooldownPower();
+        _cooldownT->start();
+    } else {
+        stop();
     }
 }
 

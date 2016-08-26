@@ -27,6 +27,8 @@ MockCamera::MockCamera()
 
 void MockCamera::takeSnapshot()
 {
+    Q_ASSERT(0<_exposure);
+
     for (int i=0; i<2048; ++i)
         for (int j=0; j<2048; ++j)
         {
@@ -41,7 +43,7 @@ void MockCamera::stop()
 {
     if (_timer->isActive())
     {
-        qInfo("Stopping camera");
+        qInfo("Forcing camera stop");
         _timer->stop();
     }
 }

@@ -1,4 +1,9 @@
-#include "AbstractCamera.h"
+#ifndef ABSTRACTDRIVER_H
+#define ABSTRACTDRIVER_H
+
+#include <QObject>
+
+#include "core_global.h"
 
 //------------------------------------------------------------------------------
 
@@ -7,18 +12,19 @@ namespace core
 
 //------------------------------------------------------------------------------
 
-AbstractCamera::AbstractCamera()
-    : QObject()
-    , _exposure(-1)
-{}
-
-void AbstractCamera::setExposure(int exposure)
+class CORESHARED_EXPORT AbstractDriver : public QObject
 {
+    Q_OBJECT
+public:
+    explicit AbstractDriver();
 
-    qInfo("Camera: exposure time set to %d ms", exposure);
-    _exposure = exposure;
-}
+signals:
+
+public slots:
+};
 
 //------------------------------------------------------------------------------
 
 }
+
+#endif // ABSTRACTDRIVER_H

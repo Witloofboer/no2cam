@@ -1,4 +1,4 @@
-#include "AbstractCamera.h"
+#include "AbstractGenerator.h"
 
 //------------------------------------------------------------------------------
 
@@ -7,16 +7,10 @@ namespace core
 
 //------------------------------------------------------------------------------
 
-AbstractCamera::AbstractCamera()
+AbstractGenerator::AbstractGenerator()
     : QObject()
-    , _exposure(-1)
-{}
-
-void AbstractCamera::setExposure(int exposure)
 {
 
-    qInfo("Camera: exposure time set to %d ms", exposure);
-    _exposure = exposure;
 }
 
 //------------------------------------------------------------------------------

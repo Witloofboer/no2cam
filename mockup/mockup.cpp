@@ -1,6 +1,6 @@
 #include <QApplication>
 
-#include "../gui/gui_global.h"
+#include "gui/gui_global.h"
 
 #include "MockCamera.h"
 

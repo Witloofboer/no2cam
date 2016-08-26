@@ -12,7 +12,7 @@ class CORESHARED_EXPORT AbstractCamera : public QObject
 {
     Q_OBJECT
 public:
-    AbstractCamera();
+    explicit AbstractCamera();
 
     void setExposure(int exposure);
 

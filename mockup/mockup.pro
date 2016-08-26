@@ -17,10 +17,14 @@ DESTDIR=../bin
 
 SOURCES += \
     mockup.cpp \
-    MockCamera.cpp
+    MockCamera.cpp \
+    MockGenerator.cpp \
+    MockDriver.cpp
 
 HEADERS  += \
-    MockCamera.h
+    MockCamera.h \
+    MockGenerator.h \
+    MockDriver.h
 
 
 RESOURCES += \
@@ -32,12 +36,12 @@ win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../bin/ -lcore
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../bin/ -lcore
 else:unix: LIBS += -L$$OUT_PWD/../bin/ -lcore
 
-INCLUDEPATH += $$PWD/../core_prj/core
-DEPENDPATH += $$PWD/../core_prj/core
+INCLUDEPATH += $$PWD/../core_prj
+DEPENDPATH += $$PWD/../core_prj
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../gui/release/ -lgui
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../gui/debug/ -lgui
 else:unix: LIBS += -L$$OUT_PWD/../bin/ -lgui
 
-INCLUDEPATH += $$PWD/../gui
-DEPENDPATH += $$PWD/../gui
+INCLUDEPATH += $$PWD/..
+DEPENDPATH += $$PWD/..
