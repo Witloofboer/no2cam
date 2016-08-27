@@ -156,7 +156,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
     if (!_configDlg->isValid())
         QTimer::singleShot(0, this, displayConfigurationDlg);
 
-    connect(coreInstance, core::Core::ready, this, updateState);
+    connect(coreInstance, core::Core::READY, this, updateState);
 
     connect(_snapshotPane, SnapshotPane::snapshotRequested,
             coreInstance, core::Core::startSnapshot);

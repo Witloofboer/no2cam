@@ -35,8 +35,11 @@ void AotfCrystalTest::frequency_power()
     Crystal crystal;
     crystal.set(alpha, theta, Ht, Lt);
 
-    QCOMPARE(f(crystal.frequency(lambda, T)), f(freq));
-    QCOMPARE(f(crystal.power(lambda, T)), f(power));
+    double freq_, power_;
+
+    crystal.computeFreqPow(lambda, T, freq_, power_);
+    QCOMPARE(f(freq_), f(freq));
+    QCOMPARE(f(power_), f(power));
 }
 
 //------------------------------------------------------------------------------

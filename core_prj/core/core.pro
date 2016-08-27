@@ -20,7 +20,8 @@ SOURCES += \
     Crystal.cpp \
     AbstractCamera.cpp \
     AbstractGenerator.cpp \
-    AbstractDriver.cpp
+    AbstractDriver.cpp \
+    AbstractCrysTempProbe.cpp
 
 HEADERS += \
     core_global.h \
@@ -28,7 +29,8 @@ HEADERS += \
     Crystal.h \
     AbstractCamera.h \
     AbstractGenerator.h \
-    AbstractDriver.h
+    AbstractDriver.h \
+    AbstractCrysTempProbe.h
 
 unix {
     target.path = /usr/lib

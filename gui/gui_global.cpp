@@ -4,9 +4,9 @@
 #include <QThread>
 
 #include "MainWindow.h"
-#include "../core/Crystal.h"
-#include "../core/Core.h"
-#include "../core/AbstractCamera.h"
+#include "core/Crystal.h"
+#include "core/Core.h"
+#include "core/AbstractCamera.h"
 
 //------------------------------------------------------------------------------
 

@@ -12,10 +12,10 @@ class QTimer;
 namespace core {
 
 class AbstractCamera;
-class AbstractGenerator;
-class AbstractDriver;
 class Crystal;
-class CoreThread;
+class AbstractCrysTempProbe;
+class AbstractDriver;
+class AbstractGenerator;
 
 //------------------------------------------------------------------------------
 
@@ -30,6 +30,7 @@ class CORESHARED_EXPORT Core : public QObject
 
 public:
     Core(const Crystal *crystal,
+         AbstractCrysTempProbe *crysTempProb,
          AbstractCamera *camera,
          AbstractGenerator *generator,
          AbstractDriver *driver);
@@ -39,26 +40,41 @@ signals:
 
 public slots:
     /**
-     * Initiate a snapshoting session.
+     * Initiate a snapshoting session for a fixed wavelength.
      *
      * @param wavelength optical wavelength [nm]
-     * @param frequency acoustic frequency [MHz]
-     * @param power acoustic power [mW]
      * @param exposure exposure time [ms]
      * @param cooldown cooldown time [ms]
-     * @param burst single snapshot or burst mode flag
      * @param relaxTime duration needed by electronic boards to relax to a new
      *        set-point.
+     * @param burst single snapshot or burst mode flag
      * @param session name used to prepend record files. No recording if empty.
      */
-    void startSnapshot(double wavelength,
-                       double frequency,
-                       double power,
-                       double exposure,
-                       double cooldown,
-                       bool burst,
-                       double relaxTime,
-                       const QString& session);
+    void spectralSnapshot(double wavelength,
+                          double exposure,
+                          double cooldown,
+                          double relaxTime,
+                          bool burst,
+                          const QString& session);
+
+    /**
+     * Initiate a snapshoting session for a fixed frequency and power.
+     *
+     * @param wavelength optical wavelength [nm]
+     * @param exposure exposure time [ms]
+     * @param cooldown cooldown time [ms]
+     * @param relaxTime duration needed by electronic boards to relax to a new
+     *        set-point.
+     * @param burst single snapshot or burst mode flag
+     * @param session name used to prepend record files. No recording if empty.
+     */
+    void acousticSnapshot(double frequency,
+                          double power,
+                          double exposure,
+                          double cooldown,
+                          double relaxTime,
+                          bool burst,
+                          const QString& session);
 
     /**
      * Initiate an observation
@@ -67,19 +83,19 @@ public slots:
      * @param exposure exposure time [s]
      * @param snapshotPerObs number of snapshots composing a single observation
      * @param cooldown cooldown time [s]
-     * @param burst single snapshot or burst mode flag
      * @param relaxTime duration needed by electronic boards to relax to a new
      *        set-point.
+     * @param burst single snapshot or burst mode flag
      * @param session name used to prepend record files. No recording if empty.
      */
-    void startObservation(double wavelength1,
-                          double wavelength2,
-                          double exposure,
-                          int snapshotPerObs,
-                          double cooldown,
-                          bool burst,
-                          double relaxTime,
-                          const QString& session);
+    void observation(double wavelength1,
+                     double wavelength2,
+                     double exposure,
+                     int snapshotPerObs,
+                     double cooldown,
+                     double relaxTime,
+                     bool burst,
+                     const QString& session);
 
 
     /**
@@ -90,19 +106,19 @@ public slots:
      * @param exposure exposure time [s]
      * @param cooldown cooldown time [s]
      * @param burst single snapshot or burst mode flag
-     * @param session name used to prepend record files. No recording if empty.
      * @param relaxTime duration needed by electronic boards to relax to a new
      *        set-point.
+     * @param session name used to prepend record files. No recording if empty.
      * @param crystal crystal used
      */
-    void startSweep(double wavelength1,
-                    double wavelength2,
-                    double wavelengthStep,
-                    double exposure,
-                    double cooldown,
-                    bool burst,
-                    double relaxTime,
-                    const QString& session);
+    void sweep(double wavelength1,
+               double wavelength2,
+               double wavelengthStep,
+               double exposure,
+               double cooldown,
+               double relaxTime,
+               bool burst,
+               const QString& session);
 
     /**
       * Requests the stop of all the devices.
@@ -120,23 +136,39 @@ private slots:
     void setAcousticWave();
 
 private:
-    enum Mode {_kReady, _kSnapshotting, _kObserving, _kSweeping};
+    enum Mode {READY, SpSNAP, AcSNAP, OBS, SWP};
 
     void cooldown();
+    void setCommonParams(Mode mode,
+                         double exposure,
+                         double cooldown,
+                         double relaxTime,
+                         bool burst,
+                         const QString &session);
+
+    void setOptimalAcousticWave(double wavelength);
 
     QTimer *_cooldownT;
-    QTimer *_relaxT;
+    QTimer *_electroRelaxT;
 
     const Crystal *_crystal;
+    AbstractCrysTempProbe *_crysTempProb;
     AbstractCamera *_camera;
     AbstractGenerator *_generator;
     AbstractDriver *_driver;
 
     Mode _mode;
     bool _bursting;
+    QString _session;
 
-    struct SnapshotParams
+    struct WlSnapshotParams
     {
+        double wavelength;
+    };
+
+    struct AcousticSnapshotParams
+    {
+        double frequency;
         double power;
     };
 
@@ -157,12 +189,11 @@ private:
     };
 
     union {
-        SnapshotParams snap;
+        WlSnapshotParams specSnap;
+        AcousticSnapshotParams acouSnap;
         ObservationParams obs;
-        SweepParams sweep;
+        SweepParams swp;
     } _p; // parameters
-
-    };
 
 };
 

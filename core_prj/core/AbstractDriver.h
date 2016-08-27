@@ -15,9 +15,12 @@ namespace core
 class CORESHARED_EXPORT AbstractDriver : public QObject
 {
     Q_OBJECT
+
 public:
     explicit AbstractDriver();
-
+    virtual void stop()=0;
+    virtual void setPower(double power)=0;
+    virtual void cooldownPower()=0;
 signals:
 
 public slots:

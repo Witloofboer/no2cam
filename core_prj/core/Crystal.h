@@ -5,6 +5,8 @@
 
 #include "core_global.h"
 
+//------------------------------------------------------------------------------
+
 namespace core {
 
 //------------------------------------------------------------------------------
@@ -26,7 +28,7 @@ public:
      *
      * \param cutAngle crystal cut angle [deg]
      * \param incidentAngle light incident angle [deg]
-     * \param transHeight transducer height [mm]
+     * \param transHeight transduGcer height [mm]
      * \param transLength transducer length [mm]
      */
      void set(double cutAngle,
@@ -39,25 +41,28 @@ public:
      double transHeight() const {return _h;}
      double transLength() const {return _l;}
 
-    /**
-     * Returns the acoustic frequency matching an optical wavelength at a given
-     * crystal temperature.
-     *
-     * @param lambda optical wavelength [nm]
-     * @param T      crystal temperature [°C]
-     * @return       the matching acoustic frequency [MHz]
-     */
-    double frequency(double lambda, double T) const;
 
-    /**
-     * Returns the optimal acoustic power for a given optical wavelength at a
-     * given crystal temperature
-     *
-     * @param lambda optical wavelength [nm]
-     * @param T      crystal temperature [°C]
-     * @return       the optimal acoustic power [MHz]
-     */
-    double power(double lambda, double T) const;
+     /**
+      * Returns the acoustic frequency and the power matching an optical
+      * wavelength at a given crystal temperature.
+      *
+      * @param wavelength optical wavelength [nm]
+      * @param T          crystal temperature [°C]
+      * @param freq       corresponding acoustic frequency [MHz]
+      * @param power      corresponding acoustic power [mW]
+      */
+     void computeFreqPow(double wavelength, double T,
+                         double &freq, double &power) const;
+
+     /**
+      * Returns the acoustic frequency matching an optical wavelength at a given
+      * crystal temperature.
+      *
+      * @param wavelength optical wavelength [nm]
+      * @param T          crystal temperature [°C]
+      * @return the acoustic frequency [MHz]
+      */
+     double frequency(double wavelength, double T) const;
 
     /**
      * Returns the optical wavelength matching an acoustic frequency at a given
@@ -94,20 +99,6 @@ private:
 
 //------------------------------------------------------------------------------
 
-inline double Crystal::frequency(double lambda, double T) const
-{
-    return acousticParam(lambda, T, true);
-}
-
-//------------------------------------------------------------------------------
-
-inline double Crystal::power(double lambda, double T) const
-{
-    return acousticParam(lambda, T, false);
-}
-
-//------------------------------------------------------------------------------
-
 /**
  * Memberwise equality operator for AotfCrystalParameters instances.
  */
@@ -130,7 +121,5 @@ bool operator!=(const Crystal& lhs,
 //------------------------------------------------------------------------------
 
 }
-
-Q_DECLARE_METATYPE(core::Crystal)
 
 #endif // CRYSTAL_H

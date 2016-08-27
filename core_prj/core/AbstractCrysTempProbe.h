@@ -1,5 +1,5 @@
-#ifndef ABSTRACTGENERATOR_H
-#define ABSTRACTGENERATOR_H
+#ifndef ABSTRACTCRYSTEMPPROBE_H
+#define ABSTRACTCRYSTEMPPROBE_H
 
 #include <QObject>
 
@@ -12,18 +12,17 @@ namespace core
 
 //------------------------------------------------------------------------------
 
-class CORESHARED_EXPORT AbstractGenerator : public QObject
+class CORESHARED_EXPORT AbstractCrysTempProbe : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit AbstractGenerator();
-    virtual void stop()=0;
-    virtual void setFrequency(double frequency)=0;
+    explicit AbstractCrysTempProbe();
+    virtual double getTemperature()=0;
 };
 
 //------------------------------------------------------------------------------
 
 }
 
-#endif // ABSTRACTGENERATOR_H
+#endif // ABSTRACTCRYSTEMPPROBE_H

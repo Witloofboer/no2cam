@@ -8,3 +8,6 @@ SUBDIRS += \
     gui \
     main \
     mockup
+
+DISTFILES += \
+    .astylerc
