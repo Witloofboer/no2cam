@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 
 MockCamera::MockCamera()
-    : AbstractCamera()
+    : core::AbstractCamera()
     , snapshot{0}
     , _timer(new QTimer(this))
 {

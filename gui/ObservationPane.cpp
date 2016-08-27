@@ -55,6 +55,7 @@ void ObservationPane::start(bool burst, bool record)
                                _exposureEdit->value(),
                                _snapPerObsEdit->value(),
                                _cooldownEdit->value(),
+                               0, // TODO Relax time
                                burst,
                                record ? _sessionEdit->text() : "");
 }

@@ -54,6 +54,7 @@ void SweepPane::start(bool burst, bool record)
                         _wavelengthStepEdit->value(),
                         _exposureEdit->value(),
                         _cooldownEdit->value(),
+                        0, // TODO relaxtime
                         burst,
                         record ? _sessionEdit->text() : "");
 }

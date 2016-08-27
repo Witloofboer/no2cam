@@ -3,11 +3,13 @@
 
 #include <QDialog>
 
-#include "Crystal.h"
-
 //------------------------------------------------------------------------------
 
 class QDialogButtonBox;
+
+namespace core {
+class Crystal;
+}
 
 namespace gui {
 
@@ -21,7 +23,8 @@ class ConfigurationDlg : public QDialog
     Q_OBJECT
 
 public:
-    ConfigurationDlg(MainWindow *mainWindow, core::Crystal *crystal);
+    ConfigurationDlg(MainWindow *mainWindow,
+                     core::Crystal *crystal);
     void persiste() const;
     bool isValid() const;
 

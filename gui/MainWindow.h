@@ -16,6 +16,7 @@ class QStackedWidget;
 namespace core {
 class Core;
 class Crystal;
+class AbstractCrysTempProbe;
 }
 
 namespace gui {
@@ -33,6 +34,7 @@ class GUISHARED_EXPORT MainWindow : public QMainWindow
 
 public:
     MainWindow(core::Crystal *crystal,
+               core::AbstractCrysTempProbe *crysTempProb,
                core::Core *coreObj,
                const QString &_version);
 

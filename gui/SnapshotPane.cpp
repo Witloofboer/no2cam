@@ -18,10 +18,12 @@ namespace gui {
 //------------------------------------------------------------------------------
 
 SnapshotPane::SnapshotPane(MainWindow* mainWindow,
-                           const core::Crystal *crystal)
+                           const core::Crystal *crystal,
+                           core::AbstractCrysTempProbe *crysTempProbe)
     : AbstractMainPane(mainWindow)
     , _crystal(crystal)
-    , _wavelengthBtn(new QRadioButton(tr("Optic")))
+    , _crystalTempProbe(crysTempProbe)
+    , _spectralBtn(new QRadioButton(tr("Optic")))
     , _acousticBtn(new QRadioButton(tr("Acoustic")))
     , _wavelengthEdit(new DoubleLineEdit)
     , _frequencyEdit(new DoubleLineEdit(9, 3, 3))
@@ -32,13 +34,13 @@ SnapshotPane::SnapshotPane(MainWindow* mainWindow,
     // Optic/accoustic ---------------------------------------------------------
 
     auto modeLayout = new QVBoxLayout;
-    modeLayout->addWidget(_wavelengthBtn);
+    modeLayout->addWidget(_spectralBtn);
     modeLayout->addWidget(_acousticBtn);
 
     auto modeBox = new QGroupBox(tr("Parameter mode"));
     modeBox->setLayout(modeLayout);
 
-    connect(_wavelengthBtn, QRadioButton::toggled, this, switchMode);
+    connect(_spectralBtn, QRadioButton::toggled, this, switchMode);
 
     // Parameter box ------------------------------------------------------------
 
@@ -62,7 +64,7 @@ SnapshotPane::SnapshotPane(MainWindow* mainWindow,
     connect(_wavelengthEdit, LineEdit::focusLost, this, recomputeParams);
     connect(_frequencyEdit, LineEdit::focusLost, this, recomputeParams);
 
-    connect(_wavelengthBtn, QRadioButton::toggled, this, refreshBtns);
+    connect(_spectralBtn, QRadioButton::toggled, this, refreshBtns);
     connect(_frequencyEdit, LineEdit::textChanged, this, refreshBtns);
     connect(_powerEdit, LineEdit::textChanged, this, refreshBtns);
     connect(_wavelengthEdit, LineEdit::textChanged, this, refreshBtns);
@@ -79,7 +81,7 @@ SnapshotPane::SnapshotPane(MainWindow* mainWindow,
 
 void SnapshotPane::switchMode()
 {
-    if (_wavelengthBtn->isChecked())
+    if (_spectralBtn->isChecked())
     {
         _wavelengthEdit->setEnabled(true);
         _frequencyEdit->setEnabled(false);
@@ -99,12 +101,15 @@ void SnapshotPane::switchMode()
 
 void SnapshotPane::recomputeParams()
 {
-    if (_wavelengthBtn->isChecked())
+    if (_spectralBtn->isChecked())
     {
         if (_wavelengthEdit->isValid())
         {
-            _frequencyEdit->setValue(_crystal->frequency(_wavelengthEdit->value(), 20)); //TODO temperature
-            _powerEdit->setValue(_crystal->power(_wavelengthEdit->value(), 20)); //TODO temperature
+            double freq, power;
+            _crystal->computeFreqPow(_wavelengthEdit->value(), 20, freq, power); // TODO temperature;
+
+            _frequencyEdit->setValue(freq);
+            _powerEdit->setValue(power);
         } else {
             _frequencyEdit->setText("");
             _powerEdit->setText("");
@@ -133,13 +138,23 @@ bool SnapshotPane::areParametersValid() const
 
 void SnapshotPane::start(bool burst, bool record)
 {
-     emit snapshotRequested(_wavelengthEdit->value(),
-                            _frequencyEdit->value(),
-                            _powerEdit->value(),
-                            _exposureEdit->value(),
-                            _cooldownEdit->value(),
-                            burst,
-                            record ? _sessionEdit->text() : "");
+    if (_spectralBtn->isChecked())
+    {
+        emit spectralSnapshot(_wavelengthEdit->value(),
+                              _exposureEdit->value(),
+                              _cooldownEdit->value(),
+                              0, // TODO relax time
+                              burst,
+                              record ? _sessionEdit->text() : "");
+    } else {
+        emit acousticSnapshot(_frequencyEdit->value(),
+                              _powerEdit->value(),
+                              _exposureEdit->value(),
+                              _cooldownEdit->value(),
+                              0, // TODO relax time
+                              burst,
+                              record ? _sessionEdit->text() : "");
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -158,7 +173,7 @@ void SnapshotPane::persiste() const
     QSettings settings;
 
     settings.beginGroup("Snapshot");
-    settings.setValue(wavelengthModeLbl, _wavelengthBtn->isChecked());
+    settings.setValue(wavelengthModeLbl, _spectralBtn->isChecked());
     if (_wavelengthEdit->isValid())
         settings.setValue(wavelengthLbl, _wavelengthEdit->text());
     if (_frequencyEdit->isValid())
@@ -182,7 +197,7 @@ void SnapshotPane::restore()
 
     settings.beginGroup("Snapshot");
     if (settings.value(wavelengthModeLbl, true).toBool())
-        _wavelengthBtn->setChecked(true);
+        _spectralBtn->setChecked(true);
     else
         _acousticBtn->setChecked(true);
 

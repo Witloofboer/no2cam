@@ -8,7 +8,8 @@
 class QRadioButton;
 
 namespace core {
-    class Crystal;
+class Crystal;
+class AbstractCrysTempProbe;
 }
 
 namespace gui {
@@ -23,17 +24,25 @@ class SnapshotPane : public AbstractMainPane
     Q_OBJECT
 public:
     explicit SnapshotPane(MainWindow* mainWindow,
-                          const core::Crystal *crystal);
+                          const core::Crystal *crystal,
+                          core::AbstractCrysTempProbe *crysTempProbe);
     void persiste() const;
 
 signals:
-    void snapshotRequested(double wavelength,
-                           double frequency,
-                           double power,
-                           double exposure,
-                           double cooldown,
-                           bool burst,
-                           const QString& session);
+    void spectralSnapshot(double wavelength,
+                          double exposure,
+                          double cooldown,
+                          double relaxTime,
+                          bool burst,
+                          const QString& session);
+
+    void acousticSnapshot(double frequency,
+                          double power,
+                          double exposure,
+                          double cooldown,
+                          double relaxTime,
+                          bool burst,
+                          const QString& session);
 public slots:
     void recomputeParams();
 
@@ -50,7 +59,9 @@ private:
     void restore();
 
     const core::Crystal *_crystal;
-    QRadioButton   *_wavelengthBtn;
+    const core::AbstractCrysTempProbe *_crystalTempProbe;
+
+    QRadioButton   *_spectralBtn;
     QRadioButton   *_acousticBtn;
     DoubleLineEdit *_wavelengthEdit;
     DoubleLineEdit *_frequencyEdit;

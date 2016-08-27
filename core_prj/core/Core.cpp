@@ -130,7 +130,6 @@ void Core::sweep(double wavelength1,
 
 void Core::stop()
 {
-    qInfo("Stopping all devices");
     _driver->stop();
     _generator->stop();
     _camera->stop();
@@ -244,7 +243,7 @@ void Core::postSnapshotProcess()
 
     if (continueAquisition)
     {
-        _driver->cooldownPower();
+        _driver->cooldown();
         _cooldownT->start();
     } else {
         stop();

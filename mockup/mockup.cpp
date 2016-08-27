@@ -3,6 +3,9 @@
 #include "gui/gui_global.h"
 
 #include "MockCamera.h"
+#include "MockDriver.h"
+#include "MockGenerator.h"
+#include "MockCrysTempProbe.h"
 
 //------------------------------------------------------------------------------
 
@@ -14,7 +17,11 @@ int main(int argc, char *argv[])
 
     QApplication application(argc, argv);
 
-    init("0.2.0 (mockup)", new MockCamera);
+    init("0.2.0 (mockup)",
+         new MockCrysTempProbe,
+         new MockCamera,
+         new MockGenerator,
+         new MockDriver);
     start();
     int result = application.exec();
     shutdown();

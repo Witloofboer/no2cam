@@ -4,7 +4,10 @@
 #include <QtCore/qglobal.h>
 
 namespace core {
-    class AbstractCamera;
+class AbstractCrysTempProbe;
+class AbstractCamera;
+class AbstractGenerator;
+class AbstractDriver;
 }
 
 //------------------------------------------------------------------------------
@@ -25,7 +28,11 @@ namespace core {
  *@param camera the camera to use. The core layer takes ownership of the camera
  *    as the Core singleton becomes the camera's parent.
  */
-GUISHARED_EXPORT void init(const char *version, core::AbstractCamera *camera);
+GUISHARED_EXPORT void init(const char *version,
+                           core::AbstractCrysTempProbe *crysTempProb,
+                           core::AbstractCamera *camera,
+                           core::AbstractGenerator *generator,
+                           core::AbstractDriver *driver);
 GUISHARED_EXPORT void start();
 GUISHARED_EXPORT void shutdown();
 GUISHARED_EXPORT void finalise();

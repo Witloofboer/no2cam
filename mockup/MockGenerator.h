@@ -9,6 +9,10 @@ class MockGenerator : public core::AbstractGenerator
 
 public:
     MockGenerator();
+
+    virtual void stop() override;
+    virtual void setFrequency(double frequency) override;
+
 };
 
 #endif // MOCKGENERATOR_H

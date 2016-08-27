@@ -23,12 +23,13 @@ public:
 
 signals:
     void observationRequested(double wavelength1,
-                 double wavelength2,
-                 double exposure,
-                 int snapshotPerObs,
-                 double cooldown,
-                 bool burst,
-                 const QString& session);
+                              double wavelength2,
+                              double exposure,
+                              int snapshotPerObs,
+                              double cooldown,
+                              double relaxTime,
+                              bool burst,
+                              const QString& session);
 
 protected slots:
     void start(bool burst, bool record) override;

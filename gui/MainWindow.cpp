@@ -22,6 +22,7 @@ namespace gui {
 //------------------------------------------------------------------------------
 
 MainWindow::MainWindow(core::Crystal *crystal,
+                       core::AbstractCrysTempProbe *crysTempProb,
                        core::Core *coreInstance,
                        const QString &version)
     : QMainWindow()
@@ -32,7 +33,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
     , _configParamActn(new QAction("&Configure", this))
     , _configDlg(new ConfigurationDlg(this, crystal))
     , _version(version)
-    , _snapshotPane(new SnapshotPane(this, crystal))
+    , _snapshotPane(new SnapshotPane(this, crystal, crysTempProb))
     , _observationPane(new ObservationPane(this))
     , _sweepPane(new SweepPane(this))
 {
@@ -156,14 +157,16 @@ MainWindow::MainWindow(core::Crystal *crystal,
     if (!_configDlg->isValid())
         QTimer::singleShot(0, this, displayConfigurationDlg);
 
-    connect(coreInstance, core::Core::READY, this, updateState);
+    connect(coreInstance, core::Core::ready, this, updateState);
 
-    connect(_snapshotPane, SnapshotPane::snapshotRequested,
-            coreInstance, core::Core::startSnapshot);
+    connect(_snapshotPane, SnapshotPane::spectralSnapshot,
+            coreInstance, core::Core::spectralSnapshot);
+    connect(_snapshotPane, SnapshotPane::acousticSnapshot,
+            coreInstance, core::Core::acousticSnapshot);
     connect(_observationPane, ObservationPane::observationRequested,
-            coreInstance, core::Core::startObservation);
+            coreInstance, core::Core::observation);
     connect(_sweepPane, SweepPane::sweepRequested,
-            coreInstance, core::Core::startSweep);
+            coreInstance, core::Core::sweep);
 
     connect(this, stop, coreInstance, core::Core::stop);
 }
