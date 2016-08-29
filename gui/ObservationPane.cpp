@@ -6,18 +6,21 @@
 #include <QSettings>
 
 #include "tooling.h"
+#include "ConfigurationDlg.h"
 
 namespace gui {
 
 //------------------------------------------------------------------------------
 
-ObservationPane::ObservationPane(MainWindow* mainWindow)
+ObservationPane::ObservationPane(MainWindow* mainWindow,
+                                 const double &stabilisationTime)
     : AbstractMainPane(mainWindow)
     , _wavelength1Edit(new DoubleLineEdit)
     , _wavelength2Edit(new DoubleLineEdit)
     , _exposureEdit(new IntLineEdit)
     , _snapPerObsEdit(new IntLineEdit)
     , _cooldownEdit(new IntLineEdit)
+    , _stabilisationTime(stabilisationTime)
 {
     // Parameter box -----------------------------------------------------------
 
@@ -50,14 +53,14 @@ ObservationPane::ObservationPane(MainWindow* mainWindow)
 
 void ObservationPane::start(bool burst, bool record)
 {
-     emit observationRequested(_wavelength1Edit->value(),
-                               _wavelength2Edit->value(),
-                               _exposureEdit->value(),
-                               _snapPerObsEdit->value(),
-                               _cooldownEdit->value(),
-                               0, // TODO Relax time
-                               burst,
-                               record ? _sessionEdit->text() : "");
+    emit observationRequested(_wavelength1Edit->value(),
+                              _wavelength2Edit->value(),
+                              _exposureEdit->value(),
+                              _snapPerObsEdit->value(),
+                              _cooldownEdit->value(),
+                              _stabilisationTime,
+                              burst,
+                              record ? _sessionEdit->text() : "");
 }
 
 //------------------------------------------------------------------------------

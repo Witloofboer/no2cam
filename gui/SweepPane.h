@@ -16,7 +16,8 @@ class SweepPane : public AbstractMainPane
 {
     Q_OBJECT
 public:
-    explicit SweepPane(MainWindow *mainWindow);
+    explicit SweepPane(MainWindow *mainWindow,
+                       const double &stabilisationTime);
     void persiste() const;
 
 signals:
@@ -25,7 +26,7 @@ signals:
                         double wavelengthStep,
                         double exposure,
                         double cooldown,
-                        double relaxTime,
+                        double stabilisationTime,
                         bool burst,
                         const QString& session);
 
@@ -43,6 +44,8 @@ private:
     DoubleLineEdit *_wavelengthStepEdit;
     IntLineEdit    *_exposureEdit;
     IntLineEdit    *_cooldownEdit;
+
+    const double &_stabilisationTime;
 };
 
 //------------------------------------------------------------------------------

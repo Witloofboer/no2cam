@@ -10,6 +10,8 @@
 #include "tooling.h"
 #include "CameraBtnBox.h"
 #include "MainWindow.h"
+#include "ConfigurationDlg.h"
+
 #include "../core/Crystal.h"
 #include "../core/Core.h"
 
@@ -19,7 +21,8 @@ namespace gui {
 
 SnapshotPane::SnapshotPane(MainWindow* mainWindow,
                            const core::Crystal *crystal,
-                           core::AbstractCrysTempProbe *crysTempProbe)
+                           core::AbstractCrysTempProbe *crysTempProbe,
+                           const double &stabilisationTime)
     : AbstractMainPane(mainWindow)
     , _crystal(crystal)
     , _crystalTempProbe(crysTempProbe)
@@ -30,6 +33,7 @@ SnapshotPane::SnapshotPane(MainWindow* mainWindow,
     , _powerEdit(new IntLineEdit(9, 4))
     , _exposureEdit(new IntLineEdit)
     , _cooldownEdit(new IntLineEdit)
+    , _stabilisationTime(stabilisationTime)
 {
     // Optic/accoustic ---------------------------------------------------------
 
@@ -143,7 +147,7 @@ void SnapshotPane::start(bool burst, bool record)
         emit spectralSnapshot(_wavelengthEdit->value(),
                               _exposureEdit->value(),
                               _cooldownEdit->value(),
-                              0, // TODO relax time
+                              _stabilisationTime,
                               burst,
                               record ? _sessionEdit->text() : "");
     } else {
@@ -151,7 +155,7 @@ void SnapshotPane::start(bool burst, bool record)
                               _powerEdit->value(),
                               _exposureEdit->value(),
                               _cooldownEdit->value(),
-                              0, // TODO relax time
+                              _stabilisationTime,
                               burst,
                               record ? _sessionEdit->text() : "");
     }

@@ -25,14 +25,15 @@ class SnapshotPane : public AbstractMainPane
 public:
     explicit SnapshotPane(MainWindow* mainWindow,
                           const core::Crystal *crystal,
-                          core::AbstractCrysTempProbe *crysTempProbe);
+                          core::AbstractCrysTempProbe *crysTempProbe,
+                          const double &stabilisationTime);
     void persiste() const;
 
 signals:
     void spectralSnapshot(double wavelength,
                           double exposure,
                           double cooldown,
-                          double relaxTime,
+                          double stabilisationTime,
                           bool burst,
                           const QString& session);
 
@@ -40,7 +41,7 @@ signals:
                           double power,
                           double exposure,
                           double cooldown,
-                          double relaxTime,
+                          double stabilisationTime,
                           bool burst,
                           const QString& session);
 public slots:
@@ -68,6 +69,8 @@ private:
     IntLineEdit    *_powerEdit;
     IntLineEdit    *_exposureEdit;
     IntLineEdit    *_cooldownEdit;
+
+    const double &_stabilisationTime;
 };
 
 //------------------------------------------------------------------------------

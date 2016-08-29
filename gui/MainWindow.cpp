@@ -26,16 +26,19 @@ MainWindow::MainWindow(core::Crystal *crystal,
                        core::Core *coreInstance,
                        const QString &version)
     : QMainWindow()
+    , _configDlg(new ConfigurationDlg(this, crystal))
     , _stackedWdgt(new QStackedWidget)
     , _snapshotModeActn(new QAction("Take &snapshots", this))
     , _observationModeActn(new QAction("Make &observations", this))
     , _sweepModeActn(new QAction("Sweep over &wavelength", this))
     , _configParamActn(new QAction("&Configure", this))
-    , _configDlg(new ConfigurationDlg(this, crystal))
     , _version(version)
-    , _snapshotPane(new SnapshotPane(this, crystal, crysTempProb))
-    , _observationPane(new ObservationPane(this))
-    , _sweepPane(new SweepPane(this))
+    , _snapshotPane(new SnapshotPane(this, crystal, crysTempProb,
+                                     _configDlg->stabilisationTime()))
+    , _observationPane(new ObservationPane(this,
+                                           _configDlg->stabilisationTime()))
+    , _sweepPane(new SweepPane(this,
+                               _configDlg->stabilisationTime()))
 {
     // -------------------------------------------------------------------------
     // Central widget
@@ -189,12 +192,12 @@ void MainWindow::updateState(bool isAppReady)
 void MainWindow::displayConfigurationDlg()
 {
     QMessageBox::warning
-        ( this
-        , tr("NO2> Camera Command Interface")
-        , "<h3>" + tr("Welcome to NO<sub>2</sub> Camera Command Interface") + "</h3>" +
-          tr("<p>No valid configuration was found from a previous usage.</p>"
-          "<p>Therefore, you need to provide the parameters to use the application.</p>")
-        , QMessageBox::Ok);
+    ( this
+      , tr("NO2> Camera Command Interface")
+      , "<h3>" + tr("Welcome to NO<sub>2</sub> Camera Command Interface") + "</h3>" +
+      tr("<p>No valid configuration was found from a previous usage.</p>"
+         "<p>Therefore, you need to provide the parameters to use the application.</p>")
+      , QMessageBox::Ok);
     _configDlg->display(true);
 }
 
@@ -281,15 +284,15 @@ void MainWindow::cameraStatus()
 void MainWindow::about()
 {
     QMessageBox::about
-            ( this
-            , tr("NO2> Camera Command Interface")
-            , tr("<h3>NO<sub>2</sub> Camera Commander</h3>")
-            + "<p>" + tr("Version") + ": " + _version + "</p>"
-            + tr("<p>Author: Didier Pieroux (didier.pieroux@aeronomie.be)</p>")
-            + tr("<p>Copyright 2016 BIRA-IASB</p>")
-            + tr("<p>This program is provided AS IS, with NO WARRANTY OF ANY "
-                 "KIND.</p>")
-              );
+    ( this
+      , tr("NO2> Camera Command Interface")
+      , tr("<h3>NO<sub>2</sub> Camera Commander</h3>")
+      + "<p>" + tr("Version") + ": " + _version + "</p>"
+      + tr("<p>Author: Didier Pieroux (didier.pieroux@aeronomie.be)</p>")
+      + tr("<p>Copyright 2016 BIRA-IASB</p>")
+      + tr("<p>This program is provided AS IS, with NO WARRANTY OF ANY "
+           "KIND.</p>")
+    );
 }
 
 //------------------------------------------------------------------------------
@@ -297,17 +300,17 @@ void MainWindow::about()
 void MainWindow::releaseNotes()
 {
     QMessageBox::information
-            ( this
-            , tr("NO<sub>2</sub> Camera Command Interface")
-            , "<h2>" + tr("Release notes") + "</h2>"
-            + "<h3>" + tr("Version") + " " + _version + "</h3>"
-            + tr("<p>Only the GUI is implemented in this version.</p>"
-                 "<p>As a consequence of the lack of logic, the snapshot button"
-                 "   remains depressed when clicked. In the final version, it"
-                 "   will automatically get released once the snapshot is"
-                 "   acquired.</p>"
-                )
-            , QMessageBox::Ok);
+    ( this
+      , tr("NO<sub>2</sub> Camera Command Interface")
+      , "<h2>" + tr("Release notes") + "</h2>"
+      + "<h3>" + tr("Version") + " " + _version + "</h3>"
+      + tr("<p>Only the GUI is implemented in this version.</p>"
+           "<p>As a consequence of the lack of logic, the snapshot button"
+           "   remains depressed when clicked. In the final version, it"
+           "   will automatically get released once the snapshot is"
+           "   acquired.</p>"
+          )
+      , QMessageBox::Ok);
 }
 
 //------------------------------------------------------------------------------
@@ -318,11 +321,11 @@ bool MainWindow::okToContinue()
     if (isWindowModified())
     {
         auto code = QMessageBox::warning
-                ( this
-                , tr("NO<sub>2</sub> Camera Command Interface")
-                , tr("The session has been modified.\n"
-                     "Do you want to save your changes?")
-                , QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+                    ( this
+                      , tr("NO<sub>2</sub> Camera Command Interface")
+                      , tr("The session has been modified.\n"
+                           "Do you want to save your changes?")
+                      , QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 
         switch (code)
         {

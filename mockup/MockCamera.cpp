@@ -29,11 +29,8 @@ void MockCamera::takeSnapshot()
 {
     Q_ASSERT(0<_exposure);
 
-    for (int i=0; i<2048; ++i)
-        for (int j=0; j<2048; ++j)
-        {
-            snapshot[i][j] = (_exposure*_scene[i][j])/1000.0;
-        }
+    qInfo("Camera: Starting snapshot");
+
     _timer->start(_exposure);
 }
 
@@ -52,6 +49,15 @@ void MockCamera::stop()
 
 void MockCamera::snapshotRdyImpl()
 {
+    // TODO
+
+    for (int i=0; i<2048; ++i)
+        for (int j=0; j<2048; ++j)
+        {
+            snapshot[i][j] = (_exposure*_scene[i][j])/1000.0;
+        }
+
+    qInfo("Camera: snapshot ready");
     emit snapshotAvailable();
 }
 

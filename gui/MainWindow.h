@@ -67,13 +67,13 @@ private slots:
 private:
     bool okToContinue();
 
+    ConfigurationDlg *_configDlg;
     QStackedWidget *_stackedWdgt;
     QAction *_snapshotModeActn;
     QAction *_observationModeActn;
     QAction *_sweepModeActn;
     QAction *_configParamActn;
 
-    ConfigurationDlg *_configDlg;
     QString _version;
 
     SnapshotPane *_snapshotPane;

@@ -45,7 +45,7 @@ public slots:
      * @param wavelength optical wavelength [nm]
      * @param exposure exposure time [ms]
      * @param cooldown cooldown time [ms]
-     * @param relaxTime duration needed by electronic boards to relax to a new
+     * @param stabilisationTime duration needed by electronic boards to relax to a new
      *        set-point.
      * @param burst single snapshot or burst mode flag
      * @param session name used to prepend record files. No recording if empty.
@@ -53,7 +53,7 @@ public slots:
     void spectralSnapshot(double wavelength,
                           double exposure,
                           double cooldown,
-                          double relaxTime,
+                          double stabilisationTime,
                           bool burst,
                           const QString& session);
 
@@ -63,7 +63,7 @@ public slots:
      * @param wavelength optical wavelength [nm]
      * @param exposure exposure time [ms]
      * @param cooldown cooldown time [ms]
-     * @param relaxTime duration needed by electronic boards to relax to a new
+     * @param stabilisationTime duration needed by electronic boards to relax to a new
      *        set-point.
      * @param burst single snapshot or burst mode flag
      * @param session name used to prepend record files. No recording if empty.
@@ -72,7 +72,7 @@ public slots:
                           double power,
                           double exposure,
                           double cooldown,
-                          double relaxTime,
+                          double stabilisationTime,
                           bool burst,
                           const QString& session);
 
@@ -83,7 +83,7 @@ public slots:
      * @param exposure exposure time [s]
      * @param snapshotPerObs number of snapshots composing a single observation
      * @param cooldown cooldown time [s]
-     * @param relaxTime duration needed by electronic boards to relax to a new
+     * @param stabilisationTime duration needed by electronic boards to relax to a new
      *        set-point.
      * @param burst single snapshot or burst mode flag
      * @param session name used to prepend record files. No recording if empty.
@@ -93,7 +93,7 @@ public slots:
                      double exposure,
                      int snapshotPerObs,
                      double cooldown,
-                     double relaxTime,
+                     double stabilisationTime,
                      bool burst,
                      const QString& session);
 
@@ -106,7 +106,7 @@ public slots:
      * @param exposure exposure time [s]
      * @param cooldown cooldown time [s]
      * @param burst single snapshot or burst mode flag
-     * @param relaxTime duration needed by electronic boards to relax to a new
+     * @param stabilisationTime duration needed by electronic boards to relax to a new
      *        set-point.
      * @param session name used to prepend record files. No recording if empty.
      * @param crystal crystal used
@@ -116,7 +116,7 @@ public slots:
                double wavelengthStep,
                double exposure,
                double cooldown,
-               double relaxTime,
+               double stabilisationTime,
                bool burst,
                const QString& session);
 
@@ -142,14 +142,14 @@ private:
     void setCommonParams(Mode mode,
                          double exposure,
                          double cooldown,
-                         double relaxTime,
+                         double stabilisationTime,
                          bool burst,
                          const QString &session);
 
     void setOptimalAcousticWave(double wavelength);
 
     QTimer *_cooldownT;
-    QTimer *_electroRelaxT;
+    QTimer *_stabilisationT;
 
     const Crystal *_crystal;
     AbstractCrysTempProbe *_crysTempProb;

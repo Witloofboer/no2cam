@@ -34,19 +34,25 @@ signals:
 public slots:
     void display(bool abortEnabled=false);
 
+    const double &stabilisationTime() const;
+
 private slots:
     void updateOkBtn();
-    void pushToGui();
-    void pushToCrystal();
+    void ackGuiValues();
+    void restoreGuiValues();
 
 private:
     void restore();
 
     MainWindow *_mainWindow;
-    DoubleLineEdit *_cutAngleEdit;    // Cut angle
-    DoubleLineEdit *_incidentEdit;    // Incident angle
-    DoubleLineEdit *_heightEdit; // Transducer height
-    DoubleLineEdit *_lengthEdit; // Transducer length
+    DoubleLineEdit *_cutAngleEdit; // Cut angle
+    DoubleLineEdit *_incidentEdit; // Incident angle
+    DoubleLineEdit *_heightEdit;   // Transducer height
+    DoubleLineEdit *_lengthEdit;   // Transducer length
+
+    DoubleLineEdit *_stabilTimeEdit;
+    double _stabilisationTime;
+
     QDialogButtonBox *_buttonBox;
 
     core::Crystal *_crystal;

@@ -25,12 +25,15 @@ ConfigurationDlg::ConfigurationDlg(MainWindow* mainWindow,
     , _incidentEdit(new DoubleLineEdit(7, 2, 1))
     , _heightEdit(new DoubleLineEdit(7, 2, 1))
     , _lengthEdit(new DoubleLineEdit(7, 2, 1))
+    , _stabilTimeEdit(new DoubleLineEdit(7, 2, 1))
     , _buttonBox(new QDialogButtonBox(QDialogButtonBox::Ok |
                                       QDialogButtonBox::Cancel |
                                       QDialogButtonBox::Abort))
     , _crystal(crystal)
 {
     setWindowTitle(tr("Configuration"));
+
+    //----------------------------------------
 
     auto crystalGrid = new QGridLayout();
 
@@ -43,6 +46,27 @@ ConfigurationDlg::ConfigurationDlg(MainWindow* mainWindow,
     auto crystalBox = new QGroupBox(tr("Crystal parameters"));
     crystalBox->setLayout(crystalGrid);
 
+    //----------------------------------------
+
+    auto boardGrid = new QGridLayout();
+    row = 0;
+    putInGrid(_stabilTimeEdit, boardGrid, row++, "Stabilisation", "[ms]");
+    boardGrid->setColumnMinimumWidth(
+        0,
+        crystalGrid->itemAtPosition(2,0)->minimumSize().width());
+    auto boardBox = new QGroupBox(tr("Board parameters"));
+    boardBox->setLayout(boardGrid);
+
+    //----------------------------------------
+
+    auto layout = new QVBoxLayout;
+    layout->addWidget(crystalBox);
+    layout->addWidget(boardBox);
+    layout->addWidget(_buttonBox);
+    setLayout(layout);
+
+    //----------------------------------------
+
     connect(_buttonBox, QDialogButtonBox::accepted, this, accept);
     connect(_buttonBox, QDialogButtonBox::rejected, this, reject);
 
@@ -50,11 +74,9 @@ ConfigurationDlg::ConfigurationDlg(MainWindow* mainWindow,
     connect(_incidentEdit, LineEdit::textChanged, this, updateOkBtn);
     connect(_heightEdit, LineEdit::textChanged, this, updateOkBtn);
     connect(_lengthEdit, LineEdit::textChanged, this, updateOkBtn);
+    connect(_stabilTimeEdit, LineEdit::textChanged, this, updateOkBtn);
 
-    auto layout = new QVBoxLayout;
-    layout->addWidget(crystalBox);
-    layout->addWidget(_buttonBox);
-    setLayout(layout);
+    //----------------------------------------
 
     restore();
 }
@@ -65,12 +87,13 @@ static const char *cutAngleLbl = "cut angle [deg]";
 static const char *incidentLbl = "incident angle [deg]";
 static const char *transHeightLbl = "transducer height [mm]";
 static const char *transLengthLbl = "transducer length [mm]";
+static const char *stabilTimeLbl = "board stabilisation [ms]";
 
 void ConfigurationDlg::persiste() const
 {
     if (isValid())
     {
-        qInfo("Persisting crystal parameters");
+        qInfo("Persisting parameters");
 
         QSettings settings;
         settings.beginGroup("Crystal");
@@ -79,8 +102,13 @@ void ConfigurationDlg::persiste() const
         settings.setValue(transHeightLbl, _heightEdit->text());
         settings.setValue(transLengthLbl, _lengthEdit->text());
         settings.endGroup();
+
+        settings.beginGroup("Boards");
+        settings.setValue(stabilTimeLbl, _stabilTimeEdit->text());
+        settings.endGroup();
+
     } else {
-        qWarning("Not persisting crystal parameters (invalid configuration)");
+        qWarning("Not persisting parameters (invalid configuration)");
     }
 }
 
@@ -88,7 +116,7 @@ void ConfigurationDlg::persiste() const
 
 void ConfigurationDlg::restore()
 {
-    qInfo("Restoring crystal parameters");
+    qInfo("Restoring parameters");
 
     QSettings settings;
     settings.beginGroup("Crystal");
@@ -98,8 +126,12 @@ void ConfigurationDlg::restore()
     _lengthEdit->setText(settings.value(transLengthLbl, "").toString());
     settings.endGroup();
 
+    settings.beginGroup("Boards");
+    _stabilTimeEdit->setText(settings.value(stabilTimeLbl, "").toString());
+    settings.endGroup();
+
     if (isValid())
-        pushToCrystal();
+        ackGuiValues();
 }
 
 //------------------------------------------------------------------------------
@@ -121,9 +153,9 @@ void ConfigurationDlg::display(bool abortEnabled)
 
     if (result==Accepted)
     {
-        pushToCrystal();        // Accepted
-        pushToGui();            // Normalisation
-        emit crystalUpdated();
+        ackGuiValues();
+        restoreGuiValues();     // Formatting
+        emit crystalUpdated();  // Should be removed.
     }
     else if (abortEnabled)
     {
@@ -131,8 +163,15 @@ void ConfigurationDlg::display(bool abortEnabled)
     }
     else
     {
-        pushToGui();            // Cancelled
+        restoreGuiValues();      // Cancelled
     }
+}
+
+//------------------------------------------------------------------------------
+
+const double &ConfigurationDlg::stabilisationTime() const
+{
+    return _stabilisationTime;
 }
 
 //------------------------------------------------------------------------------
@@ -149,22 +188,24 @@ bool ConfigurationDlg::isValid() const
     return _cutAngleEdit->isValid() &&
            _incidentEdit->isValid() &&
            _heightEdit->isValid() &&
-           _lengthEdit->isValid();
+           _lengthEdit->isValid() &&
+           _stabilTimeEdit->isValid();
 }
 
 //------------------------------------------------------------------------------
 
-void ConfigurationDlg::pushToGui()
+void ConfigurationDlg::restoreGuiValues()
 {
     _cutAngleEdit->setValue(_crystal->cutAngle());
     _incidentEdit->setValue(_crystal->lightAngle());
     _heightEdit->setValue(_crystal->transHeight());
     _lengthEdit->setValue(_crystal->transLength());
+    _stabilTimeEdit->setValue(_stabilisationTime);
 }
 
 //------------------------------------------------------------------------------
 
-void ConfigurationDlg::pushToCrystal()
+void ConfigurationDlg::ackGuiValues()
 {
     Q_ASSERT(isValid());
 
@@ -172,6 +213,7 @@ void ConfigurationDlg::pushToCrystal()
                   _incidentEdit->value(),
                   _heightEdit->value(),
                   _lengthEdit->value());
+    _stabilisationTime = _stabilTimeEdit->value();
 }
 
 //------------------------------------------------------------------------------

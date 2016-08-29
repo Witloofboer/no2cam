@@ -11,7 +11,7 @@
 
 int main(int argc, char *argv[])
 {
-    qSetMessagePattern("%{time hh:mm:ss} (%{threadid}) %{type}: %{message}");
+    qSetMessagePattern("%{time hh:mm:ss.zzz} (%{threadid}) %{type}: %{message}");
 
     Q_INIT_RESOURCE(scene);
 

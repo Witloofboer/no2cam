@@ -12,13 +12,15 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-SweepPane::SweepPane(MainWindow* mainWindow)
+SweepPane::SweepPane(MainWindow* mainWindow,
+                     const double &stabilisationTime)
     : AbstractMainPane(mainWindow)
     , _wavelength1Edit(new DoubleLineEdit)
     , _wavelength2Edit(new DoubleLineEdit)
     , _wavelengthStepEdit(new DoubleLineEdit)
     , _exposureEdit(new IntLineEdit)
     , _cooldownEdit(new IntLineEdit)
+    , _stabilisationTime(stabilisationTime)
 {
     // Parameter box -----------------------------------------------------------
     int row=0;
@@ -54,7 +56,7 @@ void SweepPane::start(bool burst, bool record)
                         _wavelengthStepEdit->value(),
                         _exposureEdit->value(),
                         _cooldownEdit->value(),
-                        0, // TODO relaxtime
+                        _stabilisationTime,
                         burst,
                         record ? _sessionEdit->text() : "");
 }

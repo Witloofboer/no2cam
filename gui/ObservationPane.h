@@ -18,7 +18,8 @@ class ObservationPane : public AbstractMainPane
 {
     Q_OBJECT
 public:
-    explicit ObservationPane(MainWindow *mainWindow);
+    explicit ObservationPane(MainWindow *mainWindow,
+                             const double &stabilisationTime);
     void persiste() const;
 
 signals:
@@ -27,7 +28,7 @@ signals:
                               double exposure,
                               int snapshotPerObs,
                               double cooldown,
-                              double relaxTime,
+                              double stabilisationTime,
                               bool burst,
                               const QString& session);
 
@@ -45,6 +46,8 @@ private:
     IntLineEdit    *_exposureEdit;
     IntLineEdit    *_snapPerObsEdit;
     IntLineEdit    *_cooldownEdit;
+
+    const double &_stabilisationTime;
 };
 
 //------------------------------------------------------------------------------
