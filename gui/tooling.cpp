@@ -19,7 +19,7 @@ LineEdit::LineEdit(int length, const QString &regexp)
     : QLineEdit()
 {
     static const QSizePolicy fixedSizePolicy_(QSizePolicy::Fixed,
-                                              QSizePolicy::Fixed);
+            QSizePolicy::Fixed);
 
     setAlignment(Qt::AlignLeft);
     setFixedWidth(length * fontMetrics().width('0'));
@@ -78,7 +78,7 @@ int IntLineEdit::value()
 
 void IntLineEdit::setValue(int value)
 {
-     setText(locale().toString(value));
+    setText(locale().toString(value));
 }
 
 
@@ -116,14 +116,14 @@ double DoubleLineEdit::value()
 
 void DoubleLineEdit::setValue(double value)
 {
-     setText(locale().toString(value, 'f', _nFracDgts));
+    setText(locale().toString(value, 'f', _nFracDgts));
 }
 
 //------------------------------------------------------------------------------
 
 void putInGrid(QWidget* widget,
                QGridLayout *grid,
-               int row,
+               int &row,
                const QString &label,
                const QString &unit)
 {
@@ -133,6 +133,8 @@ void putInGrid(QWidget* widget,
 
     if (!unit.isEmpty())
         grid->addWidget(new QLabel(unit), row, 2);
+
+    ++row;
 }
 
 //------------------------------------------------------------------------------

@@ -15,6 +15,7 @@ namespace gui {
 
 class MainWindow;
 class DoubleLineEdit;
+class IntLineEdit;
 
 //------------------------------------------------------------------------------
 
@@ -34,7 +35,7 @@ signals:
 public slots:
     void display(bool abortEnabled=false);
 
-    const double &stabilisationTime() const;
+    const int &stabilisationTime() const;
 
 private slots:
     void updateOkBtn();
@@ -50,8 +51,8 @@ private:
     DoubleLineEdit *_heightEdit;   // Transducer height
     DoubleLineEdit *_lengthEdit;   // Transducer length
 
-    DoubleLineEdit *_stabilTimeEdit;
-    double _stabilisationTime;
+    IntLineEdit *_stabilTimeEdit;
+    int _stabilisationTime;
 
     QDialogButtonBox *_buttonBox;
 

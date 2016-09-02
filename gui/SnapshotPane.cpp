@@ -31,8 +31,6 @@ SnapshotPane::SnapshotPane(MainWindow* mainWindow,
     , _wavelengthEdit(new DoubleLineEdit)
     , _frequencyEdit(new DoubleLineEdit(9, 3, 3))
     , _powerEdit(new IntLineEdit(9, 4))
-    , _exposureEdit(new IntLineEdit)
-    , _cooldownEdit(new IntLineEdit)
     , _stabilisationTime(stabilisationTime)
 {
     // Optic/accoustic ---------------------------------------------------------
@@ -50,11 +48,11 @@ SnapshotPane::SnapshotPane(MainWindow* mainWindow,
 
     int row=0;
 
-    putInGrid(_frequencyEdit, _paramBoxLayout, row++, tr("Frequency"), "[MHz]");
-    putInGrid(_powerEdit, _paramBoxLayout, row++, tr("Power"), "[mW]");
-    putInGrid(_wavelengthEdit, _paramBoxLayout, row++, tr("Wavelength"), "[nm]");
-    putInGrid(_exposureEdit, _paramBoxLayout, row++, tr("Exposure"), "[ms]");
-    putInGrid(_cooldownEdit, _paramBoxLayout, row++, tr("Cooldown"), "[ms]");
+    gui::putInGrid(_frequencyEdit, _paramBoxLayout, row, tr("Frequency"), "[MHz]");
+    gui::putInGrid(_powerEdit, _paramBoxLayout, row, tr("Power"), "[mW]");
+    gui::putInGrid(_wavelengthEdit, _paramBoxLayout, row, tr("Wavelength"), "[nm]");
+
+    AbstractMainPane::putInGrid(row);
 
     _paramBoxLayout->addWidget(new QLabel("Session:"), row, 0);
     _paramBoxLayout->addWidget(_sessionEdit, row, 1, 1, 2);
@@ -73,8 +71,6 @@ SnapshotPane::SnapshotPane(MainWindow* mainWindow,
     connect(_powerEdit, LineEdit::textChanged, this, refreshBtns);
     connect(_wavelengthEdit, LineEdit::textChanged, this, refreshBtns);
     connect(_frequencyEdit, LineEdit::textChanged, this, refreshBtns);
-    connect(_exposureEdit, LineEdit::textChanged, this, refreshBtns);
-    connect(_cooldownEdit, LineEdit::textChanged, this, refreshBtns);
 
     // Restoring
     restore();
@@ -134,8 +130,7 @@ bool SnapshotPane::areParametersValid() const
 {
     return _frequencyEdit->isValid() &&
            _powerEdit->isValid() &&
-           _exposureEdit->isValid() &&
-           _cooldownEdit->isValid();
+           AbstractMainPane::areParametersValid();
 }
 
 //------------------------------------------------------------------------------
@@ -146,7 +141,8 @@ void SnapshotPane::start(bool burst, bool record)
     {
         emit spectralSnapshot(_wavelengthEdit->value(),
                               _exposureEdit->value(),
-                              _cooldownEdit->value(),
+                              _cooldownTimeEdit->value(),
+                              _cooldownPwrEdit->value(),
                               _stabilisationTime,
                               burst,
                               record ? _sessionEdit->text() : "");
@@ -154,7 +150,8 @@ void SnapshotPane::start(bool burst, bool record)
         emit acousticSnapshot(_frequencyEdit->value(),
                               _powerEdit->value(),
                               _exposureEdit->value(),
-                              _cooldownEdit->value(),
+                              _cooldownTimeEdit->value(),
+                              _cooldownPwrEdit->value(),
                               _stabilisationTime,
                               burst,
                               record ? _sessionEdit->text() : "");
@@ -167,8 +164,6 @@ static const char *wavelengthModeLbl = "Wavelength mode";
 static const char *wavelengthLbl = "wavelength [nm]";
 static const char *frequencyLbl = "frequency [MHz]";
 static const char *powerLbl = "power [mW]";
-static const char *exposureLbl = "exposure [ms]";
-static const char *cooldownLbl = "cooldown [ms]";
 
 void SnapshotPane::persiste() const
 {
@@ -177,6 +172,9 @@ void SnapshotPane::persiste() const
     QSettings settings;
 
     settings.beginGroup("Snapshot");
+
+    AbstractMainPane::persiste(settings);
+
     settings.setValue(wavelengthModeLbl, _spectralBtn->isChecked());
     if (_wavelengthEdit->isValid())
         settings.setValue(wavelengthLbl, _wavelengthEdit->text());
@@ -184,10 +182,7 @@ void SnapshotPane::persiste() const
         settings.setValue(frequencyLbl, _frequencyEdit->text());
     if (_powerEdit->isValid())
         settings.setValue(powerLbl, _powerEdit->text());
-    if (_exposureEdit->isValid())
-        settings.setValue(exposureLbl, _exposureEdit->text());
-    if (_cooldownEdit->isValid())
-        settings.setValue(cooldownLbl, _cooldownEdit->text());
+
     settings.endGroup();
 }
 
@@ -200,6 +195,9 @@ void SnapshotPane::restore()
     QSettings settings;
 
     settings.beginGroup("Snapshot");
+
+    AbstractMainPane::restore(settings);
+
     if (settings.value(wavelengthModeLbl, true).toBool())
         _spectralBtn->setChecked(true);
     else
@@ -208,8 +206,7 @@ void SnapshotPane::restore()
     _wavelengthEdit->setText(settings.value(wavelengthLbl).toString());
     _frequencyEdit->setText(settings.value(frequencyLbl).toString());
     _powerEdit->setText(settings.value(powerLbl).toString());
-    _exposureEdit->setText(settings.value(exposureLbl).toString());
-    _cooldownEdit->setText(settings.value(cooldownLbl).toString());
+
     settings.endGroup();
 
     recomputeParams();

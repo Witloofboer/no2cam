@@ -29,7 +29,7 @@ void MockCamera::takeSnapshot()
 {
     Q_ASSERT(0<_exposure);
 
-    qInfo("Camera: Starting snapshot");
+    qInfo("Camera: snapshotting");
 
     _timer->start(_exposure);
 }

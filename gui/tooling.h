@@ -22,7 +22,7 @@ public:
     bool isValid();
 
 signals:
-    void focusLost(); // TODO: used?
+    void focusLost();
 
 protected:
     virtual void focusOutEvent(QFocusEvent *event) override;
@@ -70,7 +70,7 @@ private:
 
 void putInGrid(QWidget* widget,
                QGridLayout* grid,
-               int row,
+               int &row,
                const QString &label,
                const QString &unit);
 

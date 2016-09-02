@@ -15,7 +15,7 @@ MockGenerator::MockGenerator()
 
 void MockGenerator::stop()
 {
-    qInfo("Generator: stop");
+    setFrequency(0.0);
 }
 
 

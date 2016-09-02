@@ -8,7 +8,6 @@
 namespace gui {
 
 class DoubleLineEdit;
-class IntLineEdit;
 
 //------------------------------------------------------------------------------
 
@@ -25,7 +24,8 @@ signals:
                         double wavelength2,
                         double wavelengthStep,
                         double exposure,
-                        double cooldown,
+                        double cooldownTime,
+                        double cooldownPwr,
                         double stabilisationTime,
                         bool burst,
                         const QString& session);
@@ -42,8 +42,6 @@ private:
     DoubleLineEdit *_wavelength1Edit;
     DoubleLineEdit *_wavelength2Edit;
     DoubleLineEdit *_wavelengthStepEdit;
-    IntLineEdit    *_exposureEdit;
-    IntLineEdit    *_cooldownEdit;
 
     const double &_stabilisationTime;
 };

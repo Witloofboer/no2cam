@@ -32,7 +32,8 @@ public:
 signals:
     void spectralSnapshot(double wavelength,
                           double exposure,
-                          double cooldown,
+                          double cooldownTime,
+                          double cooldownPwr,
                           double stabilisationTime,
                           bool burst,
                           const QString& session);
@@ -40,7 +41,8 @@ signals:
     void acousticSnapshot(double frequency,
                           double power,
                           double exposure,
-                          double cooldown,
+                          double cooldownTime,
+                          double cooldownPwr,
                           double stabilisationTime,
                           bool burst,
                           const QString& session);
@@ -67,8 +69,6 @@ private:
     DoubleLineEdit *_wavelengthEdit;
     DoubleLineEdit *_frequencyEdit;
     IntLineEdit    *_powerEdit;
-    IntLineEdit    *_exposureEdit;
-    IntLineEdit    *_cooldownEdit;
 
     const double &_stabilisationTime;
 };

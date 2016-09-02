@@ -32,7 +32,7 @@ Core::Core(const Crystal *crystal,
     , _bursting(false)
     , _session()
 {
-    camera->setParent(this);
+    camera->setParent(this); // TODO setParent for the other devices
     _cooldownT->setSingleShot(true);
     _stabilisationT->setSingleShot(true);
 
@@ -44,14 +44,15 @@ Core::Core(const Crystal *crystal,
 //------------------------------------------------------------------------------
 
 void Core::spectralSnapshot(double wavelength,
-                            double exposure,
-                            double cooldown,
-                            double stabilisationTime,
+                            int exposure,
+                            int cooldownTime,
+                            int cooldownPwr,
+                            int stabilisationTime,
                             bool burst,
                             const QString& session)
 {
     qInfo("Spectral snap: wl=%.1f nm", wavelength);
-    setCommonParams(SpSNAP, exposure, cooldown, stabilisationTime, burst, session);
+    setCommonParams(SpSNAP, exposure, cooldownTime, cooldownPwr, stabilisationTime, burst, session);
 
     _p.specSnap.wavelength = wavelength;
 
@@ -62,15 +63,16 @@ void Core::spectralSnapshot(double wavelength,
 
 void Core::acousticSnapshot(double frequency,
                             double power,
-                            double exposure,
-                            double cooldown,
-                            double stabilisationTime,
+                            int exposure,
+                            int cooldownTime,
+                            int cooldownPwr,
+                            int stabilisationTime,
                             bool burst,
                             const QString& session)
 {
-    qInfo("Acoustic snap: freq=%.1f MHz, power=%.1f mW", frequency, power);
+    qInfo("Acoustic: freq=%.1f MHz, power=%.1f mW", frequency, power);
 
-    setCommonParams(AcSNAP, exposure, cooldown, stabilisationTime, burst, session);
+    setCommonParams(AcSNAP, exposure, cooldownTime, cooldownPwr, stabilisationTime, burst, session);
     _p.acouSnap.frequency = frequency;
     _p.acouSnap.power = power;
 
@@ -81,17 +83,18 @@ void Core::acousticSnapshot(double frequency,
 
 void Core::observation(double wavelength1,
                        double wavelength2,
-                       double exposure,
+                       int exposure,
                        int snapshotPerObs,
-                       double cooldown,
-                       double stabilisationTime,
+                       int cooldownTime,
+                       int cooldownPwr,
+                       int stabilisationTime,
                        bool burst,
                        const QString &session)
 {
     qInfo("Observation: wl1=%.1f nm, wl2=%.1f nm",
           wavelength1, wavelength2);
 
-    setCommonParams(OBS, exposure, cooldown, stabilisationTime, burst, session);
+    setCommonParams(OBS, exposure, cooldownTime, cooldownPwr, stabilisationTime, burst, session);
     _p.obs.wavelengths[0] = wavelength1;
     _p.obs.wavelengths[1] = wavelength2;
     _p.obs.wavelengthIx = 0;
@@ -107,16 +110,17 @@ void Core::observation(double wavelength1,
 void Core::sweep(double wavelength1,
                  double wavelength2,
                  double wavelengthStep,
-                 double exposure,
-                 double cooldown,
-                 double stabilisationTime,
+                 int exposure,
+                 int cooldownTime,
+                 int cooldownPwr,
+                 int stabilisationTime,
                  bool burst,
                  const QString &session)
 {
     qInfo("Sweep: wl1=%.1f nm, wl2=%.1f nm, step=%.1f nm",
           wavelength1, wavelength2, wavelengthStep);
 
-    setCommonParams(SWP, exposure, cooldown, stabilisationTime, burst, session);
+    setCommonParams(SWP, exposure, cooldownTime, cooldownPwr, stabilisationTime, burst, session);
 
     _p.swp.minWavelength = wavelength1;
     _p.swp.maxWavelength = wavelength2;
@@ -152,11 +156,27 @@ void Core::moveToMainThread()
 
 void Core::setAcousticWave()
 {
-    qInfo("Setting the acousting power");
+    if (_mode == READY)
+        return;
+
     switch(_mode)
     {
     case READY:
+        Q_UNREACHABLE();
+
+    case SpSNAP:
+    case AcSNAP:
+    case OBS:
+    case SWP:
+        qInfo("*** Snapshot ***");
+        _stabilisationT->start();
         break;
+    }
+
+    switch(_mode)
+    {
+    case READY:
+        Q_UNREACHABLE();
 
     case SpSNAP:
         setOptimalAcousticWave(_p.specSnap.wavelength);
@@ -179,7 +199,7 @@ void Core::setAcousticWave()
     switch(_mode)
     {
     case READY:
-        break;
+        Q_UNREACHABLE();
 
     case SpSNAP:
     case AcSNAP:
@@ -245,7 +265,7 @@ void Core::postSnapshotProcess()
 
     if (continueAquisition)
     {
-        _driver->cooldown();
+        _driver->setPower(_cooldownPwr);
         _cooldownT->start();
     } else {
         stop();
@@ -255,22 +275,24 @@ void Core::postSnapshotProcess()
 //------------------------------------------------------------------------------
 
 void Core::setCommonParams(Mode mode,
-                           double exposure,
-                           double cooldown,
-                           double stabilisationTime,
+                           int exposure,
+                           int cooldownTime,
+                           int cooldownPwr,
+                           int stabilisationTime,
                            bool burst,
                            const QString &session)
 {
     QByteArray s = session.toLatin1();
 
-    qInfo("Exposure=%.1f ms, cooldown=%.1f ms, relax time=%.1f ms, "
+    qInfo("Exposure=%d ms, cooldownTime=%d ms, %d mW, stabilisation time=%d ms, "
           "%s, session='%s'",
-          exposure, cooldown, stabilisationTime,
+          exposure, cooldownTime, cooldownPwr, stabilisationTime,
           burst ? "burst" : "singleshot", s.data());
 
     _mode = mode;
     _camera->setExposure(exposure);
-    _cooldownT->setInterval(cooldown);
+    _cooldownT->setInterval(cooldownTime);
+    _cooldownPwr = cooldownPwr;
     _stabilisationT->setInterval(stabilisationTime);
     _bursting = burst;
     _session = session;

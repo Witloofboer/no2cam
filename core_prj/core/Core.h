@@ -33,7 +33,7 @@ public:
          AbstractCrysTempProbe *crysTempProb,
          AbstractCamera *camera,
          AbstractGenerator *generator,
-         AbstractDriver *driver);
+         AbstractDriver *driver); // Todo Timer factory
 
 signals:
     void ready(bool isReady);
@@ -51,9 +51,10 @@ public slots:
      * @param session name used to prepend record files. No recording if empty.
      */
     void spectralSnapshot(double wavelength,
-                          double exposure,
-                          double cooldown,
-                          double stabilisationTime,
+                          int exposure,
+                          int cooldownTime,
+                          int cooldownPwr,
+                          int stabilisationTime,
                           bool burst,
                           const QString& session);
 
@@ -70,9 +71,10 @@ public slots:
      */
     void acousticSnapshot(double frequency,
                           double power,
-                          double exposure,
-                          double cooldown,
-                          double stabilisationTime,
+                          int exposure,
+                          int cooldownTime,
+                          int cooldownPwr,
+                          int stabilisationTime,
                           bool burst,
                           const QString& session);
 
@@ -90,10 +92,11 @@ public slots:
      */
     void observation(double wavelength1,
                      double wavelength2,
-                     double exposure,
+                     int exposure,
                      int snapshotPerObs,
-                     double cooldown,
-                     double stabilisationTime,
+                     int cooldownTime,
+                     int cooldownPwr,
+                     int stabilisationTime,
                      bool burst,
                      const QString& session);
 
@@ -114,9 +117,10 @@ public slots:
     void sweep(double wavelength1,
                double wavelength2,
                double wavelengthStep,
-               double exposure,
-               double cooldown,
-               double stabilisationTime,
+               int exposure,
+               int cooldownTime,
+               int cooldownPwr,
+               int stabilisationTime,
                bool burst,
                const QString& session);
 
@@ -140,9 +144,10 @@ private:
 
     void cooldown();
     void setCommonParams(Mode mode,
-                         double exposure,
-                         double cooldown,
-                         double stabilisationTime,
+                         int exposure,
+                         int cooldownTime,
+                         int cooldownPwr,
+                         int stabilisationTime,
                          bool burst,
                          const QString &session);
 
@@ -150,6 +155,8 @@ private:
 
     QTimer *_cooldownT;
     QTimer *_stabilisationT;
+
+    double _cooldownPwr;
 
     const Crystal *_crystal;
     AbstractCrysTempProbe *_crysTempProb;

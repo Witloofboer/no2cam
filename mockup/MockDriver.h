@@ -16,8 +16,6 @@ public:
 
     virtual void stop() override;
     virtual void setPower(double power) override;
-    virtual void cooldown() override;
-
 };
 
 //------------------------------------------------------------------------------

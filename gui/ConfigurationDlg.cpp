@@ -25,7 +25,7 @@ ConfigurationDlg::ConfigurationDlg(MainWindow* mainWindow,
     , _incidentEdit(new DoubleLineEdit(7, 2, 1))
     , _heightEdit(new DoubleLineEdit(7, 2, 1))
     , _lengthEdit(new DoubleLineEdit(7, 2, 1))
-    , _stabilTimeEdit(new DoubleLineEdit(7, 2, 1))
+    , _stabilTimeEdit(new IntLineEdit)
     , _buttonBox(new QDialogButtonBox(QDialogButtonBox::Ok |
                                       QDialogButtonBox::Cancel |
                                       QDialogButtonBox::Abort))
@@ -38,10 +38,10 @@ ConfigurationDlg::ConfigurationDlg(MainWindow* mainWindow,
     auto crystalGrid = new QGridLayout();
 
     int row = 0;
-    putInGrid(_cutAngleEdit, crystalGrid, row++, "Cut angle", "[deg]");
-    putInGrid(_incidentEdit, crystalGrid, row++, "Incident angle", "[deg]");
-    putInGrid(_heightEdit, crystalGrid, row++, "Transducer height", "[mm]");
-    putInGrid(_lengthEdit, crystalGrid, row++, "Transducer length", "[mm]");
+    putInGrid(_cutAngleEdit, crystalGrid, row, "Cut angle", "[deg]");
+    putInGrid(_incidentEdit, crystalGrid, row, "Incident angle", "[deg]");
+    putInGrid(_heightEdit, crystalGrid, row, "Transducer height", "[mm]");
+    putInGrid(_lengthEdit, crystalGrid, row, "Transducer length", "[mm]");
 
     auto crystalBox = new QGroupBox(tr("Crystal parameters"));
     crystalBox->setLayout(crystalGrid);
@@ -50,7 +50,7 @@ ConfigurationDlg::ConfigurationDlg(MainWindow* mainWindow,
 
     auto boardGrid = new QGridLayout();
     row = 0;
-    putInGrid(_stabilTimeEdit, boardGrid, row++, "Stabilisation", "[ms]");
+    putInGrid(_stabilTimeEdit, boardGrid, row, "Stabilisation", "[ms]");
     boardGrid->setColumnMinimumWidth(
         0,
         crystalGrid->itemAtPosition(2,0)->minimumSize().width());
@@ -169,7 +169,7 @@ void ConfigurationDlg::display(bool abortEnabled)
 
 //------------------------------------------------------------------------------
 
-const double &ConfigurationDlg::stabilisationTime() const
+const int &ConfigurationDlg::stabilisationTime() const
 {
     return _stabilisationTime;
 }

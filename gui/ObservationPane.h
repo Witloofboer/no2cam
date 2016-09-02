@@ -27,7 +27,8 @@ signals:
                               double wavelength2,
                               double exposure,
                               int snapshotPerObs,
-                              double cooldown,
+                              double cooldownTime,
+                              double cooldownPwr,
                               double stabilisationTime,
                               bool burst,
                               const QString& session);
@@ -43,9 +44,7 @@ private:
 
     DoubleLineEdit *_wavelength1Edit;
     DoubleLineEdit *_wavelength2Edit;
-    IntLineEdit    *_exposureEdit;
     IntLineEdit    *_snapPerObsEdit;
-    IntLineEdit    *_cooldownEdit;
 
     const double &_stabilisationTime;
 };

@@ -13,7 +13,7 @@ MockDriver::MockDriver()
 
 void MockDriver::stop()
 {
-    qInfo("Driver: stop");
+    setPower(0.0);
 }
 
 //------------------------------------------------------------------------------
@@ -21,13 +21,6 @@ void MockDriver::stop()
 void MockDriver::setPower(double power)
 {
     qInfo("Driver: set power: %.1f mW", power);
-}
-
-//------------------------------------------------------------------------------
-
-void MockDriver::cooldown()
-{
-    qInfo("Driver: cooldown");
 }
 
 //------------------------------------------------------------------------------
