@@ -6,6 +6,8 @@
 
 #include "gui_global.h"
 
+#include "core/AbstractCamera.h"
+
 //------------------------------------------------------------------------------
 
 class QAction;
@@ -21,6 +23,7 @@ class AbstractCrysTempProbe;
 
 namespace gui {
 
+class AbstractMainPane;
 class ConfigurationDlg;
 class SnapshotPane;
 class ObservationPane;
@@ -44,6 +47,7 @@ signals:
 
 public slots:
     void updateState(bool isAppReady);
+    void updateSnapshot();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -66,6 +70,9 @@ private slots:
 
 private:
     bool okToContinue();
+    AbstractMainPane *currentPane();
+
+    core::Core *_coreInstance;
 
     ConfigurationDlg *_configDlg;
     QStackedWidget *_stackedWdgt;
@@ -79,6 +86,8 @@ private:
     SnapshotPane *_snapshotPane;
     ObservationPane *_observationPane;
     SweepPane *_sweepPane;
+
+    core::Snapshot _snapshot;
 };
 
 //------------------------------------------------------------------------------

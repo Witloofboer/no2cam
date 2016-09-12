@@ -17,14 +17,15 @@ public:
     void takeSnapshot() override;
     void stop() override;
 
-    int snapshot[2048][2048];
+    void copySnapshot(core::Snapshot& buffer) override;
 
 private slots:
     void snapshotRdyImpl();
 
 private:
     QTimer *_timer;
-    double _scene[2048][2048];
+    core::Snapshot _scene;
+    int _shift;
 };
 
 #endif // MOCKCAMERA_H

@@ -12,6 +12,9 @@ namespace core
 
 //------------------------------------------------------------------------------
 
+const int snapSize = 2048;
+typedef double Snapshot[snapSize][snapSize] ;
+
 class CORESHARED_EXPORT AbstractCamera : public QObject
 {
     Q_OBJECT
@@ -22,6 +25,8 @@ public:
     void setExposure(int exposure);
 
     virtual void stop()=0;
+
+    virtual void copySnapshot(core::Snapshot &buffer)=0;
 
 signals:
     void snapshotAvailable();

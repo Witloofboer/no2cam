@@ -1,4 +1,5 @@
 #include <QLabel>
+#include <QPainter>
 #include <QSettings>
 #include <QVBoxLayout>
 
@@ -17,10 +18,12 @@ AbstractMainPane::AbstractMainPane(MainWindow *mainWindow)
     , _paramBoxLayout(new QGridLayout)
     , _snapshotBox(new QGroupBox)
     , _cameraBtnBox(new CameraBtnBox(mainWindow))
+    , _snapshotLbl(new QLabel)
     , _exposureEdit(new IntLineEdit)
     , _cooldownTimeEdit(new IntLineEdit)
     , _cooldownPwrEdit(new IntLineEdit)
     , _sessionEdit(new LineEdit)
+    , _snapshotImg(512, 512, QImage::Format_Indexed8)
 {
     // Parameter box -----------------------------------------------------------
 
@@ -44,13 +47,17 @@ AbstractMainPane::AbstractMainPane(MainWindow *mainWindow)
 
     // Snapshot image ----------------------------------------------------------
 
-    auto snapshot = QPixmap(512, 512);
-    auto snapshotLbl = new QLabel();
-    snapshotLbl->setPixmap(snapshot);
+    for(int i=0; i<256; ++i)
+    {
+        _snapshotImg.setColor(i, qRgb(i, i, i));
+    }
+
+    _snapshotImg.fill(0);
+    _snapshotLbl->setPixmap(QPixmap::fromImage(_snapshotImg));
 
     auto snapshotLayout = new QVBoxLayout;
     snapshotLayout->addStretch();
-    snapshotLayout->addWidget(snapshotLbl);
+    snapshotLayout->addWidget(_snapshotLbl);
     snapshotLayout->addStretch();
 
     _snapshotBox->setLayout(snapshotLayout);
@@ -94,6 +101,22 @@ void AbstractMainPane::putInGrid(int &row)
 void AbstractMainPane::updateState(bool isAppReady)
 {
     _cameraBtnBox->updateState(isAppReady);
+}
+
+//------------------------------------------------------------------------------
+
+void AbstractMainPane::updateSnapshot(core::Snapshot& snapshot)
+{
+    uchar *curPixel = _snapshotImg.bits();
+
+    for (int i=0; i<512; ++i)
+        for (int j=0; j<512; j++)
+        {
+            int val = 256 * snapshot[4*j][4*i];
+            *curPixel++ = val > 255 ? 255 : val;
+        }
+
+    _snapshotLbl->setPixmap(QPixmap::fromImage(_snapshotImg));
 }
 
 //------------------------------------------------------------------------------

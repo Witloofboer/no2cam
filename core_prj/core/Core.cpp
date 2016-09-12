@@ -30,7 +30,9 @@ Core::Core(const Crystal *crystal,
     , _driver(driver)
     , _mode(READY)
     , _bursting(false)
+    , _snapshot{0}
     , _session()
+    , _snapLock()
 {
     camera->setParent(this); // TODO setParent for the other devices
     _cooldownT->setSingleShot(true);
@@ -228,6 +230,13 @@ void Core::setOptimalAcousticWave(double wavelength)
 
 void Core::postSnapshotProcess()
 {
+    {
+        QWriteLocker locker(&_snapLock);
+        _camera->copySnapshot(_snapshot);
+    }
+
+    emit snapshotAvailable();
+
     bool continueAquisition = _bursting;
 
     switch(_mode)
@@ -270,6 +279,19 @@ void Core::postSnapshotProcess()
     } else {
         stop();
     }
+}
+
+//------------------------------------------------------------------------------
+
+void Core::copySnapshot(Snapshot &buffer) const
+{
+    QReadLocker locker(&_snapLock);
+
+    for (int i=0; i<core::snapSize; ++i)
+        for (int j=0; j<core::snapSize; ++j)
+        {
+            buffer[i][j] = _snapshot[i][j];
+        }
 }
 
 //------------------------------------------------------------------------------

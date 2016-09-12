@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+#include <core/AbstractCamera.h>
+
 //------------------------------------------------------------------------------
 
 class QGridLayout;
@@ -26,6 +28,7 @@ class AbstractMainPane : public QWidget
 public:
     explicit AbstractMainPane(MainWindow* mainWindow);
     void updateState(bool isAppReady);
+    void updateSnapshot(core::Snapshot& snapshot);
 
 protected slots:
     void refreshBtns();
@@ -42,12 +45,15 @@ protected:
     QGridLayout  *_paramBoxLayout;
     QGroupBox    *_snapshotBox;
     CameraBtnBox *_cameraBtnBox;
+    QLabel       *_snapshotLbl;
 
     IntLineEdit  *_exposureEdit;
     IntLineEdit  *_cooldownTimeEdit;
     IntLineEdit  *_cooldownPwrEdit;
 
     LineEdit     *_sessionEdit;
+
+    QImage       _snapshotImg;
 };
 
 //------------------------------------------------------------------------------

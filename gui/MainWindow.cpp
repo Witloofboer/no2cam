@@ -26,6 +26,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
                        core::Core *coreInstance,
                        const QString &version)
     : QMainWindow()
+    , _coreInstance(coreInstance)
     , _configDlg(new ConfigurationDlg(this, crystal))
     , _stackedWdgt(new QStackedWidget)
     , _snapshotModeActn(new QAction("Take &snapshots", this))
@@ -39,6 +40,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
                                            _configDlg->stabilisationTime()))
     , _sweepPane(new SweepPane(this,
                                _configDlg->stabilisationTime()))
+    , _snapshot{0}
 {
     // -------------------------------------------------------------------------
     // Central widget
@@ -161,6 +163,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
         QTimer::singleShot(0, this, displayConfigurationDlg);
 
     connect(coreInstance, core::Core::ready, this, updateState);
+    connect(coreInstance, core::Core::snapshotAvailable, this, updateSnapshot);
 
     connect(_snapshotPane, SnapshotPane::spectralSnapshot,
             coreInstance, core::Core::spectralSnapshot);
@@ -185,6 +188,14 @@ void MainWindow::updateState(bool isAppReady)
     _snapshotPane->updateState(isAppReady);
     _observationPane->updateState(isAppReady);
     _sweepPane->updateState(isAppReady);
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::updateSnapshot()
+{
+    _coreInstance->copySnapshot(_snapshot);
+    currentPane()->updateSnapshot(_snapshot);
 }
 
 //------------------------------------------------------------------------------
@@ -341,6 +352,13 @@ bool MainWindow::okToContinue()
     }
     else
         return true;
+}
+
+//------------------------------------------------------------------------------
+
+AbstractMainPane *MainWindow::currentPane()
+{
+    return dynamic_cast<AbstractMainPane *>(_stackedWdgt->currentWidget());
 }
 
 //------------------------------------------------------------------------------

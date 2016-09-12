@@ -8,18 +8,18 @@
 
 MockCamera::MockCamera()
     : core::AbstractCamera()
-    , snapshot{0}
     , _timer(new QTimer(this))
+    , _shift(0)
 {
     _timer->setSingleShot(true);
     connect(_timer, QTimer::timeout, this, snapshotRdyImpl);
 
     QImage image(":/scene.jpg");
 
-    for (int i=0; i<2048; ++i)
-        for (int j=0; j<2048; ++j)
+    for (int i=0; i<core::snapSize; ++i)
+        for (int j=0; j<core::snapSize; ++j)
         {
-            _scene[i][j] = qGray(image.pixel(i, j))/255.0;
+            _scene[i][j] = static_cast<double>(qGray(image.pixel(i, j)))/255.0;
         }
 }
 
@@ -47,16 +47,22 @@ void MockCamera::stop()
 
 //------------------------------------------------------------------------------
 
-void MockCamera::snapshotRdyImpl()
+void MockCamera::copySnapshot(core::Snapshot &buffer)
 {
-    // TODO
-
-    for (int i=0; i<2048; ++i)
-        for (int j=0; j<2048; ++j)
+    for (int i=0; i<core::snapSize; ++i)
+        for (int j=0; j<core::snapSize; ++j)
         {
-            snapshot[i][j] = (_exposure*_scene[i][j])/1000.0;
+            buffer[i][j] = (_exposure*_scene[(i+_shift) % core::snapSize][j]) / 50;
         }
 
+    _shift = (_shift+10) % core::snapSize;
+}
+
+
+//------------------------------------------------------------------------------
+
+void MockCamera::snapshotRdyImpl()
+{
     qInfo("Camera: snapshot ready");
     emit snapshotAvailable();
 }

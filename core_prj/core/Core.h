@@ -4,6 +4,8 @@
 #include <QObject>
 
 #include "core_global.h"
+#include "AbstractCamera.h"
+#include "QReadWriteLock.h"
 
 class QTimer;
 
@@ -11,7 +13,6 @@ class QTimer;
 
 namespace core {
 
-class AbstractCamera;
 class Crystal;
 class AbstractCrysTempProbe;
 class AbstractDriver;
@@ -37,6 +38,7 @@ public:
 
 signals:
     void ready(bool isReady);
+    void snapshotAvailable();
 
 public slots:
     /**
@@ -136,6 +138,8 @@ public slots:
 
     void postSnapshotProcess();
 
+    void copySnapshot(core::Snapshot &buffer) const;
+
 private slots:
     void setAcousticWave();
 
@@ -166,7 +170,10 @@ private:
 
     Mode _mode;
     bool _bursting;
+    Snapshot _snapshot;
     QString _session;
+
+    mutable QReadWriteLock _snapLock;
 
     struct WlSnapshotParams
     {
