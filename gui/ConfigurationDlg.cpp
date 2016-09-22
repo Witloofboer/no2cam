@@ -21,11 +21,11 @@ ConfigurationDlg::ConfigurationDlg(MainWindow* mainWindow,
                                    core::Crystal *crystal)
     : QDialog(mainWindow)
     , _mainWindow(mainWindow)
-    , _cutAngleEdit(new DoubleLineEdit(7, 2, 1))
-    , _incidentEdit(new DoubleLineEdit(7, 2, 1))
-    , _heightEdit(new DoubleLineEdit(7, 2, 1))
-    , _lengthEdit(new DoubleLineEdit(7, 2, 1))
-    , _stabilTimeEdit(new IntLineEdit)
+    , _cutAngleEdit(new DoubleLineEdit(7, 2, 2))
+    , _incidentEdit(new DoubleLineEdit(7, 2, 2))
+    , _heightEdit(new DoubleLineEdit(7, 2, 2))
+    , _lengthEdit(new DoubleLineEdit(7, 2, 2))
+    , _stabilTimeEdit(new IntLineEdit(7))
     , _buttonBox(new QDialogButtonBox(QDialogButtonBox::Ok |
                                       QDialogButtonBox::Cancel |
                                       QDialogButtonBox::Abort))
