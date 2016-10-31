@@ -1,3 +1,5 @@
+#include <iterator>
+
 #include <QLabel>
 #include <QPainter>
 #include <QSettings>
@@ -24,6 +26,7 @@ AbstractMainPane::AbstractMainPane(MainWindow *mainWindow)
     , _cooldownPwrEdit(new IntLineEdit)
     , _sessionEdit(new LineEdit)
     , _snapshotImg(512, 512, QImage::Format_Indexed8)
+    , _datagramBox(new DatagramBox)
 {
     // Parameter box -----------------------------------------------------------
 
@@ -32,17 +35,11 @@ AbstractMainPane::AbstractMainPane(MainWindow *mainWindow)
     _paramBoxLayout->setColumnMinimumWidth(0, 75);
 
 
-    // Intensity datagram ------------------------------------------------------
-
-    auto datagramBox = new DatagramBox;
-
-
     // Left Layout -------------------------------------------------------------
 
     _leftLayout->addWidget(parameterBox);
-    _leftLayout->addWidget(datagramBox);
+    _leftLayout->addWidget(_datagramBox);
     _leftLayout->addStretch();
-    _leftLayout->addWidget(_cameraBtnBox);
 
 
     // Snapshot image ----------------------------------------------------------
@@ -66,9 +63,9 @@ AbstractMainPane::AbstractMainPane(MainWindow *mainWindow)
     // Right layout ------------------------------------------------------------
 
     auto rightLayout = new QVBoxLayout;
-    rightLayout->addStretch();
     rightLayout->addWidget(_snapshotBox);
     rightLayout->addStretch();
+    rightLayout->addWidget(_cameraBtnBox);
 
     // Main layout -------------------------------------------------------------
 
@@ -109,13 +106,21 @@ void AbstractMainPane::updateSnapshot(core::Snapshot& snapshot)
 {
     uchar *curPixel = _snapshotImg.bits();
 
-    for (int i=0; i<512; ++i)
-        for (int j=0; j<512; j++)
+    Datagram datagram;
+    for(int i=0; i<256; ++i)
+        datagram[i] = 0;
+
+    for(int i=0; i<512; ++i)
+        for(int j=0; j<512; ++j)
         {
-            *curPixel++ = snapshot[4*j][4*i]>>8;
+            const quint8 val = snapshot[4*j][4*i] >> 8;
+            *curPixel++ = val;
+            ++datagram[val];
         }
 
     _snapshotLbl->setPixmap(QPixmap::fromImage(_snapshotImg));
+    _datagramBox->display(datagram);
+
 }
 
 //------------------------------------------------------------------------------

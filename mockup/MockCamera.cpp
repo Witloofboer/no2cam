@@ -52,12 +52,12 @@ void MockCamera::copySnapshot(core::Snapshot &buffer)
     for (int i=0; i<core::snapSize; ++i)
         for (int j=0; j<core::snapSize; ++j)
         {
-            buffer[i][j] = (_exposure*_scene[(i+_shift) % core::snapSize][j]) / 50;
+            double pix = (double(_exposure)*_scene[(i+_shift) % core::snapSize][j]) / 50.0;
+            buffer[i][j] = pix<65535 ? pix : 65535;
         }
 
-    _shift = (_shift+10) % core::snapSize;
+    _shift = (_shift+8) % core::snapSize;
 }
-
 
 //------------------------------------------------------------------------------
 

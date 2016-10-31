@@ -19,6 +19,7 @@ class CameraBtnBox;
 class IntLineEdit;
 class LineEdit;
 class MainWindow;
+class DatagramBox;
 
 //------------------------------------------------------------------------------
 
@@ -54,6 +55,7 @@ protected:
     LineEdit     *_sessionEdit;
 
     QImage       _snapshotImg;
+    DatagramBox  *_datagramBox;
 };
 
 //------------------------------------------------------------------------------
