@@ -112,8 +112,7 @@ void AbstractMainPane::updateSnapshot(core::Snapshot& snapshot)
     for (int i=0; i<512; ++i)
         for (int j=0; j<512; j++)
         {
-            int val = 256 * snapshot[4*j][4*i];
-            *curPixel++ = val > 255 ? 255 : val;
+            *curPixel++ = snapshot[4*j][4*i]>>8;
         }
 
     _snapshotLbl->setPixmap(QPixmap::fromImage(_snapshotImg));

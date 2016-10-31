@@ -19,11 +19,11 @@ MockCamera::MockCamera()
     for (int i=0; i<core::snapSize; ++i)
         for (int j=0; j<core::snapSize; ++j)
         {
-            _scene[i][j] = static_cast<double>(qGray(image.pixel(i, j)))/255.0;
+            _scene[i][j] = static_cast<quint16>(qGray(image.pixel(i, j))<<8);
         }
 }
-
 //------------------------------------------------------------------------------
+
 
 void MockCamera::takeSnapshot()
 {

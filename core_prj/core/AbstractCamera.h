@@ -13,7 +13,7 @@ namespace core
 //------------------------------------------------------------------------------
 
 const int snapSize = 2048;
-typedef double Snapshot[snapSize][snapSize] ;
+typedef quint16 Snapshot[snapSize][snapSize] ;
 
 class CORESHARED_EXPORT AbstractCamera : public QObject
 {
