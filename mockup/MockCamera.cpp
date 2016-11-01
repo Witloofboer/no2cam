@@ -27,8 +27,6 @@ MockCamera::MockCamera()
 
 void MockCamera::takeSnapshot()
 {
-    Q_ASSERT(0<_exposure);
-
     qInfo("Camera: snapshotting");
 
     _timer->start(_exposure);
@@ -56,7 +54,7 @@ void MockCamera::copySnapshot(Snapshot &buffer)
             buffer[i][j] = pix<65535 ? pix : 65535;
         }
 
-    _shift = (_shift+8) % size;
+    _shift = (_shift+7) % size;
 }
 
 //------------------------------------------------------------------------------
