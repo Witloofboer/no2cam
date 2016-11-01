@@ -6,7 +6,7 @@
 #include "MainWindow.h"
 #include "core/Crystal.h"
 #include "core/Core.h"
-#include "core/AbstractCamera.h"
+#include "core/BaseCamera.h"
 
 //------------------------------------------------------------------------------
 
@@ -23,7 +23,7 @@ static MainWindow *_mainWindow = nullptr;
 
 void init(const char *version,
           core::AbstractCrysTempProbe *crysTempProb,
-          core::AbstractCamera *camera,
+          core::BaseCamera *camera,
           core::AbstractGenerator *generator,
           core::AbstractDriver *driver)
 {

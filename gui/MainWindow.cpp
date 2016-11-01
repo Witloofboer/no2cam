@@ -40,7 +40,6 @@ MainWindow::MainWindow(core::Crystal *crystal,
                                            _configDlg->stabilisationTime()))
     , _sweepPane(new SweepPane(this,
                                _configDlg->stabilisationTime()))
-    , _snapshot{0}
 {
     // -------------------------------------------------------------------------
     // Central widget
@@ -194,8 +193,7 @@ void MainWindow::updateState(bool isAppReady)
 
 void MainWindow::updateSnapshot()
 {
-    _coreInstance->copySnapshot(_snapshot);
-    currentPane()->updateSnapshot(_snapshot);
+    currentPane()->updateSnapshot();
 }
 
 //------------------------------------------------------------------------------

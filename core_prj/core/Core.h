@@ -4,8 +4,7 @@
 #include <QObject>
 
 #include "core_global.h"
-#include "AbstractCamera.h"
-#include "QReadWriteLock.h"
+#include "BaseCamera.h"
 
 class QTimer;
 
@@ -32,7 +31,7 @@ class CORESHARED_EXPORT Core : public QObject
 public:
     Core(const Crystal *crystal,
          AbstractCrysTempProbe *crysTempProb,
-         AbstractCamera *camera,
+         BaseCamera *camera,
          AbstractGenerator *generator,
          AbstractDriver *driver); // Todo Timer factory
 
@@ -138,8 +137,6 @@ public slots:
 
     void postSnapshotProcess();
 
-    void copySnapshot(core::Snapshot &buffer) const;
-
 private slots:
     void setAcousticWave();
 
@@ -164,16 +161,15 @@ private:
 
     const Crystal *_crystal;
     AbstractCrysTempProbe *_crysTempProb;
-    AbstractCamera *_camera;
+    BaseCamera *_camera;
     AbstractGenerator *_generator;
     AbstractDriver *_driver;
 
     Mode _mode;
     bool _bursting;
-    Snapshot _snapshot;
-    QString _session;
+    BaseCamera::Snapshot _camSnapshot;
 
-    mutable QReadWriteLock _snapLock;
+    QString _session;
 
     struct WlSnapshotParams
     {

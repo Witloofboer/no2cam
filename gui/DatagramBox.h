@@ -19,7 +19,7 @@ class DatagramBox : public QGroupBox
 public:
     explicit DatagramBox(QWidget *parent = 0);
 
-    void display(Datagram datagram);
+    void update(Datagram datagram);
 signals:
 
 public slots:

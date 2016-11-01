@@ -3,11 +3,12 @@
 #include <QCoreApplication>
 #include <QTimer>
 
-#include "AbstractCamera.h"
+#include "BaseCamera.h"
 #include "AbstractCrysTempProbe.h"
 #include "AbstractDriver.h"
 #include "AbstractGenerator.h"
 #include "Crystal.h"
+#include "ImageBuffer.h"
 
 //------------------------------------------------------------------------------
 
@@ -17,7 +18,7 @@ namespace core {
 
 Core::Core(const Crystal *crystal,
            AbstractCrysTempProbe *crysTempProb,
-           AbstractCamera *camera,
+           BaseCamera *camera,
            AbstractGenerator *generator,
            AbstractDriver *driver)
     : QObject()
@@ -30,17 +31,16 @@ Core::Core(const Crystal *crystal,
     , _driver(driver)
     , _mode(READY)
     , _bursting(false)
-    , _snapshot{0}
+    , _camSnapshot{0}
     , _session()
-    , _snapLock()
 {
     camera->setParent(this); // TODO setParent for the other devices
     _cooldownT->setSingleShot(true);
     _stabilisationT->setSingleShot(true);
 
     connect(_cooldownT, QTimer::timeout, this, setAcousticWave);
-    connect(_stabilisationT, QTimer::timeout, _camera, AbstractCamera::takeSnapshot);
-    connect(_camera, AbstractCamera::snapshotAvailable, this, postSnapshotProcess);
+    connect(_stabilisationT, QTimer::timeout, _camera, BaseCamera::takeSnapshot);
+    connect(_camera, BaseCamera::snapshotAvailable, this, postSnapshotProcess);
 }
 
 //------------------------------------------------------------------------------
@@ -230,10 +230,8 @@ void Core::setOptimalAcousticWave(double wavelength)
 
 void Core::postSnapshotProcess()
 {
-    {
-        QWriteLocker locker(&_snapLock);
-        _camera->copySnapshot(_snapshot);
-    }
+    _camera->copySnapshot(_camSnapshot);
+    gImageBuffer.set(_camSnapshot);
 
     emit snapshotAvailable();
 
@@ -279,19 +277,6 @@ void Core::postSnapshotProcess()
     } else {
         stop();
     }
-}
-
-//------------------------------------------------------------------------------
-
-void Core::copySnapshot(Snapshot &buffer) const
-{
-    QReadLocker locker(&_snapLock);
-
-    for (int i=0; i<core::snapSize; ++i)
-        for (int j=0; j<core::snapSize; ++j)
-        {
-            buffer[i][j] = _snapshot[i][j];
-        }
 }
 
 //------------------------------------------------------------------------------

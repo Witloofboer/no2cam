@@ -33,20 +33,13 @@ SnapshotPane::SnapshotPane(MainWindow* mainWindow,
     , _powerEdit(new IntLineEdit(9, 4))
     , _stabilisationTime(stabilisationTime)
 {
-    // Optic/accoustic ---------------------------------------------------------
-
-    auto modeLayout = new QVBoxLayout;
-    modeLayout->addWidget(_spectralBtn);
-    modeLayout->addWidget(_acousticBtn);
-
-    auto modeBox = new QGroupBox(tr("Parameter mode"));
-    modeBox->setLayout(modeLayout);
-
-    connect(_spectralBtn, QRadioButton::toggled, this, switchMode);
 
     // Parameter box ------------------------------------------------------------
 
     int row=0;
+    _paramBoxLayout->addWidget(_spectralBtn, row, 0);
+    _paramBoxLayout->addWidget(_acousticBtn, row, 1, 1, 2);
+    ++row;
 
     gui::putInGrid(_frequencyEdit, _paramBoxLayout, row, tr("Frequency"), "[MHz]");
     gui::putInGrid(_powerEdit, _paramBoxLayout, row, tr("Power"), "[mW]");
@@ -58,14 +51,13 @@ SnapshotPane::SnapshotPane(MainWindow* mainWindow,
     _paramBoxLayout->addWidget(_sessionEdit, row, 1, 1, 2);
     ++row;
 
-    // Adapt the AbstractMainPane base
-    _leftLayout->insertWidget(0, modeBox);
     _snapshotBox->setTitle(tr("Snapshot"));
 
     // Connectors
     connect(_wavelengthEdit, LineEdit::focusLost, this, recomputeParams);
     connect(_frequencyEdit, LineEdit::focusLost, this, recomputeParams);
 
+    connect(_spectralBtn, QRadioButton::toggled, this, switchMode);
     connect(_spectralBtn, QRadioButton::toggled, this, refreshBtns);
     connect(_frequencyEdit, LineEdit::textChanged, this, refreshBtns);
     connect(_powerEdit, LineEdit::textChanged, this, refreshBtns);

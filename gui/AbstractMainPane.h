@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include <core/AbstractCamera.h>
+#include <core/BaseCamera.h>
 
 //------------------------------------------------------------------------------
 
@@ -29,7 +29,7 @@ class AbstractMainPane : public QWidget
 public:
     explicit AbstractMainPane(MainWindow* mainWindow);
     void updateState(bool isAppReady);
-    void updateSnapshot(core::Snapshot& snapshot);
+    void updateSnapshot();
 
 protected slots:
     void refreshBtns();
@@ -42,7 +42,6 @@ protected:
     void persiste(QSettings &settings) const;
     void restore(QSettings &settings);
 
-    QVBoxLayout  *_leftLayout;
     QGridLayout  *_paramBoxLayout;
     QGroupBox    *_snapshotBox;
     CameraBtnBox *_cameraBtnBox;

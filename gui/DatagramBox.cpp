@@ -22,12 +22,12 @@ DatagramBox::DatagramBox(QWidget *parent)
     layout->addWidget(_datagramLbl);
     layout->addStretch();
     setLayout(layout);
-
     _pixPaint.setPen(Qt::white);
-
 }
 
-void DatagramBox::display(Datagram datagram)
+//------------------------------------------------------------------------------
+
+void DatagramBox::update(Datagram datagram)
 {
     _pixmap->fill(Qt::black);
 

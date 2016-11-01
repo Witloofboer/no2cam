@@ -1,5 +1,5 @@
-#ifndef ABSTRACTCAMERA_H
-#define ABSTRACTCAMERA_H
+#ifndef BASECAMERA_H
+#define BASECAMERA_H
 
 #include <QObject>
 
@@ -12,22 +12,23 @@ namespace core
 
 //------------------------------------------------------------------------------
 
-const int snapSize = 2048;
-typedef quint16 Pixel;
-typedef Pixel Snapshot[snapSize][snapSize] ;
-
-class CORESHARED_EXPORT AbstractCamera : public QObject
+class CORESHARED_EXPORT BaseCamera : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit AbstractCamera();
+    static const int size = 2048;
+
+    typedef quint16 Pixel;
+    typedef Pixel Snapshot[size][size] ;
+
+    explicit BaseCamera();
 
     void setExposure(int exposure);
 
     virtual void stop()=0;
 
-    virtual void copySnapshot(core::Snapshot &buffer)=0;
+    virtual void copySnapshot(Snapshot &buffer)=0;
 
 signals:
     void snapshotAvailable();
@@ -43,4 +44,4 @@ protected:
 
 }
 
-#endif // ABSTRACTCAMERA_H
+#endif // BASECAMERA_H

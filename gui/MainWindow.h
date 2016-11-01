@@ -6,7 +6,7 @@
 
 #include "gui_global.h"
 
-#include "core/AbstractCamera.h"
+#include "core/BaseCamera.h"
 
 //------------------------------------------------------------------------------
 
@@ -86,8 +86,6 @@ private:
     SnapshotPane *_snapshotPane;
     ObservationPane *_observationPane;
     SweepPane *_sweepPane;
-
-    core::Snapshot _snapshot;
 };
 
 //------------------------------------------------------------------------------

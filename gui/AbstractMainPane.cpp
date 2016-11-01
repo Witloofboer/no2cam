@@ -10,13 +10,14 @@
 #include "DatagramBox.h"
 #include "tooling.h"
 
+#include "../core/ImageBuffer.h"
+
 namespace gui {
 
 //------------------------------------------------------------------------------
 
 AbstractMainPane::AbstractMainPane(MainWindow *mainWindow)
     : QWidget()
-    , _leftLayout(new QVBoxLayout)
     , _paramBoxLayout(new QGridLayout)
     , _snapshotBox(new QGroupBox)
     , _cameraBtnBox(new CameraBtnBox(mainWindow))
@@ -25,7 +26,9 @@ AbstractMainPane::AbstractMainPane(MainWindow *mainWindow)
     , _cooldownTimeEdit(new IntLineEdit)
     , _cooldownPwrEdit(new IntLineEdit)
     , _sessionEdit(new LineEdit)
-    , _snapshotImg(512, 512, QImage::Format_Indexed8)
+    , _snapshotImg(core::ImageBuffer::size,
+                   core::ImageBuffer::size,
+                   QImage::Format_Indexed8)
     , _datagramBox(new DatagramBox)
 {
     // Parameter box -----------------------------------------------------------
@@ -37,9 +40,10 @@ AbstractMainPane::AbstractMainPane(MainWindow *mainWindow)
 
     // Left Layout -------------------------------------------------------------
 
-    _leftLayout->addWidget(parameterBox);
-    _leftLayout->addWidget(_datagramBox);
-    _leftLayout->addStretch();
+    auto leftLayout = new QVBoxLayout;
+    leftLayout->addWidget(parameterBox);
+    leftLayout->addStretch();
+    leftLayout->addWidget(_cameraBtnBox);
 
 
     // Snapshot image ----------------------------------------------------------
@@ -60,20 +64,29 @@ AbstractMainPane::AbstractMainPane(MainWindow *mainWindow)
     _snapshotBox->setLayout(snapshotLayout);
 
 
+    // Middle layout -----------------------------------------------------------
+
+    auto middleLayout = new QVBoxLayout;
+    middleLayout->addWidget(_snapshotBox);
+    middleLayout->addStretch();
+
+
     // Right layout ------------------------------------------------------------
 
     auto rightLayout = new QVBoxLayout;
-    rightLayout->addWidget(_snapshotBox);
+    rightLayout->addWidget(_datagramBox);
     rightLayout->addStretch();
-    rightLayout->addWidget(_cameraBtnBox);
+
 
     // Main layout -------------------------------------------------------------
 
     auto mainLayout = new QHBoxLayout;
-    mainLayout->addLayout(_leftLayout);
+    mainLayout->addLayout(leftLayout);
+    mainLayout->addLayout(middleLayout);
     mainLayout->addLayout(rightLayout);
 
     setLayout(mainLayout);
+
 
     // Connections
     connect(_sessionEdit, LineEdit::textChanged, this, refreshBtns);
@@ -102,25 +115,24 @@ void AbstractMainPane::updateState(bool isAppReady)
 
 //------------------------------------------------------------------------------
 
-void AbstractMainPane::updateSnapshot(core::Snapshot& snapshot)
+void AbstractMainPane::updateSnapshot()
 {
-    uchar *curPixel = _snapshotImg.bits();
+    const int size = core::ImageBuffer::size;
+
+    uchar *pixels = _snapshotImg.bits();
+    core::gImageBuffer.fill(pixels);
 
     Datagram datagram;
     for(int i=0; i<256; ++i)
         datagram[i] = 0;
 
-    for(int i=0; i<512; ++i)
-        for(int j=0; j<512; ++j)
-        {
-            const quint8 val = snapshot[4*j][4*i] >> 8;
-            *curPixel++ = val;
-            ++datagram[val];
-        }
+    for(int i=0; i<size*size; ++i)
+    {
+        ++datagram[pixels[i]];
+    }
 
     _snapshotLbl->setPixmap(QPixmap::fromImage(_snapshotImg));
-    _datagramBox->display(datagram);
-
+    _datagramBox->update(datagram);
 }
 
 //------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-#include "AbstractCamera.h"
+#include "BaseCamera.h"
 
 //------------------------------------------------------------------------------
 
@@ -7,12 +7,12 @@ namespace core
 
 //------------------------------------------------------------------------------
 
-AbstractCamera::AbstractCamera()
+BaseCamera::BaseCamera()
     : QObject()
     , _exposure(-1)
 {}
 
-void AbstractCamera::setExposure(int exposure)
+void BaseCamera::setExposure(int exposure)
 {
 
     qInfo("Camera: exposure time set to %d ms", exposure);

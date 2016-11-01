@@ -5,9 +5,9 @@
 
 class QTimer;
 
-#include "core/AbstractCamera.h"
+#include "core/BaseCamera.h"
 
-class MockCamera: public core::AbstractCamera
+class MockCamera: public core::BaseCamera
 {
     Q_OBJECT
 
@@ -17,14 +17,14 @@ public:
     void takeSnapshot() override;
     void stop() override;
 
-    void copySnapshot(core::Snapshot& buffer) override;
+    void copySnapshot(Snapshot &buffer) override;
 
 private slots:
     void snapshotRdyImpl();
 
 private:
     QTimer *_timer;
-    core::Snapshot _scene;
+    Snapshot _scene;
     int _shift;
 };
 

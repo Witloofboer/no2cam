@@ -5,7 +5,7 @@
 
 namespace core {
 class AbstractCrysTempProbe;
-class AbstractCamera;
+class BaseCamera;
 class AbstractGenerator;
 class AbstractDriver;
 }
@@ -30,7 +30,7 @@ class AbstractDriver;
  */
 GUISHARED_EXPORT void init(const char *version,
                            core::AbstractCrysTempProbe *crysTempProb,
-                           core::AbstractCamera *camera,
+                           core::BaseCamera *camera,
                            core::AbstractGenerator *generator,
                            core::AbstractDriver *driver);
 GUISHARED_EXPORT void start();

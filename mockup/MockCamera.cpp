@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 
 MockCamera::MockCamera()
-    : core::AbstractCamera()
+    : core::BaseCamera()
     , _timer(new QTimer(this))
     , _shift(0)
 {
@@ -16,8 +16,8 @@ MockCamera::MockCamera()
 
     QImage image(":/scene.jpg");
 
-    for (int i=0; i<core::snapSize; ++i)
-        for (int j=0; j<core::snapSize; ++j)
+    for (int i=0; i<size; ++i)
+        for (int j=0; j<size; ++j)
         {
             _scene[i][j] = static_cast<quint16>(qGray(image.pixel(i, j))<<8);
         }
@@ -47,16 +47,16 @@ void MockCamera::stop()
 
 //------------------------------------------------------------------------------
 
-void MockCamera::copySnapshot(core::Snapshot &buffer)
+void MockCamera::copySnapshot(Snapshot &buffer)
 {
-    for (int i=0; i<core::snapSize; ++i)
-        for (int j=0; j<core::snapSize; ++j)
+    for (int i=0; i<size; ++i)
+        for (int j=0; j<size; ++j)
         {
-            double pix = (double(_exposure)*_scene[(i+_shift) % core::snapSize][j]) / 50.0;
+            double pix = (double(_exposure)*_scene[(i+_shift) % size][j]) / 50.0;
             buffer[i][j] = pix<65535 ? pix : 65535;
         }
 
-    _shift = (_shift+8) % core::snapSize;
+    _shift = (_shift+8) % size;
 }
 
 //------------------------------------------------------------------------------
