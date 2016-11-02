@@ -19,7 +19,8 @@ class CameraBtnBox;
 class IntLineEdit;
 class LineEdit;
 class MainWindow;
-class DatagramBox;
+class HistogramWidget;
+class SnapshotWidget;
 
 //------------------------------------------------------------------------------
 
@@ -45,7 +46,6 @@ protected:
     QGridLayout  *_paramBoxLayout;
     QGroupBox    *_snapshotBox;
     CameraBtnBox *_cameraBtnBox;
-    QLabel       *_snapshotLbl;
 
     IntLineEdit  *_exposureEdit;
     IntLineEdit  *_cooldownTimeEdit;
@@ -53,8 +53,8 @@ protected:
 
     LineEdit     *_sessionEdit;
 
-    QImage       _snapshotImg;
-    DatagramBox  *_datagramBox;
+    SnapshotWidget     *_snapshot;
+    HistogramWidget    *_histogram;
 };
 
 //------------------------------------------------------------------------------

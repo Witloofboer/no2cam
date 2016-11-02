@@ -23,11 +23,12 @@ SOURCES +=\
     ObservationPane.cpp \
     SnapshotPane.cpp \
     SweepPane.cpp \
-    DatagramBox.cpp \
     AbstractMainPane.cpp \
     ConfigurationDlg.cpp \
     CameraBtnBox.cpp \
-    gui_global.cpp
+    gui_global.cpp \
+    HistogramWidget.cpp \
+    SnapshotWidget.cpp
 
 HEADERS +=\
     gui_global.h \
@@ -35,11 +36,12 @@ HEADERS +=\
     MainWindow.h \
     ObservationPane.h \
     SnapshotPane.h \
-    DatagramBox.h \
     AbstractMainPane.h \
     ConfigurationDlg.h \
     SweepPane.h \
-    CameraBtnBox.h
+    CameraBtnBox.h \
+    HistogramWidget.h \
+    SnapshotWidget.h
 
 RESOURCES += \
     resources.qrc

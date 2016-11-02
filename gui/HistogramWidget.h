@@ -1,25 +1,25 @@
-#ifndef INTENSITYDATAGRAM_H
-#define INTENSITYDATAGRAM_H
+#ifndef HISTOGRAMWIDGET_H
+#define HISTOGRAMWIDGET_H
 
-#include <QGroupBox>
+#include <QLabel>
 #include <QPainter>
 
 class QPixmap;
-class QLabel;
 
 namespace gui {
 
 //------------------------------------------------------------------------------
 
-typedef quint16 Datagram[256];
 
-class DatagramBox : public QGroupBox
+class HistogramWidget : public QLabel
 {
     Q_OBJECT
-public:
-    explicit DatagramBox(QWidget *parent = 0);
 
-    void update(Datagram datagram);
+public:
+    typedef quint16 Data[256];
+    explicit HistogramWidget(QWidget *parent = 0);
+
+    void update(const Data& intensities);
 signals:
 
 public slots:
@@ -27,11 +27,9 @@ public slots:
 private:
     QPixmap *_pixmap;
     QPainter _pixPaint;
-    QLabel  *_datagramLbl;
-
 };
 
 //------------------------------------------------------------------------------
 
 }
-#endif // INTENSITYDATAGRAM_H
+#endif // HISTOGRAMWIDGET_H
