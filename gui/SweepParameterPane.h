@@ -1,7 +1,7 @@
-#ifndef SWEEPPANE_H
-#define SWEEPPANE_H
+#ifndef SWEEPPARAMETERPANE_H
+#define SWEEPPARAMETERPANE_H
 
-#include "AbstractMainPane.h"
+#include "BaseParameterPane.h"
 
 //------------------------------------------------------------------------------
 
@@ -11,12 +11,12 @@ class DoubleLineEdit;
 
 //------------------------------------------------------------------------------
 
-class SweepPane : public AbstractMainPane
+class SweepParameterPane : public BaseParameterPane
 {
     Q_OBJECT
 public:
-    explicit SweepPane(MainWindow *mainWindow,
-                       const double &stabilisationTime);
+    explicit SweepParameterPane(MainWindow *mainWindow,
+                                const double &stabilisationTime);
     void persiste() const;
 
 signals:
@@ -50,4 +50,4 @@ private:
 
 }
 
-#endif // SWEEPPANE_H
+#endif // SWEEPPARAMETERPANE_H

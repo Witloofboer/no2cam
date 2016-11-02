@@ -1,4 +1,4 @@
-#include "ObservationPane.h"
+#include "SweepParameterPane.h"
 
 #include <QGridLayout>
 #include <QGroupBox>
@@ -6,111 +6,109 @@
 #include <QSettings>
 
 #include "tooling.h"
-#include "ConfigurationDlg.h"
+#include "../core/Core.h"
 
 namespace gui {
 
 //------------------------------------------------------------------------------
 
-ObservationPane::ObservationPane(MainWindow* mainWindow,
-                                 const double &stabilisationTime)
-    : AbstractMainPane(mainWindow)
+SweepParameterPane::SweepParameterPane(MainWindow* mainWindow,
+                                       const double &stabilisationTime)
+    : BaseParameterPane(mainWindow)
     , _wavelength1Edit(new DoubleLineEdit)
     , _wavelength2Edit(new DoubleLineEdit)
-    , _snapPerObsEdit(new IntLineEdit)
+    , _wavelengthStepEdit(new DoubleLineEdit)
     , _stabilisationTime(stabilisationTime)
 {
     // Parameter box -----------------------------------------------------------
+    _parameterBox->setTitle(tr("Sweep mode"));
 
     int row=0;
-
     gui::putInGrid(_wavelength1Edit, _paramBoxLayout, row, tr("Wavelength 1"), "[nm]");
     gui::putInGrid(_wavelength2Edit, _paramBoxLayout, row, tr("Wavelength 2"), "[nm]");
-    gui::putInGrid(_snapPerObsEdit, _paramBoxLayout, row, tr("Snapshots/obs"), "");
+    gui::putInGrid(_wavelengthStepEdit, _paramBoxLayout, row, tr("Increment"), "[nm]");
 
-    AbstractMainPane::putInGrid(row);
+    BaseParameterPane::putInGrid(row);
 
     _paramBoxLayout->addWidget(new QLabel("Session:"), row, 0);
     _paramBoxLayout->addWidget(_sessionEdit, row, 1, 1, 2);
     ++row;
 
-    // Adapt the AbstractMainPane base
-    _snapshotBox->setTitle(tr("Observation"));
-
     // Connectors
     connect(_wavelength1Edit, LineEdit::textChanged, this, refreshBtns);
     connect(_wavelength2Edit, LineEdit::textChanged, this, refreshBtns);
-    connect(_snapPerObsEdit, LineEdit::textChanged, this, refreshBtns);
+    connect(_wavelengthStepEdit, LineEdit::textChanged, this, refreshBtns);
 
     restore();
 }
 
 //------------------------------------------------------------------------------
 
-void ObservationPane::start(bool burst, bool record)
+void SweepParameterPane::start(bool burst, bool record)
 {
-    emit observationRequested(_wavelength1Edit->value(),
-                              _wavelength2Edit->value(),
-                              _exposureEdit->value(),
-                              _snapPerObsEdit->value(),
-                              _cooldownTimeEdit->value(),
-                              _cooldownPwrEdit->value(),
-                              _stabilisationTime,
-                              burst,
-                              record ? _sessionEdit->text() : "");
+    emit sweepRequested(_wavelength1Edit->value(),
+                        _wavelength2Edit->value(),
+                        _wavelengthStepEdit->value(),
+                        _exposureEdit->value(),
+                        _cooldownTimeEdit->value(),
+                        _cooldownPwrEdit->value(),
+                        _stabilisationTime,
+                        burst,
+                        record ? _sessionEdit->text() : "");
 }
 
 //------------------------------------------------------------------------------
 
-bool ObservationPane::areParametersValid() const
+bool SweepParameterPane::areParametersValid() const
 {
     return _wavelength1Edit->isValid() &&
            _wavelength2Edit->isValid() &&
-           _snapPerObsEdit->isValid() &&
-           AbstractMainPane::areParametersValid();
+           _wavelengthStepEdit->isValid() &&
+           BaseParameterPane::areParametersValid();
 }
 
 //------------------------------------------------------------------------------
 
-static const char *wavelength1Lbl = "Wavelength 1 [nm]";
-static const char *wavelength2Lbl = "Wavelength 2 [nm]";
-static const char *snapPerObsLbl = "Snapshops per observation [nm]";
+static const char *wavelength1Lbl = "Start wavelength [nm]";
+static const char *wavelength2Lbl = "End wavelength [nm]";
+static const char *wavelengthStepLbl = "Step [nm]";
 
-void ObservationPane::persiste() const
+void SweepParameterPane::persiste() const
 {
-    qInfo("Persisting observation parameters");
+    qInfo("Persisting sweep parameters");
 
     QSettings settings;
 
-    settings.beginGroup("Observations");
+    settings.beginGroup("Sweep");
 
-    AbstractMainPane::persiste(settings);
+    BaseParameterPane::persiste(settings);
 
     if (_wavelength1Edit->isValid())
         settings.setValue(wavelength1Lbl, _wavelength1Edit->text());
     if (_wavelength2Edit->isValid())
         settings.setValue(wavelength2Lbl, _wavelength2Edit->text());
-    if (_snapPerObsEdit->isValid())
-        settings.setValue(snapPerObsLbl, _snapPerObsEdit->text());
+    if (_wavelengthStepEdit->isValid())
+        settings.setValue(wavelengthStepLbl, _wavelengthStepEdit->text());
 
     settings.endGroup();
+
 }
 
 //------------------------------------------------------------------------------
 
-void ObservationPane::restore()
+void SweepParameterPane::restore()
 {
-    qInfo("Restoring observation parameters");
+    qInfo("Restoring sweep parameters");
 
     QSettings settings;
 
-    settings.beginGroup("Observations");
+    settings.beginGroup("Sweep");
 
-    AbstractMainPane::restore(settings);
+    BaseParameterPane::restore(settings);
 
     _wavelength1Edit->setText(settings.value(wavelength1Lbl).toString());
     _wavelength2Edit->setText(settings.value(wavelength2Lbl).toString());
-    _snapPerObsEdit->setText(settings.value(snapPerObsLbl).toString());
+    _wavelengthStepEdit->setText(settings.value(wavelengthStepLbl).toString());
     settings.endGroup();
 
     refreshBtns();

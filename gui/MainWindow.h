@@ -23,11 +23,13 @@ class AbstractCrysTempProbe;
 
 namespace gui {
 
-class AbstractMainPane;
+class BaseParameterPane;
 class ConfigurationDlg;
-class SnapshotPane;
-class ObservationPane;
-class SweepPane;
+class HistogramWidget;
+class ObservationParameterPane;
+class SnapshotWidget;
+class SnapshotParameterPane;
+class SweepParameterPane;
 
 //------------------------------------------------------------------------------
 
@@ -70,7 +72,7 @@ private slots:
 
 private:
     bool okToContinue();
-    AbstractMainPane *currentPane();
+    BaseParameterPane *currentPane();
 
     core::Core *_coreInstance;
 
@@ -83,9 +85,12 @@ private:
 
     QString _version;
 
-    SnapshotPane *_snapshotPane;
-    ObservationPane *_observationPane;
-    SweepPane *_sweepPane;
+    SnapshotParameterPane *_snapshotPane;
+    ObservationParameterPane *_observationPane;
+    SweepParameterPane *_sweepPane;
+
+    SnapshotWidget     *_snapshot;
+    HistogramWidget    *_histogram;
 };
 
 //------------------------------------------------------------------------------

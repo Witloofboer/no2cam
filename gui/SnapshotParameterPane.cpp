@@ -1,4 +1,4 @@
-#include "SnapshotPane.h"
+#include "SnapshotParameterPane.h"
 
 #include <Qdebug>
 #include <QGridLayout>
@@ -19,11 +19,11 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-SnapshotPane::SnapshotPane(MainWindow* mainWindow,
-                           const core::Crystal *crystal,
-                           core::AbstractCrysTempProbe *crysTempProbe,
-                           const double &stabilisationTime)
-    : AbstractMainPane(mainWindow)
+SnapshotParameterPane::SnapshotParameterPane(MainWindow* mainWindow,
+        const core::Crystal *crystal,
+        core::AbstractCrysTempProbe *crysTempProbe,
+        const double &stabilisationTime)
+    : BaseParameterPane(mainWindow)
     , _crystal(crystal)
     , _crystalTempProbe(crysTempProbe)
     , _spectralBtn(new QRadioButton(tr("Optic")))
@@ -35,6 +35,7 @@ SnapshotPane::SnapshotPane(MainWindow* mainWindow,
 {
 
     // Parameter box ------------------------------------------------------------
+    _parameterBox->setTitle(tr("Snapshot mode"));
 
     int row=0;
     _paramBoxLayout->addWidget(_spectralBtn, row, 0);
@@ -45,13 +46,11 @@ SnapshotPane::SnapshotPane(MainWindow* mainWindow,
     gui::putInGrid(_powerEdit, _paramBoxLayout, row, tr("Power"), "[mW]");
     gui::putInGrid(_wavelengthEdit, _paramBoxLayout, row, tr("Wavelength"), "[nm]");
 
-    AbstractMainPane::putInGrid(row);
+    BaseParameterPane::putInGrid(row);
 
     _paramBoxLayout->addWidget(new QLabel("Session:"), row, 0);
     _paramBoxLayout->addWidget(_sessionEdit, row, 1, 1, 2);
     ++row;
-
-    _snapshotBox->setTitle(tr("Snapshot"));
 
     // Connectors
     connect(_wavelengthEdit, LineEdit::focusLost, this, recomputeParams);
@@ -71,7 +70,7 @@ SnapshotPane::SnapshotPane(MainWindow* mainWindow,
 
 //------------------------------------------------------------------------------
 
-void SnapshotPane::switchMode()
+void SnapshotParameterPane::switchMode()
 {
     if (_spectralBtn->isChecked())
     {
@@ -91,7 +90,7 @@ void SnapshotPane::switchMode()
 
 //------------------------------------------------------------------------------
 
-void SnapshotPane::recomputeParams()
+void SnapshotParameterPane::recomputeParams()
 {
     if (_spectralBtn->isChecked())
     {
@@ -118,16 +117,16 @@ void SnapshotPane::recomputeParams()
 
 //------------------------------------------------------------------------------
 
-bool SnapshotPane::areParametersValid() const
+bool SnapshotParameterPane::areParametersValid() const
 {
     return _frequencyEdit->isValid() &&
            _powerEdit->isValid() &&
-           AbstractMainPane::areParametersValid();
+           BaseParameterPane::areParametersValid();
 }
 
 //------------------------------------------------------------------------------
 
-void SnapshotPane::start(bool burst, bool record)
+void SnapshotParameterPane::start(bool burst, bool record)
 {
     if (_spectralBtn->isChecked())
     {
@@ -157,7 +156,7 @@ static const char *wavelengthLbl = "wavelength [nm]";
 static const char *frequencyLbl = "frequency [MHz]";
 static const char *powerLbl = "power [mW]";
 
-void SnapshotPane::persiste() const
+void SnapshotParameterPane::persiste() const
 {
     qInfo("Persisting snapshot parameters");
 
@@ -165,7 +164,7 @@ void SnapshotPane::persiste() const
 
     settings.beginGroup("Snapshot");
 
-    AbstractMainPane::persiste(settings);
+    BaseParameterPane::persiste(settings);
 
     settings.setValue(wavelengthModeLbl, _spectralBtn->isChecked());
     if (_wavelengthEdit->isValid())
@@ -180,7 +179,7 @@ void SnapshotPane::persiste() const
 
 //------------------------------------------------------------------------------
 
-void SnapshotPane::restore()
+void SnapshotParameterPane::restore()
 {
     qInfo("Restoring snapshot parameters");
 
@@ -188,7 +187,7 @@ void SnapshotPane::restore()
 
     settings.beginGroup("Snapshot");
 
-    AbstractMainPane::restore(settings);
+    BaseParameterPane::restore(settings);
 
     if (settings.value(wavelengthModeLbl, true).toBool())
         _spectralBtn->setChecked(true);

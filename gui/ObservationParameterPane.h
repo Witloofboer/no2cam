@@ -1,7 +1,7 @@
-#ifndef OBSERVATIONPANE_H
-#define OBSERVATIONPANE_H
+#ifndef OBSERVATIONPARAMETERPANE_H
+#define OBSERVATIONPARAMETERPANE_H
 
-#include "AbstractMainPane.h"
+#include "BaseParameterPane.h"
 #include "../core/Core.h"
 
 //------------------------------------------------------------------------------
@@ -14,12 +14,12 @@ class MainWindow;
 
 //------------------------------------------------------------------------------
 
-class ObservationPane : public AbstractMainPane
+class ObservationParameterPane : public BaseParameterPane
 {
     Q_OBJECT
 public:
-    explicit ObservationPane(MainWindow *mainWindow,
-                             const double &stabilisationTime);
+    explicit ObservationParameterPane(MainWindow *mainWindow,
+                                      const double &stabilisationTime);
     void persiste() const;
 
 signals:
@@ -53,4 +53,4 @@ private:
 
 }
 
-#endif // OBSERVATIONPANE_H
+#endif // OBSERVATIONPARAMETERPANE_H

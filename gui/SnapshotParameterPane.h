@@ -1,7 +1,7 @@
-#ifndef SNAPSHOTPANE_H
-#define SNAPSHOTPANE_H
+#ifndef SNAPSHOTPARAMETERPANE_H
+#define SNAPSHOTPARAMETERPANE_H
 
-#include "AbstractMainPane.h"
+#include "BaseParameterPane.h"
 
 //------------------------------------------------------------------------------
 
@@ -19,14 +19,14 @@ class IntLineEdit;
 
 //------------------------------------------------------------------------------
 
-class SnapshotPane : public AbstractMainPane
+class SnapshotParameterPane : public BaseParameterPane
 {
     Q_OBJECT
 public:
-    explicit SnapshotPane(MainWindow* mainWindow,
-                          const core::Crystal *crystal,
-                          core::AbstractCrysTempProbe *crysTempProbe,
-                          const double &stabilisationTime);
+    explicit SnapshotParameterPane(MainWindow* mainWindow,
+                                   const core::Crystal *crystal,
+                                   core::AbstractCrysTempProbe *crysTempProbe,
+                                   const double &stabilisationTime);
     void persiste() const;
 
 signals:
@@ -77,4 +77,4 @@ private:
 
 }
 
-#endif // SNAPSHOTPANE_H
+#endif // SNAPSHOTPARAMETERPANE_H

@@ -1,9 +1,7 @@
-#ifndef ABSTRACTMAINPANE_H
-#define ABSTRACTMAINPANE_H
+#ifndef BASEPARAMETERPANE_H
+#define BASEPARAMETERPANE_H
 
 #include <QWidget>
-
-#include <core/BaseCamera.h>
 
 //------------------------------------------------------------------------------
 
@@ -19,18 +17,15 @@ class CameraBtnBox;
 class IntLineEdit;
 class LineEdit;
 class MainWindow;
-class HistogramWidget;
-class SnapshotWidget;
 
 //------------------------------------------------------------------------------
 
-class AbstractMainPane : public QWidget
+class BaseParameterPane : public QWidget
 {
     Q_OBJECT
 public:
-    explicit AbstractMainPane(MainWindow* mainWindow);
+    explicit BaseParameterPane(MainWindow* mainWindow);
     void updateState(bool isAppReady);
-    void updateSnapshot();
 
 protected slots:
     void refreshBtns();
@@ -43,8 +38,8 @@ protected:
     void persiste(QSettings &settings) const;
     void restore(QSettings &settings);
 
+    QGroupBox    *_parameterBox;
     QGridLayout  *_paramBoxLayout;
-    QGroupBox    *_snapshotBox;
     CameraBtnBox *_cameraBtnBox;
 
     IntLineEdit  *_exposureEdit;
@@ -52,13 +47,10 @@ protected:
     IntLineEdit  *_cooldownPwrEdit;
 
     LineEdit     *_sessionEdit;
-
-    SnapshotWidget     *_snapshot;
-    HistogramWidget    *_histogram;
 };
 
 //------------------------------------------------------------------------------
 
 }
 
-#endif // ABSTRACTMAINPANE_H
+#endif // BASEPARAMETERPANE_H

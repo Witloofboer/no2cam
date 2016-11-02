@@ -3,16 +3,21 @@
 #include <QAction>
 #include <QActionGroup>
 #include <QCloseEvent>
+#include <QGroupBox>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QStackedWidget>
 #include <QTimer>
 #include <QToolBar>
-#include <QStackedWidget>
+#include <QVBoxLayout>
 
-#include "SnapshotPane.h"
-#include "ObservationPane.h"
-#include "SweepPane.h"
+
+#include "SnapshotParameterPane.h"
+#include "ObservationParameterPane.h"
+#include "SweepParameterPane.h"
 #include "ConfigurationDlg.h"
+#include "HistogramWidget.h"
+#include "SnapshotWidget.h"
 
 #include "core.h"
 #include "core/Crystal.h"
@@ -34,22 +39,48 @@ MainWindow::MainWindow(core::Crystal *crystal,
     , _sweepModeActn(new QAction("Sweep over &wavelength", this))
     , _configParamActn(new QAction("&Configure", this))
     , _version(version)
-    , _snapshotPane(new SnapshotPane(this, crystal, crysTempProb,
-                                     _configDlg->stabilisationTime()))
-    , _observationPane(new ObservationPane(this,
-                                           _configDlg->stabilisationTime()))
-    , _sweepPane(new SweepPane(this,
-                               _configDlg->stabilisationTime()))
+    , _snapshotPane(new SnapshotParameterPane(this, crystal, crysTempProb,
+                    _configDlg->stabilisationTime()))
+    , _observationPane(new ObservationParameterPane(this,
+                       _configDlg->stabilisationTime()))
+    , _sweepPane(new SweepParameterPane(this,
+                                        _configDlg->stabilisationTime()))
+    , _snapshot(new SnapshotWidget)
+    , _histogram(new HistogramWidget)
 {
     // -------------------------------------------------------------------------
     // Central widget
     // -------------------------------------------------------------------------
 
+    // Left part
     _stackedWdgt->addWidget(_snapshotPane);
     _stackedWdgt->addWidget(_observationPane);
     _stackedWdgt->addWidget(_sweepPane);
 
-    setCentralWidget(_stackedWdgt);
+    // Middle part
+    auto snapshotLayout = new QVBoxLayout;
+    snapshotLayout->addWidget(_snapshot);
+
+    auto snapshotBox = new QGroupBox(tr("Snapshot"));
+    snapshotBox->setLayout(snapshotLayout);
+
+    // Right part
+    auto histogramBoxLayout = new QVBoxLayout;
+    histogramBoxLayout->addWidget(_histogram);
+
+    auto histogramBox = new QGroupBox(tr("Histogram"));
+    histogramBox->setLayout(histogramBoxLayout);
+
+    auto mainLayout = new QHBoxLayout;
+
+    mainLayout->addWidget(_stackedWdgt);
+    mainLayout->addWidget(snapshotBox);
+    mainLayout->addWidget(histogramBox);
+
+    auto *centralWidget = new QWidget();
+    centralWidget->setLayout(mainLayout);
+    setCentralWidget(centralWidget);
+
 
     // -------------------------------------------------------------------------
     // Actions
@@ -157,20 +188,20 @@ MainWindow::MainWindow(core::Crystal *crystal,
     _snapshotModeActn->setChecked(true);
 
     connect(_configDlg, ConfigurationDlg::crystalUpdated,
-            _snapshotPane, SnapshotPane::recomputeParams);
+            _snapshotPane, SnapshotParameterPane::recomputeParams);
     if (!_configDlg->isValid())
         QTimer::singleShot(0, this, displayConfigurationDlg);
 
     connect(coreInstance, core::Core::ready, this, updateState);
     connect(coreInstance, core::Core::snapshotAvailable, this, updateSnapshot);
 
-    connect(_snapshotPane, SnapshotPane::spectralSnapshot,
+    connect(_snapshotPane, SnapshotParameterPane::spectralSnapshot,
             coreInstance, core::Core::spectralSnapshot);
-    connect(_snapshotPane, SnapshotPane::acousticSnapshot,
+    connect(_snapshotPane, SnapshotParameterPane::acousticSnapshot,
             coreInstance, core::Core::acousticSnapshot);
-    connect(_observationPane, ObservationPane::observationRequested,
+    connect(_observationPane, ObservationParameterPane::observationRequested,
             coreInstance, core::Core::observation);
-    connect(_sweepPane, SweepPane::sweepRequested,
+    connect(_sweepPane, SweepParameterPane::sweepRequested,
             coreInstance, core::Core::sweep);
 
     connect(this, stop, coreInstance, core::Core::stop);
@@ -193,7 +224,8 @@ void MainWindow::updateState(bool isAppReady)
 
 void MainWindow::updateSnapshot()
 {
-    currentPane()->updateSnapshot();
+    _snapshot->update();
+    _histogram->update(_snapshot->histogramData());
 }
 
 //------------------------------------------------------------------------------
@@ -354,9 +386,9 @@ bool MainWindow::okToContinue()
 
 //------------------------------------------------------------------------------
 
-AbstractMainPane *MainWindow::currentPane()
+BaseParameterPane *MainWindow::currentPane()
 {
-    return dynamic_cast<AbstractMainPane *>(_stackedWdgt->currentWidget());
+    return dynamic_cast<BaseParameterPane *>(_stackedWdgt->currentWidget());
 }
 
 //------------------------------------------------------------------------------

@@ -20,28 +20,28 @@ INCLUDEPATH += ../core_prj/
 SOURCES +=\
     tooling.cpp \
     MainWindow.cpp \
-    ObservationPane.cpp \
-    SnapshotPane.cpp \
-    SweepPane.cpp \
-    AbstractMainPane.cpp \
     ConfigurationDlg.cpp \
     CameraBtnBox.cpp \
     gui_global.cpp \
     HistogramWidget.cpp \
-    SnapshotWidget.cpp
+    SnapshotWidget.cpp \
+    BaseParameterPane.cpp \
+    SweepParameterPane.cpp \
+    SnapshotParameterPane.cpp \
+    ObservationParameterPane.cpp
 
 HEADERS +=\
     gui_global.h \
     tooling.h \
     MainWindow.h \
-    ObservationPane.h \
-    SnapshotPane.h \
-    AbstractMainPane.h \
     ConfigurationDlg.h \
-    SweepPane.h \
     CameraBtnBox.h \
     HistogramWidget.h \
-    SnapshotWidget.h
+    SnapshotWidget.h \
+    BaseParameterPane.h \
+    SnapshotParameterPane.h \
+    ObservationParameterPane.h \
+    SweepParameterPane.h
 
 RESOURCES += \
     resources.qrc
