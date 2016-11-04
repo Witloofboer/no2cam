@@ -45,6 +45,16 @@ ObservationParameterPane::ObservationParameterPane(MainWindow* mainWindow,
 
 //------------------------------------------------------------------------------
 
+void ObservationParameterPane::updateState(bool isAppReady)
+{
+    BaseParameterPane::updateState(isAppReady);
+    _wavelength1Edit->setEnabled(isAppReady);
+    _wavelength2Edit->setEnabled(isAppReady);
+    _snapPerObsEdit->setEnabled(isAppReady);
+}
+
+//------------------------------------------------------------------------------
+
 void ObservationParameterPane::start(bool burst, bool record)
 {
     emit observationRequested(_wavelength1Edit->value(),

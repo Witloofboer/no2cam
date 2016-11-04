@@ -343,14 +343,18 @@ void MainWindow::releaseNotes()
     QMessageBox::information
     ( this
       , tr("NO<sub>2</sub> Camera Command Interface")
-      , "<h2>" + tr("Release notes") + "</h2>"
-      + "<h3>" + tr("Version") + " " + _version + "</h3>"
-      + tr("<p>Only the GUI is implemented in this version.</p>"
-           "<p>As a consequence of the lack of logic, the snapshot button"
-           "   remains depressed when clicked. In the final version, it"
-           "   will automatically get released once the snapshot is"
-           "   acquired.</p>"
-          )
+      , "<h2>" + tr("Release notes of the version") + " " + _version + "</h2>"
+      + "<h3>" + tr("Implemented functionalities") + "</h3>"
+
+      + "<p> This version contains a full implementation of the GUI (with the "
+      + "exception of the data folder selection) and the business logic "
+      + "required by the  GUI.</p>"
+
+      + "<h3>" + tr("Missing functionalities") + "</h3>"
+
+      + "<p> All devices (camera, electronic boards, temperator sensor) are "
+      + "mockups and there is no mechanism yet to store the snapshot data on "
+      + "disk.</p>"
       , QMessageBox::Ok);
 }
 

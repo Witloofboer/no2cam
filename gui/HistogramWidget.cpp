@@ -13,6 +13,7 @@ HistogramWidget::HistogramWidget(QWidget *parent)
     , _brush(Qt::white, Qt::SolidPattern)
     , _redBrush(Qt::red, Qt::SolidPattern)
 {
+    _pixmap->fill(Qt::black);
     setPixmap(*_pixmap);
 }
 

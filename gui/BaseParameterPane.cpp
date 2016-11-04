@@ -57,6 +57,10 @@ void BaseParameterPane::putInGrid(int &row)
 void BaseParameterPane::updateState(bool isAppReady)
 {
     _cameraBtnBox->updateState(isAppReady);
+    _exposureEdit->setEnabled(isAppReady);
+    _cooldownTimeEdit->setEnabled(isAppReady);
+    _cooldownPwrEdit->setEnabled(isAppReady);
+    _sessionEdit->setEnabled(isAppReady);
 }
 
 //------------------------------------------------------------------------------

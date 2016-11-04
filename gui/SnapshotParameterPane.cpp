@@ -56,21 +56,34 @@ SnapshotParameterPane::SnapshotParameterPane(MainWindow* mainWindow,
     connect(_wavelengthEdit, LineEdit::focusLost, this, recomputeParams);
     connect(_frequencyEdit, LineEdit::focusLost, this, recomputeParams);
 
-    connect(_spectralBtn, QRadioButton::toggled, this, switchMode);
+    connect(_spectralBtn, QRadioButton::toggled, this, enableFieldsWrtMode);
     connect(_spectralBtn, QRadioButton::toggled, this, refreshBtns);
     connect(_frequencyEdit, LineEdit::textChanged, this, refreshBtns);
     connect(_powerEdit, LineEdit::textChanged, this, refreshBtns);
     connect(_wavelengthEdit, LineEdit::textChanged, this, refreshBtns);
-    connect(_frequencyEdit, LineEdit::textChanged, this, refreshBtns);
 
     // Restoring
     restore();
-    switchMode();
+    enableFieldsWrtMode();
+}
+
+void SnapshotParameterPane::updateState(bool isAppReady)
+{
+    BaseParameterPane::updateState(isAppReady);
+
+    if (isAppReady)
+    {
+        enableFieldsWrtMode();
+    } else {
+        _wavelengthEdit->setEnabled(false);
+        _frequencyEdit->setEnabled(false);
+        _powerEdit->setEnabled(false);
+    }
 }
 
 //------------------------------------------------------------------------------
 
-void SnapshotParameterPane::switchMode()
+void SnapshotParameterPane::enableFieldsWrtMode()
 {
     if (_spectralBtn->isChecked())
     {

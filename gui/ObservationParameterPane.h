@@ -20,6 +20,7 @@ class ObservationParameterPane : public BaseParameterPane
 public:
     explicit ObservationParameterPane(MainWindow *mainWindow,
                                       const double &stabilisationTime);
+    void updateState(bool isAppReady);
     void persiste() const;
 
 signals:

@@ -44,6 +44,17 @@ SweepParameterPane::SweepParameterPane(MainWindow* mainWindow,
 
 //------------------------------------------------------------------------------
 
+void SweepParameterPane::updateState(bool isAppReady)
+{
+    BaseParameterPane::updateState(isAppReady);
+
+    _wavelength1Edit->setEnabled(isAppReady);
+    _wavelength2Edit->setEnabled(isAppReady);
+    _wavelengthStepEdit->setEnabled(isAppReady);
+}
+
+//------------------------------------------------------------------------------
+
 void SweepParameterPane::start(bool burst, bool record)
 {
     emit sweepRequested(_wavelength1Edit->value(),

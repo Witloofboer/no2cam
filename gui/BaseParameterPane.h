@@ -25,13 +25,13 @@ class BaseParameterPane : public QWidget
     Q_OBJECT
 public:
     explicit BaseParameterPane(MainWindow* mainWindow);
-    void updateState(bool isAppReady);
 
 protected slots:
     void refreshBtns();
     virtual void start(bool burst, bool record) =0;
 
 protected:
+    void updateState(bool isAppReady);
     void putInGrid(int &row);
     virtual bool areParametersValid() const;
 

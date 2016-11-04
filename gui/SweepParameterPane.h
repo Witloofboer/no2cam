@@ -17,6 +17,7 @@ class SweepParameterPane : public BaseParameterPane
 public:
     explicit SweepParameterPane(MainWindow *mainWindow,
                                 const double &stabilisationTime);
+    void updateState(bool isAppReady);
     void persiste() const;
 
 signals:

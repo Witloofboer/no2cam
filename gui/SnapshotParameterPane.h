@@ -27,6 +27,7 @@ public:
                                    const core::Crystal *crystal,
                                    core::AbstractCrysTempProbe *crysTempProbe,
                                    const double &stabilisationTime);
+    void updateState(bool isAppReady);
     void persiste() const;
 
 signals:
@@ -56,7 +57,7 @@ protected:
     bool areParametersValid() const override;
 
 private slots:
-    void switchMode();
+    void enableFieldsWrtMode();
 
 private:
     void restore();
