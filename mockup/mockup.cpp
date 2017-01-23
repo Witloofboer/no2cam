@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 
     QApplication application(argc, argv);
 
-    init("0.2.0 (mockup)",
+    init("0.3.0 (mockup)",
          new MockCrysTempProbe,
          new MockCamera,
          new MockGenerator,

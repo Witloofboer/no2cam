@@ -17,7 +17,7 @@ class CORESHARED_EXPORT BaseCamera : public QObject
     Q_OBJECT
 
 public:
-    static const int size = 2048;
+    static const qint64 size = 2048;
 
     typedef quint16 Pixel;
     typedef Pixel Snapshot[size][size] ;

@@ -79,6 +79,7 @@ void CameraBtnBox::refreshBtns()
     {
         _singleBtn->setChecked(false);
         _burstBtn->setChecked(false);
+        if (!_recordEnabled) _recordBtn->setChecked(false);
     }
 
 }
