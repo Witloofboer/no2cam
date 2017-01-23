@@ -311,7 +311,7 @@ void Core::postSnapshotProcess()
         emit snapshotAvailable();
 
         saveSnapshot(_snapTime,
-                     SpectralSnap,
+                     AcousticSnap,
                      p.wavelength,
                      p.in_frequency,
                      p.in_power,
@@ -415,12 +415,12 @@ void Core::saveSnapshot(const QDateTime& dateTime,
                         BaseCamera::Snapshot& snapshot)
 {
     if (_session.isEmpty()) return;
+
     const QChar zero('0');
 
     QString expo = (mode==Obs)
                    ? QString("%1x%2").arg(snapPerObs).arg(exposure)
                    : QString("%1").arg(exposure);
-
 
     auto _filename = QString("%1-%2-%3-%4nm-%5Ghz-%6mW-%7ms-%8degC.dat")
                      . arg(_session)
