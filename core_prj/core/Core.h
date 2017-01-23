@@ -1,6 +1,7 @@
 #ifndef CORE_H
 #define CORE_H
 
+#include <QDateTime>
 #include <QObject>
 
 #include "core_global.h"
@@ -139,9 +140,11 @@ public slots:
 
 private slots:
     void setAcousticWave();
+    void takeSnapshot();
 
 private:
-    enum Mode {READY, SpSNAP, AcSNAP, OBS, SWP};
+    enum Mode {READY, SpectralSnap, AcousticSnap, Obs, Sweep};
+    const QString _modeToCode[5] = {"XX", "Spt", "Acs", "Obs", "Swo"};
 
     void cooldown();
     void setCommonParams(Mode mode,
@@ -152,10 +155,19 @@ private:
                          bool burst,
                          const QString &session);
 
-    void setOptimalAcousticWave(double wavelength);
+    void saveSnapshot(const QDateTime &dateTime,
+                      Mode mode,
+                      double wavelength,
+                      double frequency,
+                      double power,
+                      int snapPerObs,
+                      int exposure,
+                      double temperature,
+                      BaseCamera::Snapshot &snapshot);
 
     QTimer *_cooldownT;
     QTimer *_stabilisationT;
+
 
     double _cooldownPwr;
 
@@ -166,36 +178,50 @@ private:
     AbstractDriver *_driver;
 
     Mode _mode;
+    int _exposure;
     bool _bursting;
-    BaseCamera::Snapshot _camSnapshot;
+    BaseCamera::Snapshot _snapshot;
+    QDateTime _snapTime;
 
     QString _session;
 
     struct WlSnapshotParams
     {
-        double wavelength;
-    };
-
-    struct AcousticSnapshotParams
-    {
+        double in_wavelength;
+        double temperature;
         double frequency;
         double power;
     };
 
+    struct AcousticSnapshotParams
+    {
+        double in_frequency;
+        double in_power;
+        double temperature;
+        double wavelength;
+    };
+
     struct ObservationParams
     {
-        double wavelengths[2];
-        int wavelengthIx;
+        double in_wavelengths[2];
+        int in_snapshotPerObs;
+        int idx;
         int snapshotCount;
-        int snapshotPerObs;
+        double temperature;
+        double frequency[2];
+        double power[2];
+        BaseCamera::Snapshot snapshots[2];
     };
 
     struct SweepParams
     {
-        double minWavelength;
-        double maxWavelength;
+        double in_minWavelength;
+        double in_maxWavelength;
+        double in_wavelengthStep;
         double wavelength;
-        double wavelengthStep;
+        double temperature;
+        double frequency;
+        double power;
     };
 
     union {
