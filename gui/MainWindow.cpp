@@ -3,9 +3,12 @@
 #include <QAction>
 #include <QActionGroup>
 #include <QCloseEvent>
+#include <QDir>
+#include <QFileDialog>
 #include <QGroupBox>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QSettings>
 #include <QStackedWidget>
 #include <QTimer>
 #include <QToolBar>
@@ -35,10 +38,12 @@ MainWindow::MainWindow(core::Crystal *crystal,
     , _coreInstance(coreInstance)
     , _configDlg(new ConfigurationDlg(this, crystal))
     , _stackedWdgt(new QStackedWidget)
+    , _selectFolderActn(new QAction("&Select data folder"))
     , _snapshotModeActn(new QAction("Take &snapshots", this))
     , _observationModeActn(new QAction("Make &observations", this))
     , _sweepModeActn(new QAction("Sweep over &wavelength", this))
     , _configParamActn(new QAction("&Configure", this))
+    , _dataFolder()
     , _version(version)
     , _snapshotPane(new SnapshotParameterPane(crystal, crysTempProb))
     , _observationPane(new ObservationParameterPane)
@@ -96,6 +101,8 @@ MainWindow::MainWindow(core::Crystal *crystal,
     // Actions
     // -------------------------------------------------------------------------
 
+    connect(_selectFolderActn, QAction::triggered, this, selectFolder);
+
     _configParamActn->setIcon(QIcon(":/icons/C-gold-24.png"));
     _configParamActn->setIconVisibleInMenu(false);
     _configParamActn->setShortcut(QKeySequence("Alt+C"));
@@ -144,6 +151,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
     // -------------------------------------------------------------------------
 
     auto fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(_selectFolderActn);
     fileMenu->addAction(_configParamActn);
     fileMenu->addSeparator();
     fileMenu->addAction(exitAction);
@@ -172,7 +180,6 @@ MainWindow::MainWindow(core::Crystal *crystal,
     // Varia
     // -------------------------------------------------------------------------
 
-    setWindowTitle("NO2 Camera - " + version);
     setWindowIcon(QIcon(":/icons/video-camera-64.png"));
     setFixedSize(sizeHint());
     _snapshotModeActn->setChecked(true);
@@ -203,6 +210,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
     connect(_cameraBtnBox, CameraBtnBox::stopped, this, stopped);
 
     refreshBtns();
+    restore();
 }
 
 //------------------------------------------------------------------------------
@@ -257,6 +265,7 @@ void MainWindow::displayConfigurationDlg()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    persiste();
     _configDlg->persiste();
     _snapshotPane->persiste();
     _observationPane->persiste();
@@ -294,6 +303,20 @@ void MainWindow::switchMode()
 void MainWindow::refreshBtns()
 {
     _cameraBtnBox->enableBtns(currentPane()->areParametersValid(), true);
+}
+
+//------------------------------------------------------------------------------
+
+
+void MainWindow::selectFolder()
+{
+    _dataFolder = QFileDialog::getExistingDirectory
+                  (this,
+                   tr("Select data folder"),
+                   _dataFolder,
+                   QFileDialog::ShowDirsOnly
+                  );
+    refreshWindowTitle();
 }
 
 //------------------------------------------------------------------------------
@@ -346,6 +369,42 @@ void MainWindow::releaseNotes()
 BaseParameterPane *MainWindow::currentPane()
 {
     return dynamic_cast<BaseParameterPane *>(_stackedWdgt->currentWidget());
+}
+
+//------------------------------------------------------------------------------
+
+static const char *dataFolderLbl = "Data folder";
+
+void MainWindow::persiste()
+{
+    qInfo("Persisting main window parameters");
+
+    QSettings settings;
+
+    settings.setValue(dataFolderLbl, _dataFolder);
+
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::restore()
+{
+    qInfo("Restoring main window parameters");
+
+    QSettings settings;
+
+    _dataFolder = settings.value(dataFolderLbl, "").toString();
+    if (_dataFolder.isEmpty())
+        _dataFolder = QDir::homePath();
+
+    refreshWindowTitle();
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::refreshWindowTitle()
+{
+    setWindowTitle("NO2 Camera - "+ _dataFolder);
 }
 
 //------------------------------------------------------------------------------

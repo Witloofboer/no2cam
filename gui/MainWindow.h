@@ -59,6 +59,7 @@ private slots:
     void start(bool burst, bool record);
     void switchMode();
     void refreshBtns();
+    void selectFolder();
     void configure();
 
     void releaseNotes();
@@ -68,16 +69,21 @@ private slots:
 
 private:
     BaseParameterPane *currentPane();
+    void persiste();
+    void restore();
+    void refreshWindowTitle();
 
     core::Core *_coreInstance;
 
     ConfigurationDlg *_configDlg;
     QStackedWidget *_stackedWdgt;
+    QAction *_selectFolderActn;
     QAction *_snapshotModeActn;
     QAction *_observationModeActn;
     QAction *_sweepModeActn;
     QAction *_configParamActn;
 
+    QString _dataFolder;
     QString _version;
 
     SnapshotParameterPane    *_snapshotPane;
