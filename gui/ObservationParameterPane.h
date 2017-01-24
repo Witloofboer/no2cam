@@ -2,7 +2,6 @@
 #define OBSERVATIONPARAMETERPANE_H
 
 #include "BaseParameterPane.h"
-#include "../core/Core.h"
 
 //------------------------------------------------------------------------------
 
@@ -10,7 +9,6 @@ namespace gui {
 
 class IntLineEdit;
 class DoubleLineEdit;
-class MainWindow;
 
 //------------------------------------------------------------------------------
 
@@ -18,10 +16,14 @@ class ObservationParameterPane : public BaseParameterPane
 {
     Q_OBJECT
 public:
-    explicit ObservationParameterPane(MainWindow *mainWindow,
-                                      const double &stabilisationTime);
+    explicit ObservationParameterPane();
     void updateState(bool isAppReady);
     void persiste() const;
+
+    void start(bool burst,
+               bool record,
+               double stabilisationTime,
+               QString session) override;
 
 signals:
     void observationRequested(double wavelength1,
@@ -32,10 +34,8 @@ signals:
                               double cooldownPwr,
                               double stabilisationTime,
                               bool burst,
+                              bool record,
                               const QString& session);
-
-protected slots:
-    void start(bool burst, bool record) override;
 
 protected:
     bool areParametersValid() const override;
@@ -46,8 +46,6 @@ private:
     DoubleLineEdit *_wavelength1Edit;
     DoubleLineEdit *_wavelength2Edit;
     IntLineEdit    *_snapPerObsEdit;
-
-    const double &_stabilisationTime;
 };
 
 //------------------------------------------------------------------------------

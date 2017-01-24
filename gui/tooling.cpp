@@ -2,12 +2,8 @@
 
 #include <QCoreApplication>
 #include <QGridLayout>
-#include <QKeyEvent>
 #include <QLabel>
-#include <QLocale>
 #include <QRegExpValidator>
-
-#include "MainWindow.h"
 
 namespace gui {
 

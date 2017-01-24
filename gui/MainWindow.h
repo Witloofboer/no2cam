@@ -24,8 +24,10 @@ class AbstractCrysTempProbe;
 namespace gui {
 
 class BaseParameterPane;
+class CameraBtnBox;
 class ConfigurationDlg;
 class HistogramWidget;
+class LineEdit;
 class ObservationParameterPane;
 class SnapshotWidget;
 class SnapshotParameterPane;
@@ -44,8 +46,7 @@ public:
                const QString &_version);
 
 signals:
-    void start(bool burst, bool record);
-    void stop();
+    void stopped();
 
 public slots:
     void updateState(bool isAppReady);
@@ -55,23 +56,17 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 
 private slots:
-    void newSession();
-    void loadSession();
-    bool saveSession();
-    bool saveAsSession();
-
+    void start(bool burst, bool record);
     void switchMode();
+    void refreshBtns();
     void configure();
-    void cameraStatus();
 
     void releaseNotes();
     void about();
 
-private slots:
     void displayConfigurationDlg();
 
 private:
-    bool okToContinue();
     BaseParameterPane *currentPane();
 
     core::Core *_coreInstance;
@@ -85,12 +80,14 @@ private:
 
     QString _version;
 
-    SnapshotParameterPane *_snapshotPane;
+    SnapshotParameterPane    *_snapshotPane;
     ObservationParameterPane *_observationPane;
-    SweepParameterPane *_sweepPane;
+    SweepParameterPane       *_sweepPane;
+    CameraBtnBox *_cameraBtnBox;
 
-    SnapshotWidget     *_snapshot;
-    HistogramWidget    *_histogram;
+    LineEdit        *_sessionEdit;
+    SnapshotWidget  *_snapshot;
+    HistogramWidget *_histogram;
 };
 
 //------------------------------------------------------------------------------

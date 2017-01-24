@@ -1,6 +1,5 @@
 #include "SnapshotParameterPane.h"
 
-#include <Qdebug>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
@@ -8,22 +7,16 @@
 #include <QSettings>
 
 #include "tooling.h"
-#include "CameraBtnBox.h"
-#include "MainWindow.h"
-#include "ConfigurationDlg.h"
 
-#include "../core/Crystal.h"
-#include "../core/Core.h"
+#include "../core/Crystal.h" // TODO temperature remove this
 
 namespace gui {
 
 //------------------------------------------------------------------------------
 
-SnapshotParameterPane::SnapshotParameterPane(MainWindow* mainWindow,
-        const core::Crystal *crystal,
-        core::AbstractCrysTempProbe *crysTempProbe,
-        const double &stabilisationTime)
-    : BaseParameterPane(mainWindow)
+SnapshotParameterPane::SnapshotParameterPane(const core::Crystal *crystal,
+        core::AbstractCrysTempProbe *crysTempProbe)
+    : BaseParameterPane()
     , _crystal(crystal)
     , _crystalTempProbe(crysTempProbe)
     , _spectralBtn(new QRadioButton(tr("Optic")))
@@ -31,7 +24,6 @@ SnapshotParameterPane::SnapshotParameterPane(MainWindow* mainWindow,
     , _wavelengthEdit(new DoubleLineEdit)
     , _frequencyEdit(new DoubleLineEdit(9, 3, 3))
     , _powerEdit(new IntLineEdit(9, 4))
-    , _stabilisationTime(stabilisationTime)
 {
 
     // Parameter box ------------------------------------------------------------
@@ -48,19 +40,15 @@ SnapshotParameterPane::SnapshotParameterPane(MainWindow* mainWindow,
 
     BaseParameterPane::putInGrid(row);
 
-    _paramBoxLayout->addWidget(new QLabel("Session:"), row, 0);
-    _paramBoxLayout->addWidget(_sessionEdit, row, 1, 1, 2);
-    ++row;
-
     // Connectors
     connect(_wavelengthEdit, LineEdit::focusLost, this, recomputeParams);
     connect(_frequencyEdit, LineEdit::focusLost, this, recomputeParams);
 
     connect(_spectralBtn, QRadioButton::toggled, this, enableFieldsWrtMode);
-    connect(_spectralBtn, QRadioButton::toggled, this, refreshBtns);
-    connect(_frequencyEdit, LineEdit::textChanged, this, refreshBtns);
-    connect(_powerEdit, LineEdit::textChanged, this, refreshBtns);
-    connect(_wavelengthEdit, LineEdit::textChanged, this, refreshBtns);
+    connect(_spectralBtn, QRadioButton::toggled, this, parametersChanged);
+    connect(_frequencyEdit, LineEdit::textChanged, this, parametersChanged);
+    connect(_powerEdit, LineEdit::textChanged, this, parametersChanged);
+    connect(_wavelengthEdit, LineEdit::textChanged, this, parametersChanged);
 
     // Restoring
     restore();
@@ -139,7 +127,10 @@ bool SnapshotParameterPane::areParametersValid() const
 
 //------------------------------------------------------------------------------
 
-void SnapshotParameterPane::start(bool burst, bool record)
+void SnapshotParameterPane::start(bool burst,
+                                  bool record,
+                                  double stabilisationTime,
+                                  QString session)
 {
     if (_spectralBtn->isChecked())
     {
@@ -147,18 +138,21 @@ void SnapshotParameterPane::start(bool burst, bool record)
                               _exposureEdit->value(),
                               _cooldownTimeEdit->value(),
                               _cooldownPwrEdit->value(),
-                              _stabilisationTime,
+                              stabilisationTime,
                               burst,
-                              record ? _sessionEdit->text() : "");
+                              record,
+                              session);
+
     } else {
         emit acousticSnapshot(_frequencyEdit->value(),
                               _powerEdit->value(),
                               _exposureEdit->value(),
                               _cooldownTimeEdit->value(),
                               _cooldownPwrEdit->value(),
-                              _stabilisationTime,
+                              stabilisationTime,
                               burst,
-                              record ? _sessionEdit->text() : "");
+                              record,
+                              session);
     }
 }
 
@@ -214,7 +208,7 @@ void SnapshotParameterPane::restore()
     settings.endGroup();
 
     recomputeParams();
-    refreshBtns();
+    emit parametersChanged();
 }
 
 //------------------------------------------------------------------------------

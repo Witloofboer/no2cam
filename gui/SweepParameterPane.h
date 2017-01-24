@@ -15,10 +15,14 @@ class SweepParameterPane : public BaseParameterPane
 {
     Q_OBJECT
 public:
-    explicit SweepParameterPane(MainWindow *mainWindow,
-                                const double &stabilisationTime);
+    explicit SweepParameterPane();
     void updateState(bool isAppReady);
     void persiste() const;
+
+    void start(bool burst,
+               bool record,
+               double stabilisationTime,
+               QString session) override;
 
 signals:
     void sweepRequested(double wavelength1,
@@ -29,10 +33,8 @@ signals:
                         double cooldownPwr,
                         double stabilisationTime,
                         bool burst,
+                        bool record,
                         const QString& session);
-
-protected slots:
-    void start(bool burst, bool record) override;
 
 protected:
     bool areParametersValid() const override;
@@ -43,8 +45,6 @@ private:
     DoubleLineEdit *_wavelength1Edit;
     DoubleLineEdit *_wavelength2Edit;
     DoubleLineEdit *_wavelengthStepEdit;
-
-    const double &_stabilisationTime;
 };
 
 //------------------------------------------------------------------------------

@@ -53,11 +53,12 @@ void Core::spectralSnapshot(double wavelength,
                             int cooldownPwr,
                             int stabilisationTime,
                             bool burst,
-                            const QString& session)
+                            bool record,
+                            QString session)
 {
     qInfo("Spectral snap: wl=%.1f nm", wavelength);
     setCommonParams(SpectralSnap, exposure, cooldownTime, cooldownPwr,
-                    stabilisationTime, burst, session);
+                    stabilisationTime, burst, record, session);
 
     auto &p = _p.specSnap;
     p.in_wavelength = wavelength;
@@ -74,12 +75,13 @@ void Core::acousticSnapshot(double frequency,
                             int cooldownPwr,
                             int stabilisationTime,
                             bool burst,
-                            const QString& session)
+                            bool record,
+                            QString session)
 {
     qInfo("Acoustic: freq=%.1f MHz, power=%.1f mW", frequency, power);
 
     setCommonParams(AcousticSnap, exposure, cooldownTime, cooldownPwr,
-                    stabilisationTime, burst, session);
+                    stabilisationTime, burst, record, session);
 
     auto &p = _p.acouSnap;
     p.in_frequency = frequency;
@@ -98,13 +100,14 @@ void Core::observation(double wavelength1,
                        int cooldownPwr,
                        int stabilisationTime,
                        bool burst,
-                       const QString &session)
+                       bool record,
+                       QString session)
 {
     qInfo("Observation: wl1=%.1f nm, wl2=%.1f nm",
           wavelength1, wavelength2);
 
     setCommonParams(Obs, exposure, cooldownTime, cooldownPwr,
-                    stabilisationTime, burst, session);
+                    stabilisationTime, burst, record, session);
 
     auto &p = _p.obs;
     p.in_wavelengths[0] = wavelength1;
@@ -127,13 +130,14 @@ void Core::sweep(double wavelength1,
                  int cooldownPwr,
                  int stabilisationTime,
                  bool burst,
-                 const QString &session)
+                 bool record,
+                 QString session)
 {
     qInfo("Sweep: wl1=%.1f nm, wl2=%.1f nm, step=%.1f nm",
           wavelength1, wavelength2, wavelengthStep);
 
     setCommonParams(Sweep, exposure, cooldownTime, cooldownPwr,
-                    stabilisationTime, burst, session);
+                    stabilisationTime, burst, record, session);
 
     auto &p = _p.swp;
     p.in_minWavelength = wavelength1;
@@ -414,7 +418,7 @@ void Core::saveSnapshot(const QDateTime& dateTime,
                         double temperature,
                         BaseCamera::Snapshot& snapshot)
 {
-    if (_session.isEmpty()) return;
+    if (!_record) return;
 
     const QChar zero('0');
 
@@ -423,8 +427,8 @@ void Core::saveSnapshot(const QDateTime& dateTime,
                    : QString("%1").arg(exposure);
 
     auto _filename = QString("%1-%2-%3-%4nm-%5Ghz-%6mW-%7ms-%8degC.dat")
-                     . arg(_session)
                      . arg(dateTime.toString("yyMMdd-HHmmss.zzz"))
+                     . arg(_session.isEmpty() ? "_" : _session)
                      . arg(_modeToCode[mode])
                      . arg(wavelength, 1, 'f', 1, zero)
                      . arg(frequency, 1, 'f', 3, zero)
@@ -449,6 +453,7 @@ void Core::setCommonParams(Mode mode,
                            int cooldownPwr,
                            int stabilisationTime,
                            bool burst,
+                           bool record,
                            const QString &session)
 {
     QByteArray s = session.toLatin1();
@@ -465,6 +470,7 @@ void Core::setCommonParams(Mode mode,
     _cooldownPwr = cooldownPwr;
     _stabilisationT->setInterval(stabilisationTime);
     _bursting = burst;
+    _record = record;
     _session = session;
 }
 

@@ -58,7 +58,8 @@ public slots:
                           int cooldownPwr,
                           int stabilisationTime,
                           bool burst,
-                          const QString& session);
+                          bool record,
+                          QString session);
 
     /**
      * Initiate a snapshoting session for a fixed frequency and power.
@@ -78,7 +79,8 @@ public slots:
                           int cooldownPwr,
                           int stabilisationTime,
                           bool burst,
-                          const QString& session);
+                          bool record,
+                          QString session);
 
     /**
      * Initiate an observation
@@ -100,7 +102,8 @@ public slots:
                      int cooldownPwr,
                      int stabilisationTime,
                      bool burst,
-                     const QString& session);
+                     bool record,
+                     QString session);
 
 
     /**
@@ -124,7 +127,8 @@ public slots:
                int cooldownPwr,
                int stabilisationTime,
                bool burst,
-               const QString& session);
+               bool record,
+               QString session);
 
     /**
       * Requests the stop of all the devices.
@@ -144,7 +148,7 @@ private slots:
 
 private:
     enum Mode {READY, SpectralSnap, AcousticSnap, Obs, Sweep};
-    const QString _modeToCode[5] = {"XX", "Spt", "Acs", "Obs", "Swo"};
+    const QString _modeToCode[5] = {"XX", "S", "A", "O", "W"};
 
     void cooldown();
     void setCommonParams(Mode mode,
@@ -153,6 +157,7 @@ private:
                          int cooldownPwr,
                          int stabilisationTime,
                          bool burst,
+                         bool record,
                          const QString &session);
 
     void saveSnapshot(const QDateTime &dateTime,
@@ -182,7 +187,7 @@ private:
     bool _bursting;
     BaseCamera::Snapshot _snapshot;
     QDateTime _snapTime;
-
+    bool _record;
     QString _session;
 
     struct WlSnapshotParams

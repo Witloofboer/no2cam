@@ -11,13 +11,14 @@
 #include <QToolBar>
 #include <QVBoxLayout>
 
-
+#include "CameraBtnBox.h"
 #include "SnapshotParameterPane.h"
 #include "ObservationParameterPane.h"
 #include "SweepParameterPane.h"
 #include "ConfigurationDlg.h"
 #include "HistogramWidget.h"
 #include "SnapshotWidget.h"
+#include "tooling.h"
 
 #include "core.h"
 #include "core/Crystal.h"
@@ -39,12 +40,11 @@ MainWindow::MainWindow(core::Crystal *crystal,
     , _sweepModeActn(new QAction("Sweep over &wavelength", this))
     , _configParamActn(new QAction("&Configure", this))
     , _version(version)
-    , _snapshotPane(new SnapshotParameterPane(this, crystal, crysTempProb,
-                    _configDlg->stabilisationTime()))
-    , _observationPane(new ObservationParameterPane(this,
-                       _configDlg->stabilisationTime()))
-    , _sweepPane(new SweepParameterPane(this,
-                                        _configDlg->stabilisationTime()))
+    , _snapshotPane(new SnapshotParameterPane(crystal, crysTempProb))
+    , _observationPane(new ObservationParameterPane)
+    , _sweepPane(new SweepParameterPane)
+    , _cameraBtnBox(new CameraBtnBox)
+    , _sessionEdit(new LineEdit)
     , _snapshot(new SnapshotWidget)
     , _histogram(new HistogramWidget)
 {
@@ -53,9 +53,19 @@ MainWindow::MainWindow(core::Crystal *crystal,
     // -------------------------------------------------------------------------
 
     // Left part
+    auto leftLayout = new QVBoxLayout;
     _stackedWdgt->addWidget(_snapshotPane);
     _stackedWdgt->addWidget(_observationPane);
     _stackedWdgt->addWidget(_sweepPane);
+
+    auto lineEditLayout = new QHBoxLayout;
+    lineEditLayout->addWidget(new QLabel("Session:"));
+    lineEditLayout->addWidget(_sessionEdit);
+
+    leftLayout->addWidget(_stackedWdgt);
+    leftLayout->addWidget(_cameraBtnBox);
+    leftLayout->addLayout(lineEditLayout);
+
 
     // Middle part
     auto snapshotLayout = new QVBoxLayout;
@@ -73,7 +83,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
 
     auto mainLayout = new QHBoxLayout;
 
-    mainLayout->addWidget(_stackedWdgt);
+    mainLayout->addLayout(leftLayout);
     mainLayout->addWidget(snapshotBox);
     mainLayout->addWidget(histogramBox);
 
@@ -85,15 +95,6 @@ MainWindow::MainWindow(core::Crystal *crystal,
     // -------------------------------------------------------------------------
     // Actions
     // -------------------------------------------------------------------------
-
-    auto newAction = new QAction("&New", this);
-    auto loadAction = new QAction("&Load", this);
-    auto saveAction = new QAction("&Save", this);
-    auto saveAsAction = new QAction("Save &as", this);
-    connect(newAction, QAction::triggered, this, newSession);
-    connect(loadAction, QAction::triggered, this, loadSession);
-    connect(saveAction, QAction::triggered, this, saveSession);
-    connect(saveAsAction, QAction::triggered, this, saveAsSession);
 
     _configParamActn->setIcon(QIcon(":/icons/C-gold-24.png"));
     _configParamActn->setIconVisibleInMenu(false);
@@ -132,9 +133,6 @@ MainWindow::MainWindow(core::Crystal *crystal,
     _sweepModeActn->setStatusTip(tr("Switch to wavelength sweeping mode"));
     connect(_sweepModeActn, QAction::triggered, this, switchMode);
 
-    auto cameraStatusAction = new QAction("&Camera status", this);
-    connect(cameraStatusAction, QAction::triggered, this, cameraStatus);
-
     auto releaseNotesAction = new QAction("&Release Notes", this);
     connect(releaseNotesAction, QAction::triggered, this, releaseNotes);
 
@@ -146,11 +144,6 @@ MainWindow::MainWindow(core::Crystal *crystal,
     // -------------------------------------------------------------------------
 
     auto fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(newAction);
-    fileMenu->addAction(loadAction);
-    fileMenu->addAction(saveAction);
-    fileMenu->addAction(saveAsAction);
-    fileMenu->addSeparator();
     fileMenu->addAction(_configParamActn);
     fileMenu->addSeparator();
     fileMenu->addAction(exitAction);
@@ -159,9 +152,6 @@ MainWindow::MainWindow(core::Crystal *crystal,
     modeMenu->addAction(_snapshotModeActn);
     modeMenu->addAction(_observationModeActn);
     modeMenu->addAction(_sweepModeActn);
-
-    auto deviceMenu = menuBar()->addMenu(tr("&Devices"));
-    deviceMenu->addAction(cameraStatusAction);
 
     auto helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(releaseNotesAction);
@@ -195,6 +185,10 @@ MainWindow::MainWindow(core::Crystal *crystal,
     connect(coreInstance, core::Core::ready, this, updateState);
     connect(coreInstance, core::Core::snapshotAvailable, this, updateSnapshot);
 
+    connect(_snapshotPane, BaseParameterPane::parametersChanged, this, refreshBtns);
+    connect(_observationPane, BaseParameterPane::parametersChanged, this, refreshBtns);
+    connect(_sweepPane, BaseParameterPane::parametersChanged, this, refreshBtns);
+
     connect(_snapshotPane, SnapshotParameterPane::spectralSnapshot,
             coreInstance, core::Core::spectralSnapshot);
     connect(_snapshotPane, SnapshotParameterPane::acousticSnapshot,
@@ -204,7 +198,22 @@ MainWindow::MainWindow(core::Crystal *crystal,
     connect(_sweepPane, SweepParameterPane::sweepRequested,
             coreInstance, core::Core::sweep);
 
-    connect(this, stop, coreInstance, core::Core::stop);
+    connect(this, stopped, coreInstance, core::Core::stop);
+    connect(_cameraBtnBox, CameraBtnBox::started, this, start);
+    connect(_cameraBtnBox, CameraBtnBox::stopped, this, stopped);
+
+    refreshBtns();
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::start(bool burst, bool record)
+{
+    updateState(false);
+    currentPane()->start(burst,
+                         record,
+                         _configDlg->stabilisationTime(),
+                         _sessionEdit->text());
 }
 
 //------------------------------------------------------------------------------
@@ -218,6 +227,8 @@ void MainWindow::updateState(bool isAppReady)
     _snapshotPane->updateState(isAppReady);
     _observationPane->updateState(isAppReady);
     _sweepPane->updateState(isAppReady);
+    _cameraBtnBox->updateState(isAppReady);
+    _sessionEdit->setEnabled(isAppReady);
 }
 
 //------------------------------------------------------------------------------
@@ -255,50 +266,22 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 //------------------------------------------------------------------------------
 
-void MainWindow::newSession()
-{
-    qWarning("New session NOT IMPLEMENTED"); //TODO
-}
-
-//------------------------------------------------------------------------------
-
-void MainWindow::loadSession()
-{
-    qWarning("Load session NOT IMPLEMENTED"); //TODO
-}
-
-//------------------------------------------------------------------------------
-
-bool MainWindow::saveSession()
-{
-    qWarning("Save session NOT IMPLEMENTED"); //TODO
-    return true;
-}
-
-//------------------------------------------------------------------------------
-
-bool MainWindow::saveAsSession()
-{
-    qWarning("Save as session NOT IMPLEMENTED"); //TODO
-    return true;
-}
-
-
-//------------------------------------------------------------------------------
-
 void MainWindow::switchMode()
 {
     if (_snapshotModeActn->isChecked())
     {
         _stackedWdgt->setCurrentIndex(0);
+        refreshBtns();
     }
     else if (_observationModeActn->isChecked())
     {
         _stackedWdgt->setCurrentIndex(1);
+        refreshBtns();
     }
     else if (_sweepModeActn->isChecked())
     {
         _stackedWdgt->setCurrentIndex(2);
+        refreshBtns();
     }
     else
     {
@@ -308,16 +291,16 @@ void MainWindow::switchMode()
 
 //------------------------------------------------------------------------------
 
-void MainWindow::configure()
+void MainWindow::refreshBtns()
 {
-    _configDlg->exec();
+    _cameraBtnBox->enableBtns(currentPane()->areParametersValid(), true);
 }
 
 //------------------------------------------------------------------------------
 
-void MainWindow::cameraStatus()
+void MainWindow::configure()
 {
-    qWarning("Save session NOT IMPLEMENTED");
+    _configDlg->exec();
 }
 
 //------------------------------------------------------------------------------
@@ -356,36 +339,6 @@ void MainWindow::releaseNotes()
       + "mockups and there is no mechanism yet to store the snapshot data on "
       + "disk.</p>"
       , QMessageBox::Ok);
-}
-
-//------------------------------------------------------------------------------
-
-bool MainWindow::okToContinue()
-{
-
-    if (isWindowModified())
-    {
-        auto code = QMessageBox::warning
-                    ( this
-                      , tr("NO<sub>2</sub> Camera Command Interface")
-                      , tr("The session has been modified.\n"
-                           "Do you want to save your changes?")
-                      , QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-
-        switch (code)
-        {
-        case QMessageBox::Yes:
-            return saveSession();
-        case QMessageBox::No:
-            return true;
-        case QMessageBox::Cancel:
-            return false;
-        default:
-            Q_UNREACHABLE();
-        }
-    }
-    else
-        return true;
 }
 
 //------------------------------------------------------------------------------

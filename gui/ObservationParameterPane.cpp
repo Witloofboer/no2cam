@@ -1,24 +1,19 @@
 #include "ObservationParameterPane.h"
 
-#include <QGridLayout>
 #include <QGroupBox>
-#include <QLabel>
 #include <QSettings>
 
 #include "tooling.h"
-#include "ConfigurationDlg.h"
 
 namespace gui {
 
 //------------------------------------------------------------------------------
 
-ObservationParameterPane::ObservationParameterPane(MainWindow* mainWindow,
-        const double &stabilisationTime)
-    : BaseParameterPane(mainWindow)
+ObservationParameterPane::ObservationParameterPane()
+    : BaseParameterPane()
     , _wavelength1Edit(new DoubleLineEdit)
     , _wavelength2Edit(new DoubleLineEdit)
     , _snapPerObsEdit(new IntLineEdit)
-    , _stabilisationTime(stabilisationTime)
 {
     // Parameter box -----------------------------------------------------------
     _parameterBox->setTitle(tr("Observation mode"));
@@ -31,14 +26,10 @@ ObservationParameterPane::ObservationParameterPane(MainWindow* mainWindow,
 
     BaseParameterPane::putInGrid(row);
 
-    _paramBoxLayout->addWidget(new QLabel("Session:"), row, 0);
-    _paramBoxLayout->addWidget(_sessionEdit, row, 1, 1, 2);
-    ++row;
-
     // Connectors
-    connect(_wavelength1Edit, LineEdit::textChanged, this, refreshBtns);
-    connect(_wavelength2Edit, LineEdit::textChanged, this, refreshBtns);
-    connect(_snapPerObsEdit, LineEdit::textChanged, this, refreshBtns);
+    connect(_wavelength1Edit, LineEdit::textChanged, this, parametersChanged);
+    connect(_wavelength2Edit, LineEdit::textChanged, this, parametersChanged);
+    connect(_snapPerObsEdit, LineEdit::textChanged, this, parametersChanged);
 
     restore();
 }
@@ -55,7 +46,10 @@ void ObservationParameterPane::updateState(bool isAppReady)
 
 //------------------------------------------------------------------------------
 
-void ObservationParameterPane::start(bool burst, bool record)
+void ObservationParameterPane::start(bool burst,
+                                     bool record,
+                                     double stabilisationTime,
+                                     QString session)
 {
     emit observationRequested(_wavelength1Edit->value(),
                               _wavelength2Edit->value(),
@@ -63,9 +57,10 @@ void ObservationParameterPane::start(bool burst, bool record)
                               _snapPerObsEdit->value(),
                               _cooldownTimeEdit->value(),
                               _cooldownPwrEdit->value(),
-                              _stabilisationTime,
+                              stabilisationTime,
                               burst,
-                              record ? _sessionEdit->text() : "");
+                              record,
+                              session);
 }
 
 //------------------------------------------------------------------------------
@@ -121,7 +116,7 @@ void ObservationParameterPane::restore()
     _snapPerObsEdit->setText(settings.value(snapPerObsLbl).toString());
     settings.endGroup();
 
-    refreshBtns();
+    emit parametersChanged();
 }
 
 //------------------------------------------------------------------------------

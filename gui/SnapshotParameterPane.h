@@ -9,7 +9,7 @@ class QRadioButton;
 
 namespace core {
 class Crystal;
-class AbstractCrysTempProbe;
+class AbstractCrysTempProbe; // should be set via a signal
 }
 
 namespace gui {
@@ -23,12 +23,15 @@ class SnapshotParameterPane : public BaseParameterPane
 {
     Q_OBJECT
 public:
-    explicit SnapshotParameterPane(MainWindow* mainWindow,
-                                   const core::Crystal *crystal,
-                                   core::AbstractCrysTempProbe *crysTempProbe,
-                                   const double &stabilisationTime);
+    explicit SnapshotParameterPane(const core::Crystal *crystal,
+                                   core::AbstractCrysTempProbe *crysTempProbe);
     void updateState(bool isAppReady);
     void persiste() const;
+
+    void start(bool burst,
+               bool record,
+               double stabilisationTime,
+               QString session) override;
 
 signals:
     void spectralSnapshot(double wavelength,
@@ -37,6 +40,7 @@ signals:
                           double cooldownPwr,
                           double stabilisationTime,
                           bool burst,
+                          bool record,
                           const QString& session);
 
     void acousticSnapshot(double frequency,
@@ -46,12 +50,11 @@ signals:
                           double cooldownPwr,
                           double stabilisationTime,
                           bool burst,
+                          bool record,
                           const QString& session);
 public slots:
     void recomputeParams();
 
-protected slots:
-    void start(bool burst, bool record) override;
 
 protected:
     bool areParametersValid() const override;
@@ -70,8 +73,6 @@ private:
     DoubleLineEdit *_wavelengthEdit;
     DoubleLineEdit *_frequencyEdit;
     IntLineEdit    *_powerEdit;
-
-    const double &_stabilisationTime;
 };
 
 //------------------------------------------------------------------------------
