@@ -39,6 +39,8 @@ public:
 signals:
     void ready(bool isReady);
     void snapshotAvailable();
+    void errorOnFileCreation(QString dirname, QString filename);
+    void errorOnFileWritting(QString dirname, QString filename);
 
 public slots:
     /**
@@ -59,6 +61,7 @@ public slots:
                           int stabilisationTime,
                           bool burst,
                           bool record,
+                          QString dataFolder,
                           QString session);
 
     /**
@@ -80,6 +83,7 @@ public slots:
                           int stabilisationTime,
                           bool burst,
                           bool record,
+                          QString dataFolder,
                           QString session);
 
     /**
@@ -103,6 +107,7 @@ public slots:
                      int stabilisationTime,
                      bool burst,
                      bool record,
+                     QString dataFolder,
                      QString session);
 
 
@@ -128,6 +133,7 @@ public slots:
                int stabilisationTime,
                bool burst,
                bool record,
+               QString dataFolder,
                QString session);
 
     /**
@@ -158,6 +164,7 @@ private:
                          int stabilisationTime,
                          bool burst,
                          bool record,
+                         const QString &dataFolder,
                          const QString &session);
 
     void saveSnapshot(const QDateTime &dateTime,
@@ -188,6 +195,7 @@ private:
     BaseCamera::Snapshot _snapshot;
     QDateTime _snapTime;
     bool _record;
+    QString _dataFolder;
     QString _session;
 
     struct WlSnapshotParams

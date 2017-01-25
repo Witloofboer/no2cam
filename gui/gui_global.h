@@ -28,7 +28,8 @@ class AbstractDriver;
  *@param camera the camera to use. The core layer takes ownership of the camera
  *    as the Core singleton becomes the camera's parent.
  */
-GUISHARED_EXPORT void init(const char *version,
+GUISHARED_EXPORT void init(const QString& version,
+                           const QString& releaseNotes,
                            core::AbstractCrysTempProbe *crysTempProb,
                            core::BaseCamera *camera,
                            core::AbstractGenerator *generator,

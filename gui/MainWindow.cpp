@@ -33,7 +33,8 @@ namespace gui {
 MainWindow::MainWindow(core::Crystal *crystal,
                        core::AbstractCrysTempProbe *crysTempProb,
                        core::Core *coreInstance,
-                       const QString &version)
+                       const QString &version,
+                       const QString &releaseNotes)
     : QMainWindow()
     , _coreInstance(coreInstance)
     , _configDlg(new ConfigurationDlg(this, crystal))
@@ -45,6 +46,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
     , _configParamActn(new QAction("&Configure", this))
     , _dataFolder()
     , _version(version)
+    , _releaseNotes(releaseNotes)
     , _snapshotPane(new SnapshotParameterPane(crystal, crysTempProb))
     , _observationPane(new ObservationParameterPane)
     , _sweepPane(new SweepParameterPane)
@@ -141,7 +143,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
     connect(_sweepModeActn, QAction::triggered, this, switchMode);
 
     auto releaseNotesAction = new QAction("&Release Notes", this);
-    connect(releaseNotesAction, QAction::triggered, this, releaseNotes);
+    connect(releaseNotesAction, QAction::triggered, this, displayReleaseNotes);
 
     auto aboutAction = new QAction("&About", this);
     connect(aboutAction, QAction::triggered, this, about);
@@ -189,7 +191,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
     if (!_configDlg->isValid())
         QTimer::singleShot(0, this, displayConfigurationDlg);
 
-    connect(coreInstance, core::Core::ready, this, updateState);
+    connect(coreInstance, core::Core::ready, this, updateGuiState);
     connect(coreInstance, core::Core::snapshotAvailable, this, updateSnapshot);
 
     connect(_snapshotPane, BaseParameterPane::parametersChanged, this, refreshBtns);
@@ -209,6 +211,8 @@ MainWindow::MainWindow(core::Crystal *crystal,
     connect(_cameraBtnBox, CameraBtnBox::started, this, start);
     connect(_cameraBtnBox, CameraBtnBox::stopped, this, stopped);
 
+    connect(coreInstance, core::Core::errorOnFileCreation, this, displayErrorOnFileCreation);
+    connect(coreInstance, core::Core::errorOnFileWritting, this, displayErrorOnFileWritting);
     refreshBtns();
     restore();
 }
@@ -217,16 +221,38 @@ MainWindow::MainWindow(core::Crystal *crystal,
 
 void MainWindow::start(bool burst, bool record)
 {
-    updateState(false);
+    if (record)
+    {
+        QDir dir(_dataFolder);
+        bool ok=dir.mkpath(".");
+
+        if (!ok)
+        {
+            QMessageBox::critical
+            ( this
+              , tr("NO2 Camera: Operation cancelled")
+              , QString(tr("<p>The data folder %1 does not exist and can not be "
+                           "created.</p>"
+                           "<p>Please use another data directory or enable its "
+                           "creation before re-attempting the recording.</p>")
+                       ).arg(_dataFolder)
+              , QMessageBox::Ok);
+            updateGuiState(true);
+            return;
+        }
+    }
+
+    updateGuiState(false);
     currentPane()->start(burst,
                          record,
                          _configDlg->stabilisationTime(),
-                         _sessionEdit->text());
+                         _sessionEdit->text(),
+                         _dataFolder);
 }
 
 //------------------------------------------------------------------------------
 
-void MainWindow::updateState(bool isAppReady)
+void MainWindow::updateGuiState(bool isAppReady)
 {
     _snapshotModeActn->setEnabled(isAppReady);
     _observationModeActn->setEnabled(isAppReady);
@@ -253,12 +279,43 @@ void MainWindow::displayConfigurationDlg()
 {
     QMessageBox::warning
     ( this
-      , tr("NO2> Camera Command Interface")
+      , tr("NO2 Camera Command Interface")
       , "<h3>" + tr("Welcome to NO<sub>2</sub> Camera Command Interface") + "</h3>" +
       tr("<p>No valid configuration was found from a previous usage.</p>"
          "<p>Therefore, you need to provide the parameters to use the application.</p>")
       , QMessageBox::Ok);
     _configDlg->display(true);
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::displayErrorOnFileCreation(QString datafolder,
+        QString filename)
+{
+    QMessageBox::critical
+    ( this
+      , tr("NO2 Camera: Operation cancelled")
+      , QString(tr("<p><b>Failure to open file in data folder.</b></p>"
+                   "<p><b>File:</b> %1<br/><b>Folder:</b> %2</p>"
+                   "<p>Hint: Check the folder access rights.</p>"
+                  )).arg(filename).arg(datafolder)
+      , QMessageBox::Ok);
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::displayErrorOnFileWritting(QString datafolder,
+        QString filename)
+{
+    QMessageBox::critical
+    ( this
+      , tr("NO2 Camera: Operation cancelled")
+      , QString(tr("<p><b>Failure to dump snapshot in file.</b></p>"
+                   "<p><b>File:</b> %1<br/><b>Folder:</b> %2</p>"
+                   "<p>Hint: check the space left on the device and your usage"
+                   "quota.</p>"
+                  )).arg(filename).arg(datafolder)
+      , QMessageBox::Ok);
 }
 
 //------------------------------------------------------------------------------
@@ -336,7 +393,7 @@ void MainWindow::about()
       , tr("<h3>NO<sub>2</sub> Camera Commander</h3>")
       + "<p>" + tr("Version") + ": " + _version + "</p>"
       + tr("<p>Author: Didier Pieroux (didier.pieroux@aeronomie.be)</p>")
-      + tr("<p>Copyright 2016 BIRA-IASB</p>")
+      + tr("<p>Copyright 2016-2017 BIRA-IASB</p>")
       + tr("<p>This program is provided AS IS, with NO WARRANTY OF ANY "
            "KIND.</p>")
     );
@@ -344,23 +401,14 @@ void MainWindow::about()
 
 //------------------------------------------------------------------------------
 
-void MainWindow::releaseNotes()
+void MainWindow::displayReleaseNotes()
 {
     QMessageBox::information
     ( this
       , tr("NO<sub>2</sub> Camera Command Interface")
       , "<h2>" + tr("Release notes of the version") + " " + _version + "</h2>"
       + "<h3>" + tr("Implemented functionalities") + "</h3>"
-
-      + "<p> This version contains a full implementation of the GUI (with the "
-      + "exception of the data folder selection) and the business logic "
-      + "required by the  GUI.</p>"
-
-      + "<h3>" + tr("Missing functionalities") + "</h3>"
-
-      + "<p> All devices (camera, electronic boards, temperator sensor) are "
-      + "mockups and there is no mechanism yet to store the snapshot data on "
-      + "disk.</p>"
+      + _releaseNotes
       , QMessageBox::Ok);
 }
 
@@ -373,7 +421,7 @@ BaseParameterPane *MainWindow::currentPane()
 
 //------------------------------------------------------------------------------
 
-static const char *dataFolderLbl = "Data folder";
+static const char *dataFolderLbl = "data folder";
 
 void MainWindow::persiste()
 {
@@ -395,7 +443,7 @@ void MainWindow::restore()
 
     _dataFolder = settings.value(dataFolderLbl, "").toString();
     if (_dataFolder.isEmpty())
-        _dataFolder = QDir::homePath();
+        _dataFolder = QDir::homePath()+"/no2cam";
 
     refreshWindowTitle();
 }
@@ -404,7 +452,7 @@ void MainWindow::restore()
 
 void MainWindow::refreshWindowTitle()
 {
-    setWindowTitle("NO2 Camera - "+ _dataFolder);
+    setWindowTitle("NO2 Camera - "+ QDir::toNativeSeparators(_dataFolder));
 }
 
 //------------------------------------------------------------------------------

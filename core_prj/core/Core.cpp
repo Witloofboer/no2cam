@@ -33,8 +33,6 @@ Core::Core(const Crystal *crystal,
     , _mode(READY)
     , _bursting(false)
     , _snapshot{0}
-    , _snapTime()
-    , _session()
 {
     camera->setParent(this); // TODO setParent for the other devices
     _cooldownT->setSingleShot(true);
@@ -54,11 +52,12 @@ void Core::spectralSnapshot(double wavelength,
                             int stabilisationTime,
                             bool burst,
                             bool record,
+                            QString dataFolder,
                             QString session)
 {
     qInfo("Spectral snap: wl=%.1f nm", wavelength);
     setCommonParams(SpectralSnap, exposure, cooldownTime, cooldownPwr,
-                    stabilisationTime, burst, record, session);
+                    stabilisationTime, burst, record, dataFolder, session);
 
     auto &p = _p.specSnap;
     p.in_wavelength = wavelength;
@@ -76,12 +75,13 @@ void Core::acousticSnapshot(double frequency,
                             int stabilisationTime,
                             bool burst,
                             bool record,
+                            QString dataFolder,
                             QString session)
 {
     qInfo("Acoustic: freq=%.1f MHz, power=%.1f mW", frequency, power);
 
     setCommonParams(AcousticSnap, exposure, cooldownTime, cooldownPwr,
-                    stabilisationTime, burst, record, session);
+                    stabilisationTime, burst, record, dataFolder, session);
 
     auto &p = _p.acouSnap;
     p.in_frequency = frequency;
@@ -101,13 +101,14 @@ void Core::observation(double wavelength1,
                        int stabilisationTime,
                        bool burst,
                        bool record,
+                       QString dataFolder,
                        QString session)
 {
     qInfo("Observation: wl1=%.1f nm, wl2=%.1f nm",
           wavelength1, wavelength2);
 
     setCommonParams(Obs, exposure, cooldownTime, cooldownPwr,
-                    stabilisationTime, burst, record, session);
+                    stabilisationTime, burst, record, dataFolder, session);
 
     auto &p = _p.obs;
     p.in_wavelengths[0] = wavelength1;
@@ -131,13 +132,14 @@ void Core::sweep(double wavelength1,
                  int stabilisationTime,
                  bool burst,
                  bool record,
+                 QString dataFolder,
                  QString session)
 {
     qInfo("Sweep: wl1=%.1f nm, wl2=%.1f nm, step=%.1f nm",
           wavelength1, wavelength2, wavelengthStep);
 
     setCommonParams(Sweep, exposure, cooldownTime, cooldownPwr,
-                    stabilisationTime, burst, record, session);
+                    stabilisationTime, burst, record, dataFolder, session);
 
     auto &p = _p.swp;
     p.in_minWavelength = wavelength1;
@@ -436,15 +438,31 @@ void Core::saveSnapshot(const QDateTime& dateTime,
                      . arg(expo)
                      . arg(temperature, 1, 'f', 1, zero);
 
-    QFile file(_filename);
+    QFile file(_dataFolder+"/"+_filename);
     qInfo("Writing snapshot on disk");
-    file.open(QIODevice::WriteOnly);
-    const qint64 size = BaseCamera::size;
 
-    file.write(reinterpret_cast<const char*>(snapshot), size*size*2);
+    const bool ok = file.open(QIODevice::WriteOnly);
+
+    if (! ok)
+    {
+        stop();
+        emit errorOnFileCreation(_dataFolder, _filename);
+        return;
+    }
+
+    auto buf = reinterpret_cast<const char*>(snapshot);
+    const qint64 bufSize = BaseCamera::size*BaseCamera::size*2;
+
+    const qint64 onDisk = file.write(buf, bufSize);
+
     file.close();
-}
 
+    if (bufSize != onDisk)
+    {
+        stop();
+        emit errorOnFileWritting(_dataFolder, _filename);
+    }
+}
 //------------------------------------------------------------------------------
 
 void Core::setCommonParams(Mode mode,
@@ -454,6 +472,7 @@ void Core::setCommonParams(Mode mode,
                            int stabilisationTime,
                            bool burst,
                            bool record,
+                           const QString &dataFolder,
                            const QString &session)
 {
     QByteArray s = session.toLatin1();
@@ -471,6 +490,7 @@ void Core::setCommonParams(Mode mode,
     _stabilisationT->setInterval(stabilisationTime);
     _bursting = burst;
     _record = record;
+    _dataFolder = dataFolder;
     _session = session;
 }
 

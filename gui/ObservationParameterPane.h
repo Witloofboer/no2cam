@@ -23,7 +23,8 @@ public:
     void start(bool burst,
                bool record,
                double stabilisationTime,
-               QString session) override;
+               const QString& session,
+               const QString& dataFolder) override;
 
 signals:
     void observationRequested(double wavelength1,
@@ -35,7 +36,8 @@ signals:
                               double stabilisationTime,
                               bool burst,
                               bool record,
-                              const QString& session);
+                              QString dataFolder,
+                              QString session);
 
 protected:
     bool areParametersValid() const override;

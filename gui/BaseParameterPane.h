@@ -26,7 +26,8 @@ public:
     virtual void start(bool burst,
                        bool record,
                        double stabilisationTime,
-                       QString session) =0;
+                       const QString& session,
+                       const QString& dataFolder) =0;
 
     virtual bool areParametersValid() const;
 

@@ -130,7 +130,8 @@ bool SnapshotParameterPane::areParametersValid() const
 void SnapshotParameterPane::start(bool burst,
                                   bool record,
                                   double stabilisationTime,
-                                  QString session)
+                                  const QString &session,
+                                  const QString &dataFolder)
 {
     if (_spectralBtn->isChecked())
     {
@@ -141,6 +142,7 @@ void SnapshotParameterPane::start(bool burst,
                               stabilisationTime,
                               burst,
                               record,
+                              dataFolder,
                               session);
 
     } else {
@@ -152,6 +154,7 @@ void SnapshotParameterPane::start(bool burst,
                               stabilisationTime,
                               burst,
                               record,
+                              dataFolder,
                               session);
     }
 }

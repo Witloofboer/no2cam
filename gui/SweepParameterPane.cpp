@@ -50,7 +50,8 @@ void SweepParameterPane::updateState(bool isAppReady)
 void SweepParameterPane::start(bool burst,
                                bool record,
                                double stabilisationTime,
-                               QString session)
+                               const QString &session,
+                               const QString &dataFolder)
 {
     emit sweepRequested(_wavelength1Edit->value(),
                         _wavelength2Edit->value(),
@@ -61,6 +62,7 @@ void SweepParameterPane::start(bool burst,
                         stabilisationTime,
                         burst,
                         record,
+                        dataFolder,
                         session);
 }
 

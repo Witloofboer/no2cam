@@ -43,13 +43,14 @@ public:
     MainWindow(core::Crystal *crystal,
                core::AbstractCrysTempProbe *crysTempProb,
                core::Core *coreObj,
-               const QString &_version);
+               const QString &version,
+               const QString &releaseNotes);
 
 signals:
     void stopped();
 
 public slots:
-    void updateState(bool isAppReady);
+    void updateGuiState(bool isAppReady);
     void updateSnapshot();
 
 protected:
@@ -62,10 +63,12 @@ private slots:
     void selectFolder();
     void configure();
 
-    void releaseNotes();
+    void displayReleaseNotes();
     void about();
 
     void displayConfigurationDlg();
+    void displayErrorOnFileCreation(QString datafolder, QString filename);
+    void displayErrorOnFileWritting(QString datafolder, QString filename);
 
 private:
     BaseParameterPane *currentPane();
@@ -85,6 +88,7 @@ private:
 
     QString _dataFolder;
     QString _version;
+    QString _releaseNotes;
 
     SnapshotParameterPane    *_snapshotPane;
     ObservationParameterPane *_observationPane;

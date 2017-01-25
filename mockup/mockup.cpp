@@ -17,7 +17,14 @@ int main(int argc, char *argv[])
 
     QApplication application(argc, argv);
 
+    QString releaseNotes(
+        "<p> This version contains a full implementation of the GUI (with the "
+        "exception of the data folder selection) and the business logic "
+        "required by the  GUI.</p>"
+        "<p><b>Note that in this version all devices are mockups.</b></p>");
+
     init("0.3.0 (mockup)",
+         releaseNotes,
          new MockCrysTempProbe,
          new MockCamera,
          new MockGenerator,

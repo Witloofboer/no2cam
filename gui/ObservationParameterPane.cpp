@@ -49,7 +49,8 @@ void ObservationParameterPane::updateState(bool isAppReady)
 void ObservationParameterPane::start(bool burst,
                                      bool record,
                                      double stabilisationTime,
-                                     QString session)
+                                     const QString &session,
+                                     const QString &dataFolder)
 {
     emit observationRequested(_wavelength1Edit->value(),
                               _wavelength2Edit->value(),
@@ -60,6 +61,7 @@ void ObservationParameterPane::start(bool burst,
                               stabilisationTime,
                               burst,
                               record,
+                              dataFolder,
                               session);
 }
 

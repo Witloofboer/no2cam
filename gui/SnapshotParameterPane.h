@@ -31,7 +31,8 @@ public:
     void start(bool burst,
                bool record,
                double stabilisationTime,
-               QString session) override;
+               const QString& session,
+               const QString& dataFolder) override;
 
 signals:
     void spectralSnapshot(double wavelength,
@@ -41,7 +42,8 @@ signals:
                           double stabilisationTime,
                           bool burst,
                           bool record,
-                          const QString& session);
+                          QString dataFolder,
+                          QString session);
 
     void acousticSnapshot(double frequency,
                           double power,
@@ -51,7 +53,8 @@ signals:
                           double stabilisationTime,
                           bool burst,
                           bool record,
-                          const QString& session);
+                          QString dataFolder,
+                          QString session);
 public slots:
     void recomputeParams();
 
