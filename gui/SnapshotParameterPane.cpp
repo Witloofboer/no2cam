@@ -14,11 +14,10 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-SnapshotParameterPane::SnapshotParameterPane(const core::Crystal *crystal,
-        core::AbstractCrysTempProbe *crysTempProbe)
+SnapshotParameterPane::SnapshotParameterPane(const core::Crystal *crystal)
     : BaseParameterPane()
     , _crystal(crystal)
-    , _crystalTempProbe(crysTempProbe)
+    , _temperature(20.0) // Initial value, will be updated
     , _spectralBtn(new QRadioButton(tr("Optic")))
     , _acousticBtn(new QRadioButton(tr("Acoustic")))
     , _wavelengthEdit(new DoubleLineEdit)
@@ -54,6 +53,8 @@ SnapshotParameterPane::SnapshotParameterPane(const core::Crystal *crystal,
     restore();
     enableFieldsWrtMode();
 }
+
+//------------------------------------------------------------------------------
 
 void SnapshotParameterPane::updateState(bool isAppReady)
 {
@@ -98,7 +99,8 @@ void SnapshotParameterPane::recomputeParams()
         if (_wavelengthEdit->isValid())
         {
             double freq, power;
-            _crystal->computeFreqPow(_wavelengthEdit->value(), 20, freq, power); // TODO temperature;
+            _crystal->computeFreqPow(_wavelengthEdit->value(),
+                                     _temperature, freq, power);
 
             _frequencyEdit->setValue(freq);
             _powerEdit->setValue(power);
@@ -109,11 +111,20 @@ void SnapshotParameterPane::recomputeParams()
     } else {
         if (_frequencyEdit->isValid())
         {
-            _wavelengthEdit->setValue(_crystal->wavelength(_frequencyEdit->value(), 20)); //TODO temperature
+            _wavelengthEdit->setValue(_crystal->wavelength(_frequencyEdit->value(),
+                                      _temperature));
         } else {
             _wavelengthEdit->setText("");
         }
     }
+}
+
+//------------------------------------------------------------------------------
+
+void SnapshotParameterPane::updateTemperature(double temperature)
+{
+    _temperature = temperature;
+    recomputeParams();
 }
 
 //------------------------------------------------------------------------------

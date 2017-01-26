@@ -25,8 +25,9 @@ Core::Core(const Crystal *crystal,
     : QObject()
     , _cooldownT(new QTimer(this))
     , _stabilisationT(new QTimer(this))
+    , _temperatureT(new QTimer(this))
     , _crystal(crystal)
-    , _crysTempProb(crysTempProb)
+    , _temperatureProbe(crysTempProb)
     , _camera(camera)
     , _generator(generator)
     , _driver(driver)
@@ -40,6 +41,7 @@ Core::Core(const Crystal *crystal,
 
     connect(_cooldownT, QTimer::timeout, this, setAcousticWave);
     connect(_stabilisationT, QTimer::timeout, this, takeSnapshot);
+    connect(_temperatureT, QTimer::timeout, this, updateTemperature);
     connect(_camera, BaseCamera::snapshotAvailable, this, postSnapshotProcess);
 }
 
@@ -166,9 +168,21 @@ void Core::stop()
 
 //------------------------------------------------------------------------------
 
-void Core::moveToMainThread()
+void Core::updateTemperaturePeriod(int temperaturePeriod)
+{
+    qInfo("Setting temperature probe period to %dms.", temperaturePeriod);
+    _temperatureT->stop();
+    updateTemperature();
+    _temperatureT->start(temperaturePeriod);
+
+}
+
+//------------------------------------------------------------------------------
+
+void Core::threadFinished()
 {
     qInfo("Moving core layer back to main thread");
+    _temperatureT->stop();
     moveToThread(QCoreApplication::instance()->thread());
 }
 
@@ -189,9 +203,8 @@ void Core::setAcousticWave()
     {
         auto &p = _p.specSnap;
 
-        p.temperature = _crysTempProb->getTemperature();
         _crystal->computeFreqPow(p.in_wavelength,
-                                 p.temperature,
+                                 _temperature,
                                  p.frequency,
                                  p.power);
         _generator->setFrequency(p.frequency);
@@ -204,9 +217,8 @@ void Core::setAcousticWave()
     {
         auto &p = _p.acouSnap;
 
-        p.temperature = _crysTempProb->getTemperature();
         p.wavelength = _crystal->wavelength(p.in_frequency,
-                                            p.temperature);
+                                            _temperature);
         _generator->setFrequency(p.in_frequency);
         _driver->setPower(p.in_power);
 
@@ -227,12 +239,10 @@ void Core::setAcousticWave()
                     p.snapshots[1][i][j] = 0;
                 }
 
-            p.temperature = _crysTempProb->getTemperature();
-
             for(int i=0; i<2; ++i)
             {
                 _crystal->computeFreqPow(p.in_wavelengths[i],
-                                         p.temperature,
+                                         _temperature,
                                          p.frequency[i],
                                          p.power[i]);
             }
@@ -248,9 +258,8 @@ void Core::setAcousticWave()
     {
         auto &p = _p.swp;
 
-        p.temperature = _crysTempProb->getTemperature();
         _crystal->computeFreqPow(p.wavelength,
-                                 p.temperature,
+                                 _temperature,
                                  p.frequency,
                                  p.power);
         _generator->setFrequency(p.frequency);
@@ -280,6 +289,15 @@ void Core::takeSnapshot()
 
 //------------------------------------------------------------------------------
 
+
+void Core::updateTemperature()
+{
+    _temperature = _temperatureProbe->getTemperature();
+    emit temperatureUpdated(_temperature);
+}
+
+//------------------------------------------------------------------------------
+
 void Core::postSnapshotProcess()
 {
     _camera->copySnapshot(_snapshot);
@@ -305,7 +323,7 @@ void Core::postSnapshotProcess()
                      p.power,
                      1,
                      _exposure,
-                     p.temperature,
+                     _temperature,
                      _snapshot);
         break;
     }
@@ -323,7 +341,7 @@ void Core::postSnapshotProcess()
                      p.in_power,
                      1,
                      _exposure,
-                     p.temperature,
+                     _temperature,
                      _snapshot);
         break;
     }
@@ -352,7 +370,7 @@ void Core::postSnapshotProcess()
                              p.power[i],
                              p.in_snapshotPerObs,
                              _exposure,
-                             p.temperature,
+                             _temperature,
                              p.snapshots[i]);
 
             for(int i=0; i<BaseCamera::size; ++i)
@@ -378,7 +396,7 @@ void Core::postSnapshotProcess()
                      p.power,
                      1,
                      _exposure,
-                     p.temperature,
+                     _temperature,
                      _snapshot);
 
         gImageBuffer.set(_snapshot);
@@ -461,7 +479,10 @@ void Core::saveSnapshot(const QDateTime& dateTime,
     {
         stop();
         emit errorOnFileWritting(_dataFolder, _filename);
+        return;
     }
+
+    emit informationMsg(QString("Snapshot dumped to %1").arg(_filename));
 }
 //------------------------------------------------------------------------------
 

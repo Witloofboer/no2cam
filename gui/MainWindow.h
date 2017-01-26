@@ -12,8 +12,10 @@
 
 class QAction;
 class QCloseEvent;
+class QLabel;
 class QShowEvent;
 class QStackedWidget;
+class QTimer;
 
 namespace core {
 class Core;
@@ -41,17 +43,18 @@ class GUISHARED_EXPORT MainWindow : public QMainWindow
 
 public:
     MainWindow(core::Crystal *crystal,
-               core::AbstractCrysTempProbe *crysTempProb,
                core::Core *coreObj,
                const QString &version,
                const QString &releaseNotes);
 
 signals:
     void stopped();
+    void temperaturePeriodUpdated(int temperaturePeriod);
 
 public slots:
     void updateGuiState(bool isAppReady);
     void updateSnapshot();
+    void onInformationMessage(QString msg);
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -67,8 +70,11 @@ private slots:
     void about();
 
     void displayConfigurationDlg();
+    void onParametersUpdated();
+    void onTemperatureUpdated(double temperature);
     void displayErrorOnFileCreation(QString datafolder, QString filename);
     void displayErrorOnFileWritting(QString datafolder, QString filename);
+    void clearInfoMsg();
 
 private:
     BaseParameterPane *currentPane();
@@ -98,6 +104,9 @@ private:
     LineEdit        *_sessionEdit;
     SnapshotWidget  *_snapshot;
     HistogramWidget *_histogram;
+    QLabel          *_infoWdgt;
+    QLabel          *_temperatureWdgt;
+    QTimer          *_infoT;
 };
 
 //------------------------------------------------------------------------------

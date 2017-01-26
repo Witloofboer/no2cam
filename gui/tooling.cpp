@@ -79,6 +79,42 @@ void IntLineEdit::setValue(int value)
 
 
 //==============================================================================
+// PosIntLineEdit
+//==============================================================================
+
+PosIntLineEdit::PosIntLineEdit(int length, int nDgts)
+    : LineEdit(length, QString("^[1-9]\\d{0,%1}$").arg(nDgts-1))
+{}
+
+//------------------------------------------------------------------------------
+
+bool PosIntLineEdit::isValid()
+{
+    bool ok;
+    locale().toInt(text(), &ok);
+    return ok;
+}
+
+//------------------------------------------------------------------------------
+
+int PosIntLineEdit::value()
+{
+    bool ok;
+    int d = locale().toInt(text(), &ok);
+
+    Q_ASSERT(ok);
+    return d;
+}
+
+//------------------------------------------------------------------------------
+
+void PosIntLineEdit::setValue(int value)
+{
+    setText(locale().toString(value));
+}
+
+
+//==============================================================================
 // DoubleLineEdit
 //==============================================================================
 

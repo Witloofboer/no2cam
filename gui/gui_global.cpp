@@ -37,12 +37,11 @@ void init(const QString& version,
     _coreThr = new QThread;
     _crystal = new Crystal;
     _coreLayer = new Core(_crystal, crysTempProb, camera, generator, driver);
-    _mainWindow = new gui::MainWindow(_crystal, crysTempProb, _coreLayer,
-                                      version, releaseNotes);
+    _mainWindow = new gui::MainWindow(_crystal, _coreLayer, version, releaseNotes);
     _mainWindow->show();
 
     QObject::connect(_coreThr, QThread::finished,
-                     _coreLayer, Core::moveToMainThread);
+                     _coreLayer, Core::threadFinished);
 }
 
 //------------------------------------------------------------------------------

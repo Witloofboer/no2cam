@@ -41,6 +41,8 @@ signals:
     void snapshotAvailable();
     void errorOnFileCreation(QString dirname, QString filename);
     void errorOnFileWritting(QString dirname, QString filename);
+    void temperatureUpdated(double temperature);
+    void informationMsg(QString msg);
 
 public slots:
     /**
@@ -142,15 +144,22 @@ public slots:
     void stop();
 
     /**
+      * Update the temperature period
+      */
+    void updateTemperaturePeriod(int temperaturePeriod);
+
+
+    /**
      * Requests the instance to move to the main thread.
      */
-    void moveToMainThread();
+    void threadFinished();
 
     void postSnapshotProcess();
 
 private slots:
     void setAcousticWave();
     void takeSnapshot();
+    void updateTemperature();
 
 private:
     enum Mode {READY, SpectralSnap, AcousticSnap, Obs, Sweep};
@@ -179,15 +188,17 @@ private:
 
     QTimer *_cooldownT;
     QTimer *_stabilisationT;
+    QTimer *_temperatureT;
 
 
     double _cooldownPwr;
 
     const Crystal *_crystal;
-    AbstractCrysTempProbe *_crysTempProb;
+    AbstractCrysTempProbe *_temperatureProbe;
     BaseCamera *_camera;
     AbstractGenerator *_generator;
     AbstractDriver *_driver;
+    double _temperature;
 
     Mode _mode;
     int _exposure;
@@ -201,7 +212,6 @@ private:
     struct WlSnapshotParams
     {
         double in_wavelength;
-        double temperature;
         double frequency;
         double power;
     };
@@ -210,7 +220,6 @@ private:
     {
         double in_frequency;
         double in_power;
-        double temperature;
         double wavelength;
     };
 
@@ -232,7 +241,6 @@ private:
         double in_maxWavelength;
         double in_wavelengthStep;
         double wavelength;
-        double temperature;
         double frequency;
         double power;
     };

@@ -23,8 +23,7 @@ class SnapshotParameterPane : public BaseParameterPane
 {
     Q_OBJECT
 public:
-    explicit SnapshotParameterPane(const core::Crystal *crystal,
-                                   core::AbstractCrysTempProbe *crysTempProbe);
+    explicit SnapshotParameterPane(const core::Crystal *crystal);
     void updateState(bool isAppReady);
     void persiste() const;
 
@@ -33,6 +32,8 @@ public:
                double stabilisationTime,
                const QString& session,
                const QString& dataFolder) override;
+
+    void updateTemperature(double temperature);
 
 signals:
     void spectralSnapshot(double wavelength,
@@ -58,7 +59,6 @@ signals:
 public slots:
     void recomputeParams();
 
-
 protected:
     bool areParametersValid() const override;
 
@@ -71,6 +71,7 @@ private:
     const core::Crystal *_crystal;
     const core::AbstractCrysTempProbe *_crystalTempProbe;
 
+    double _temperature;
     QRadioButton   *_spectralBtn;
     QRadioButton   *_acousticBtn;
     DoubleLineEdit *_wavelengthEdit;

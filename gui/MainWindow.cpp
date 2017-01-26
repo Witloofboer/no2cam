@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QStackedWidget>
+#include <QStatusBar>
 #include <QTimer>
 #include <QToolBar>
 #include <QVBoxLayout>
@@ -31,7 +32,6 @@ namespace gui {
 //------------------------------------------------------------------------------
 
 MainWindow::MainWindow(core::Crystal *crystal,
-                       core::AbstractCrysTempProbe *crysTempProb,
                        core::Core *coreInstance,
                        const QString &version,
                        const QString &releaseNotes)
@@ -47,13 +47,16 @@ MainWindow::MainWindow(core::Crystal *crystal,
     , _dataFolder()
     , _version(version)
     , _releaseNotes(releaseNotes)
-    , _snapshotPane(new SnapshotParameterPane(crystal, crysTempProb))
+    , _snapshotPane(new SnapshotParameterPane(crystal))
     , _observationPane(new ObservationParameterPane)
     , _sweepPane(new SweepParameterPane)
     , _cameraBtnBox(new CameraBtnBox)
     , _sessionEdit(new LineEdit)
     , _snapshot(new SnapshotWidget)
     , _histogram(new HistogramWidget)
+    , _infoWdgt(new QLabel)
+    , _temperatureWdgt(new QLabel)
+    , _infoT(new QTimer)
 {
     // -------------------------------------------------------------------------
     // Central widget
@@ -69,10 +72,14 @@ MainWindow::MainWindow(core::Crystal *crystal,
     lineEditLayout->addWidget(new QLabel("Session:"));
     lineEditLayout->addWidget(_sessionEdit);
 
-    leftLayout->addWidget(_stackedWdgt);
-    leftLayout->addWidget(_cameraBtnBox);
-    leftLayout->addLayout(lineEditLayout);
+    auto lineEditBox = new QGroupBox;
+    lineEditBox->setLayout(lineEditLayout);
 
+    leftLayout->addWidget(_stackedWdgt);
+    leftLayout->addWidget(lineEditBox);
+    leftLayout->addWidget(_cameraBtnBox);
+
+    _cameraBtnBox->setStyleSheet("margin-bottom: 0px");
 
     // Middle part
     auto snapshotLayout = new QVBoxLayout;
@@ -88,11 +95,44 @@ MainWindow::MainWindow(core::Crystal *crystal,
     auto histogramBox = new QGroupBox(tr("Histogram"));
     histogramBox->setLayout(histogramBoxLayout);
 
-    auto mainLayout = new QHBoxLayout;
+    auto topLayout = new QHBoxLayout;
 
-    mainLayout->addLayout(leftLayout);
-    mainLayout->addWidget(snapshotBox);
-    mainLayout->addWidget(histogramBox);
+    topLayout->addLayout(leftLayout);
+    topLayout->addWidget(snapshotBox);
+    topLayout->addWidget(histogramBox);
+
+    // -------------------------------------------------------------------------
+    // Info box
+    // -------------------------------------------------------------------------
+
+    auto bottomLayout = new QHBoxLayout;
+
+    auto infoBox = new QGroupBox;
+    auto infoBoxLayout = new QHBoxLayout;
+    infoBoxLayout->addWidget(_infoWdgt);
+    infoBoxLayout->addStretch();
+    infoBox->setLayout(infoBoxLayout);
+    infoBox->setTitle("Info");
+
+    auto temperatureBox = new QGroupBox;
+    auto temperatureBoxLayout = new QHBoxLayout;
+    temperatureBoxLayout->addWidget(_temperatureWdgt);
+    temperatureBox->setLayout(temperatureBoxLayout);
+    temperatureBox->setTitle("T [°C]");
+
+    bottomLayout->addWidget(infoBox);
+    bottomLayout->addWidget(temperatureBox);
+
+
+    _infoT->setSingleShot(true);
+    _infoT->setInterval(4000);
+    connect(_infoT, QTimer::timeout, this, clearInfoMsg);
+
+    statusBar()->hide();
+
+    auto mainLayout = new QVBoxLayout;
+    mainLayout->addLayout(topLayout);
+    mainLayout->addLayout(bottomLayout);
 
     auto *centralWidget = new QWidget();
     centralWidget->setLayout(mainLayout);
@@ -186,10 +226,10 @@ MainWindow::MainWindow(core::Crystal *crystal,
     setFixedSize(sizeHint());
     _snapshotModeActn->setChecked(true);
 
-    connect(_configDlg, ConfigurationDlg::crystalUpdated,
-            _snapshotPane, SnapshotParameterPane::recomputeParams);
+    connect(_configDlg, ConfigurationDlg::parametersUpdated,
+            this, onParametersUpdated);
     if (!_configDlg->isValid())
-        QTimer::singleShot(0, this, displayConfigurationDlg);
+        QTimer::singleShot(0, this, displayConfigurationDlg); //TODO emit instead of timer?
 
     connect(coreInstance, core::Core::ready, this, updateGuiState);
     connect(coreInstance, core::Core::snapshotAvailable, this, updateSnapshot);
@@ -208,13 +248,23 @@ MainWindow::MainWindow(core::Crystal *crystal,
             coreInstance, core::Core::sweep);
 
     connect(this, stopped, coreInstance, core::Core::stop);
+    connect(this, temperaturePeriodUpdated, coreInstance, core::Core::updateTemperaturePeriod);
     connect(_cameraBtnBox, CameraBtnBox::started, this, start);
     connect(_cameraBtnBox, CameraBtnBox::stopped, this, stopped);
 
     connect(coreInstance, core::Core::errorOnFileCreation, this, displayErrorOnFileCreation);
     connect(coreInstance, core::Core::errorOnFileWritting, this, displayErrorOnFileWritting);
+
+    connect(coreInstance, core::Core::temperatureUpdated,
+            this, onTemperatureUpdated);
+
+    connect(coreInstance, core::Core::informationMsg,
+            this, onInformationMessage);
     refreshBtns();
     restore();
+
+
+    onParametersUpdated();
 }
 
 //------------------------------------------------------------------------------
@@ -245,7 +295,7 @@ void MainWindow::start(bool burst, bool record)
     updateGuiState(false);
     currentPane()->start(burst,
                          record,
-                         _configDlg->stabilisationTime(),
+                         _configDlg->stabilisingTime(),
                          _sessionEdit->text(),
                          _dataFolder);
 }
@@ -275,16 +325,47 @@ void MainWindow::updateSnapshot()
 
 //------------------------------------------------------------------------------
 
+void MainWindow::onInformationMessage(QString msg)
+{
+    _infoWdgt->setText(msg);
+    _infoT->start();
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::clearInfoMsg()
+{
+    _infoWdgt->setText("");
+}
+
+//------------------------------------------------------------------------------
+
 void MainWindow::displayConfigurationDlg()
 {
     QMessageBox::warning
     ( this
       , tr("NO2 Camera Command Interface")
-      , "<h3>" + tr("Welcome to NO<sub>2</sub> Camera Command Interface") + "</h3>" +
-      tr("<p>No valid configuration was found from a previous usage.</p>"
-         "<p>Therefore, you need to provide the parameters to use the application.</p>")
+      , tr("<h3> Welcome to NO<sub>2</sub> Camera Command Interface</h3>"
+           "<p>No valid configuration was found from a previous usage.</p>"
+           "<p>Therefore, you need to provide the parameters to use the application.</p>")
       , QMessageBox::Ok);
     _configDlg->display(true);
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::onParametersUpdated()
+{
+    _snapshotPane->recomputeParams();
+    emit temperaturePeriodUpdated(_configDlg->temperaturePeriod());
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::onTemperatureUpdated(double temperature)
+{
+    _snapshotPane->updateTemperature(temperature);
+    _temperatureWdgt->setText(QString("%1").arg(temperature, 5, 'f', 2));
 }
 
 //------------------------------------------------------------------------------

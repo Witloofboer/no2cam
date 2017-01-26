@@ -5,11 +5,15 @@
 
 //------------------------------------------------------------------------------
 
-class MockCrysTempProbe : public core::AbstractCrysTempProbe
+class MockTemperatureProbe : public core::AbstractCrysTempProbe
 {
 public:
-    MockCrysTempProbe();
+    MockTemperatureProbe();
     virtual double getTemperature() override;
+
+private:
+    double _temperature;
+    double _delta;
 };
 
 //------------------------------------------------------------------------------

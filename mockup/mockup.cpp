@@ -5,7 +5,7 @@
 #include "MockCamera.h"
 #include "MockDriver.h"
 #include "MockGenerator.h"
-#include "MockCrysTempProbe.h"
+#include "MockTemperatureProbe.h"
 
 //------------------------------------------------------------------------------
 
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 
     init("0.3.0 (mockup)",
          releaseNotes,
-         new MockCrysTempProbe,
+         new MockTemperatureProbe,
          new MockCamera,
          new MockGenerator,
          new MockDriver);

@@ -25,7 +25,8 @@ ConfigurationDlg::ConfigurationDlg(MainWindow* mainWindow,
     , _incidentEdit(new DoubleLineEdit(7, 2, 2))
     , _heightEdit(new DoubleLineEdit(7, 2, 2))
     , _lengthEdit(new DoubleLineEdit(7, 2, 2))
-    , _stabilTimeEdit(new IntLineEdit(7))
+    , _stabilisationTimeEdit(new IntLineEdit(7))
+    , _temperaturePeriodEdit(new PosIntLineEdit(7))
     , _buttonBox(new QDialogButtonBox(QDialogButtonBox::Ok |
                                       QDialogButtonBox::Cancel |
                                       QDialogButtonBox::Abort))
@@ -48,14 +49,19 @@ ConfigurationDlg::ConfigurationDlg(MainWindow* mainWindow,
 
     //----------------------------------------
 
-    auto boardGrid = new QGridLayout();
+    auto paramGrid = new QGridLayout();
     row = 0;
-    putInGrid(_stabilTimeEdit, boardGrid, row, "Stabilisation", "[ms]");
-    boardGrid->setColumnMinimumWidth(
+    putInGrid(_stabilisationTimeEdit, paramGrid, row, "Stabilisation", "[ms]");
+    putInGrid(_temperaturePeriodEdit, paramGrid, row, "T° probing period", "[ms]");
+
+    paramGrid->setColumnMinimumWidth(
         0,
         crystalGrid->itemAtPosition(2,0)->minimumSize().width());
-    auto boardBox = new QGroupBox(tr("Board parameters"));
-    boardBox->setLayout(boardGrid);
+
+
+
+    auto boardBox = new QGroupBox(tr("Functional parameters"));
+    boardBox->setLayout(paramGrid);
 
     //----------------------------------------
 
@@ -74,7 +80,8 @@ ConfigurationDlg::ConfigurationDlg(MainWindow* mainWindow,
     connect(_incidentEdit, LineEdit::textChanged, this, updateOkBtn);
     connect(_heightEdit, LineEdit::textChanged, this, updateOkBtn);
     connect(_lengthEdit, LineEdit::textChanged, this, updateOkBtn);
-    connect(_stabilTimeEdit, LineEdit::textChanged, this, updateOkBtn);
+    connect(_stabilisationTimeEdit, LineEdit::textChanged, this, updateOkBtn);
+    connect(_temperaturePeriodEdit, LineEdit::textChanged, this, updateOkBtn);
 
     //----------------------------------------
 
@@ -87,7 +94,10 @@ static const char *cutAngleLbl = "cut angle [deg]";
 static const char *incidentLbl = "incident angle [deg]";
 static const char *transHeightLbl = "transducer height [mm]";
 static const char *transLengthLbl = "transducer length [mm]";
-static const char *stabilTimeLbl = "board stabilisation [ms]";
+static const char *stabilisingTimeLbl = "board stabilisation [ms]";
+static const char *temperaturePeriodLbl = "T probe period [ms]";
+
+//------------------------------------------------------------------------------
 
 void ConfigurationDlg::persiste() const
 {
@@ -103,8 +113,9 @@ void ConfigurationDlg::persiste() const
         settings.setValue(transLengthLbl, _lengthEdit->text());
         settings.endGroup();
 
-        settings.beginGroup("Boards");
-        settings.setValue(stabilTimeLbl, _stabilTimeEdit->text());
+        settings.beginGroup("Parameters");
+        settings.setValue(stabilisingTimeLbl, _stabilisationTimeEdit->text());
+        settings.setValue(temperaturePeriodLbl, _temperaturePeriodEdit->text());
         settings.endGroup();
 
     } else {
@@ -126,8 +137,9 @@ void ConfigurationDlg::restore()
     _lengthEdit->setText(settings.value(transLengthLbl, "").toString());
     settings.endGroup();
 
-    settings.beginGroup("Boards");
-    _stabilTimeEdit->setText(settings.value(stabilTimeLbl, "").toString());
+    settings.beginGroup("Parameters");
+    _stabilisationTimeEdit->setText(settings.value(stabilisingTimeLbl,  "1").toString());
+    _temperaturePeriodEdit->setText(settings.value(temperaturePeriodLbl, "500").toString());
     settings.endGroup();
 
     if (isValid())
@@ -154,8 +166,7 @@ void ConfigurationDlg::display(bool abortEnabled)
     if (result==Accepted)
     {
         ackGuiValues();
-        restoreGuiValues();     // Formatting
-        emit crystalUpdated();  // Should be removed.
+        restoreGuiValues();
     }
     else if (abortEnabled)
     {
@@ -169,9 +180,16 @@ void ConfigurationDlg::display(bool abortEnabled)
 
 //------------------------------------------------------------------------------
 
-const int &ConfigurationDlg::stabilisationTime() const
+int ConfigurationDlg::stabilisingTime() const
 {
-    return _stabilisationTime;
+    return _stabilisingTime;
+}
+
+//------------------------------------------------------------------------------
+
+int ConfigurationDlg::temperaturePeriod() const
+{
+    return _temperaturePeriod;
 }
 
 //------------------------------------------------------------------------------
@@ -189,7 +207,8 @@ bool ConfigurationDlg::isValid() const
            _incidentEdit->isValid() &&
            _heightEdit->isValid() &&
            _lengthEdit->isValid() &&
-           _stabilTimeEdit->isValid();
+           _stabilisationTimeEdit->isValid() &&
+           _temperaturePeriodEdit->isValid();
 }
 
 //------------------------------------------------------------------------------
@@ -197,10 +216,12 @@ bool ConfigurationDlg::isValid() const
 void ConfigurationDlg::restoreGuiValues()
 {
     _cutAngleEdit->setValue(_crystal->cutAngle());
-    _incidentEdit->setValue(_crystal->lightAngle());
+    _incidentEdit->setValue(_crystal->incidentAngle());
     _heightEdit->setValue(_crystal->transHeight());
     _lengthEdit->setValue(_crystal->transLength());
-    _stabilTimeEdit->setValue(_stabilisationTime);
+    _stabilisationTimeEdit->setValue(_stabilisingTime);
+    _temperaturePeriodEdit->setValue(_temperaturePeriod);
+
 }
 
 //------------------------------------------------------------------------------
@@ -213,7 +234,10 @@ void ConfigurationDlg::ackGuiValues()
                   _incidentEdit->value(),
                   _heightEdit->value(),
                   _lengthEdit->value());
-    _stabilisationTime = _stabilTimeEdit->value();
+    _stabilisingTime = _stabilisationTimeEdit->value();
+    _temperaturePeriod = _temperaturePeriodEdit->value();
+
+    emit parametersUpdated();
 }
 
 //------------------------------------------------------------------------------

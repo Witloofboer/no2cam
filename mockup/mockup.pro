@@ -20,13 +20,13 @@ SOURCES += \
     MockCamera.cpp \
     MockGenerator.cpp \
     MockDriver.cpp \
-    MockCrysTempProbe.cpp
+    MockTemperatureProbe.cpp
 
 HEADERS  += \
     MockCamera.h \
     MockGenerator.h \
     MockDriver.h \
-    MockCrysTempProbe.h
+    MockTemperatureProbe.h
 
 
 RESOURCES += \
