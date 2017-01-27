@@ -1,7 +1,7 @@
 #ifndef MOCKGENERATOR_H
 #define MOCKGENERATOR_H
 
-#include "core/AbstractGenerator.h"
+#include "core/Generator.h"
 
 class MockGenerator : public core::AbstractGenerator
 {
@@ -10,7 +10,6 @@ class MockGenerator : public core::AbstractGenerator
 public:
     MockGenerator();
 
-    virtual void stop() override;
     virtual void setFrequency(double frequency) override;
 
 };

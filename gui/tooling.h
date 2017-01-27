@@ -49,16 +49,14 @@ public:
 // PosIntLineEdit
 //==============================================================================
 
-class PosIntLineEdit: public LineEdit
+class PosIntLineEdit: public IntLineEdit
 {
     Q_OBJECT
 
 public:
     PosIntLineEdit(int length=9, int nDgts=5);
 
-    virtual bool isValid();
-    void setValue(int value);
-    int value();
+    bool isValid() override;
 };
 
 //==============================================================================

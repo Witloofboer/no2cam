@@ -3,7 +3,7 @@
 
 //------------------------------------------------------------------------------
 
-#include "core/AbstractDriver.h"
+#include "core/Driver.h"
 
 //------------------------------------------------------------------------------
 
@@ -14,7 +14,6 @@ class MockDriver : public core::AbstractDriver
 public:
     MockDriver();
 
-    virtual void stop() override;
     virtual void setPower(double power) override;
 };
 

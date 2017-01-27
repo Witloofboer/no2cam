@@ -20,7 +20,7 @@ double MockTemperatureProbe::getTemperature()
     if (_temperature < 18.0) _delta = fabs(_delta);
     else if (22.0 < _temperature) _delta = -fabs(_delta);
 
-    qInfo("Temperature probe: %f°C", _temperature);
+    qDebug("Temperature probe: %f degC", _temperature);
     return _temperature;
 }
 //------------------------------------------------------------------------------

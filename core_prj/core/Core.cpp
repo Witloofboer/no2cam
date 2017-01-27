@@ -6,8 +6,6 @@
 
 #include "BaseCamera.h"
 #include "AbstractCrysTempProbe.h"
-#include "AbstractDriver.h"
-#include "AbstractGenerator.h"
 #include "Crystal.h"
 #include "ImageBuffer.h"
 
@@ -57,7 +55,7 @@ void Core::spectralSnapshot(double wavelength,
                             QString dataFolder,
                             QString session)
 {
-    qInfo("Spectral snap: wl=%.1f nm", wavelength);
+    qDebug("Spectral snap: wl=%.1f nm", wavelength);
     setCommonParams(SpectralSnap, exposure, cooldownTime, cooldownPwr,
                     stabilisationTime, burst, record, dataFolder, session);
 
@@ -80,7 +78,7 @@ void Core::acousticSnapshot(double frequency,
                             QString dataFolder,
                             QString session)
 {
-    qInfo("Acoustic: freq=%.1f MHz, power=%.1f mW", frequency, power);
+    qDebug("Acoustic: freq=%.1f MHz, power=%.1f mW", frequency, power);
 
     setCommonParams(AcousticSnap, exposure, cooldownTime, cooldownPwr,
                     stabilisationTime, burst, record, dataFolder, session);
@@ -106,8 +104,8 @@ void Core::observation(double wavelength1,
                        QString dataFolder,
                        QString session)
 {
-    qInfo("Observation: wl1=%.1f nm, wl2=%.1f nm",
-          wavelength1, wavelength2);
+    qDebug("Observation: wl1=%.1f nm, wl2=%.1f nm",
+           wavelength1, wavelength2);
 
     setCommonParams(Obs, exposure, cooldownTime, cooldownPwr,
                     stabilisationTime, burst, record, dataFolder, session);
@@ -137,8 +135,8 @@ void Core::sweep(double wavelength1,
                  QString dataFolder,
                  QString session)
 {
-    qInfo("Sweep: wl1=%.1f nm, wl2=%.1f nm, step=%.1f nm",
-          wavelength1, wavelength2, wavelengthStep);
+    qDebug("Sweep: wl1=%.1f nm, wl2=%.1f nm, step=%.1f nm",
+           wavelength1, wavelength2, wavelengthStep);
 
     setCommonParams(Sweep, exposure, cooldownTime, cooldownPwr,
                     stabilisationTime, burst, record, dataFolder, session);
@@ -156,8 +154,8 @@ void Core::sweep(double wavelength1,
 
 void Core::stop()
 {
-    _driver->stop();
-    _generator->stop();
+    _generator.setFrequency(0.0);
+    _driver.setPower(0.0);
     _camera->stop();
     _cooldownT->stop();
     _stabilisationT->stop();
@@ -170,7 +168,7 @@ void Core::stop()
 
 void Core::updateTemperaturePeriod(int temperaturePeriod)
 {
-    qInfo("Setting temperature probe period to %dms.", temperaturePeriod);
+    qDebug("Setting temperature probe period to %dms.", temperaturePeriod);
     _temperatureT->stop();
     updateTemperature();
     _temperatureT->start(temperaturePeriod);
@@ -181,7 +179,7 @@ void Core::updateTemperaturePeriod(int temperaturePeriod)
 
 void Core::threadFinished()
 {
-    qInfo("Moving core layer back to main thread");
+    qDebug("Moving core layer back to main thread");
     _temperatureT->stop();
     moveToThread(QCoreApplication::instance()->thread());
 }
@@ -207,9 +205,7 @@ void Core::setAcousticWave()
                                  _temperature,
                                  p.frequency,
                                  p.power);
-        _generator->setFrequency(p.frequency);
-        _driver->setPower(p.power);
-
+        requestAcousticWave(p.frequency, p.power);
         break;
     }
 
@@ -219,9 +215,7 @@ void Core::setAcousticWave()
 
         p.wavelength = _crystal->wavelength(p.in_frequency,
                                             _temperature);
-        _generator->setFrequency(p.in_frequency);
-        _driver->setPower(p.in_power);
-
+        requestAcousticWave(p.in_frequency, p.in_power);
         break;
     }
 
@@ -248,9 +242,7 @@ void Core::setAcousticWave()
             }
         }
 
-        _generator->setFrequency(p.frequency[p.idx]);
-        _driver->setPower(p.power[p.idx]);
-
+        requestAcousticWave(p.frequency[p.idx], p.power[p.idx]);
         break;
     }
 
@@ -262,16 +254,10 @@ void Core::setAcousticWave()
                                  _temperature,
                                  p.frequency,
                                  p.power);
-        _generator->setFrequency(p.frequency);
-        _driver->setPower(p.power);
-
+        requestAcousticWave(p.frequency, p.power);
         break;
     }
     }
-
-    qInfo("Waiting for acoustic wave stabilisation");
-    _stabilisationT->start();
-
 }
 
 //------------------------------------------------------------------------------
@@ -300,13 +286,14 @@ void Core::updateTemperature()
 
 void Core::postSnapshotProcess()
 {
-    _camera->copySnapshot(_snapshot);
+    if (_mode==READY) return;
 
-    bool continueAquisition = _bursting;
+    _camera->copySnapshot(_snapshot);
 
     switch(_mode)
     {
     case READY:
+        Q_UNREACHABLE();
         break;
 
     case SpectralSnap:
@@ -327,6 +314,7 @@ void Core::postSnapshotProcess()
                      _snapshot);
         break;
     }
+
     case AcousticSnap:
     {
         auto &p = _p.acouSnap;
@@ -370,7 +358,7 @@ void Core::postSnapshotProcess()
                              p.power[i],
                              p.in_snapshotPerObs,
                              _exposure,
-                             _temperature,
+                             p.temperature,
                              p.snapshots[i]);
 
             for(int i=0; i<BaseCamera::size; ++i)
@@ -380,8 +368,6 @@ void Core::postSnapshotProcess()
             gImageBuffer.set(_snapshot);
             emit snapshotAvailable();
         }
-
-        continueAquisition |= p.snapshotCount != 0;
         break;
     }
 
@@ -405,25 +391,75 @@ void Core::postSnapshotProcess()
         if (p.wavelength < p.in_maxWavelength)
         {
             p.wavelength += p.in_wavelengthStep;
-        }
-        else
-        {
+        } else {
             p.wavelength = p.in_minWavelength;
         }
-
-        continueAquisition |= p.wavelength < p.in_maxWavelength;
-
         break;
     }
     }
 
-    if (continueAquisition)
+    if (mustContinueAquisition())
     {
-        _driver->setPower(_cooldownPwr);
-        _cooldownT->start();
+        if (mustCooldown())
+        {
+            this->cooldown();
+        } else {
+            setAcousticWave();
+        }
     } else {
         stop();
     }
+}
+
+//------------------------------------------------------------------------------
+
+bool Core::mustContinueAquisition() const
+{
+    switch(_mode)
+    {
+    case READY:
+        return false;
+
+    case SpectralSnap:
+    case AcousticSnap:
+        return _bursting;
+
+    case Obs:
+        return _bursting || _p.obs.snapshotCount != 0;
+
+    case Sweep:
+        return _bursting || _p.swp.wavelength < _p.swp.in_maxWavelength;
+    }
+    Q_UNREACHABLE();
+}
+
+//------------------------------------------------------------------------------
+
+bool Core::mustCooldown() const
+{
+    switch(_mode)
+    {
+    case READY:
+        Q_UNREACHABLE();
+
+    case SpectralSnap:
+    case AcousticSnap:
+    case Sweep:
+        return _cooldownT->interval() != 0;
+
+    case Obs:
+        return _cooldownT->interval() != 0 && _p.obs.snapshotCount == 0;
+    }
+    Q_UNREACHABLE();
+}
+
+//------------------------------------------------------------------------------
+
+void Core::cooldown()
+{
+    qDebug("Cooling down: %dms", _cooldownT->interval());
+    _driver.setPower(_cooldownPwr);
+    _cooldownT->start();
 }
 
 //------------------------------------------------------------------------------
@@ -457,7 +493,7 @@ void Core::saveSnapshot(const QDateTime& dateTime,
                      . arg(temperature, 1, 'f', 1, zero);
 
     QFile file(_dataFolder+"/"+_filename);
-    qInfo("Writing snapshot on disk");
+    qInfo("Dumping snapshot to %s", _filename.toLatin1().constData());
 
     const bool ok = file.open(QIODevice::WriteOnly);
 
@@ -484,6 +520,25 @@ void Core::saveSnapshot(const QDateTime& dateTime,
 
     emit informationMsg(QString("Snapshot dumped to %1").arg(_filename));
 }
+
+//------------------------------------------------------------------------------
+
+void Core::requestAcousticWave(double frequency, double power)
+{
+    bool waveChanged = false;
+
+    waveChanged |= _generator.setFrequency(frequency);
+    waveChanged |= _driver.setPower(power);
+
+    if (power != 0.0 && waveChanged)
+    {
+        qDebug("Acoustic wave stabilisation");
+        _stabilisationT->start();
+    } else {
+        takeSnapshot();
+    }
+}
+
 //------------------------------------------------------------------------------
 
 void Core::setCommonParams(Mode mode,
@@ -498,10 +553,10 @@ void Core::setCommonParams(Mode mode,
 {
     QByteArray s = session.toLatin1();
 
-    qInfo("Exposure=%d ms, cooldownTime=%d ms, %d mW, "
-          "stabilisation time=%d ms, %s, session='%s'",
-          exposure, cooldownTime, cooldownPwr, stabilisationTime,
-          burst ? "burst" : "singleshot", s.data());
+    qDebug("Exposure=%d ms, cooldownTime=%d ms, %d mW, "
+           "stabilisation time=%d ms, %s, session='%s'",
+           exposure, cooldownTime, cooldownPwr, stabilisationTime,
+           burst ? "burst" : "singleshot", s.data());
 
     _mode = mode;
     _exposure=exposure;

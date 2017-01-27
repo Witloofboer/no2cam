@@ -18,21 +18,21 @@ DESTDIR=../../bin
 SOURCES += \
     Core.cpp \
     Crystal.cpp \
-    AbstractGenerator.cpp \
-    AbstractDriver.cpp \
     AbstractCrysTempProbe.cpp \
     ImageBuffer.cpp \
-    BaseCamera.cpp
+    BaseCamera.cpp \
+    Generator.cpp \
+    Driver.cpp
 
 HEADERS += \
     core_global.h \
     Core.h \
     Crystal.h \
-    AbstractGenerator.h \
-    AbstractDriver.h \
     AbstractCrysTempProbe.h \
     ImageBuffer.h \
-    BaseCamera.h
+    BaseCamera.h \
+    Generator.h \
+    Driver.h
 
 unix {
     target.path = /usr/lib

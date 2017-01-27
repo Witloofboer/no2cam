@@ -30,7 +30,7 @@ signals:
 public slots:
 
 private:
-    const unsigned squeezeLvl = 3;
+    const unsigned squeezeLvl = 1;
     const unsigned squeezeWidth = 1 << squeezeLvl;
     const unsigned nbrSqueezedValues = 256 >> squeezeLvl;
 

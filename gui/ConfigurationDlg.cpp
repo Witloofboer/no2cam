@@ -103,7 +103,7 @@ void ConfigurationDlg::persiste() const
 {
     if (isValid())
     {
-        qInfo("Persisting parameters");
+        qDebug("Persisting parameters");
 
         QSettings settings;
         settings.beginGroup("Crystal");
@@ -127,7 +127,7 @@ void ConfigurationDlg::persiste() const
 
 void ConfigurationDlg::restore()
 {
-    qInfo("Restoring parameters");
+    qDebug("Restoring parameters");
 
     QSettings settings;
     settings.beginGroup("Crystal");

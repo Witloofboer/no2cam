@@ -6,6 +6,8 @@
 
 #include "core_global.h"
 #include "BaseCamera.h"
+#include "Driver.h"
+#include "Generator.h"
 
 class QTimer;
 
@@ -161,11 +163,11 @@ private slots:
     void takeSnapshot();
     void updateTemperature();
 
+
 private:
     enum Mode {READY, SpectralSnap, AcousticSnap, Obs, Sweep};
     const QString _modeToCode[5] = {"XX", "S", "A", "O", "W"};
 
-    void cooldown();
     void setCommonParams(Mode mode,
                          int exposure,
                          int cooldownTime,
@@ -196,8 +198,9 @@ private:
     const Crystal *_crystal;
     AbstractCrysTempProbe *_temperatureProbe;
     BaseCamera *_camera;
-    AbstractGenerator *_generator;
-    AbstractDriver *_driver;
+
+    GeneratorProxy _generator;
+    DriverProxy _driver;
     double _temperature;
 
     Mode _mode;
@@ -208,6 +211,12 @@ private:
     bool _record;
     QString _dataFolder;
     QString _session;
+
+    void requestAcousticWave(double frequency, double power);
+
+    bool mustContinueAquisition() const;
+    bool mustCooldown() const;
+    void cooldown();
 
     struct WlSnapshotParams
     {
@@ -251,7 +260,6 @@ private:
         ObservationParams obs;
         SweepParams swp;
     } _p; // parameters
-
 };
 
 //------------------------------------------------------------------------------

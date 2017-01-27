@@ -83,7 +83,7 @@ static const char *snapPerObsLbl = "Snapshops per observation [nm]";
 
 void ObservationParameterPane::persiste() const
 {
-    qInfo("Persisting observation parameters");
+    qDebug("Persisting observation parameters");
 
     QSettings settings;
 
@@ -105,7 +105,7 @@ void ObservationParameterPane::persiste() const
 
 void ObservationParameterPane::restore()
 {
-    qInfo("Restoring observation parameters");
+    qDebug("Restoring observation parameters");
 
     QSettings settings;
 

@@ -506,7 +506,7 @@ static const char *dataFolderLbl = "data folder";
 
 void MainWindow::persiste()
 {
-    qInfo("Persisting main window parameters");
+    qDebug("Persisting main window parameters");
 
     QSettings settings;
 
@@ -518,7 +518,7 @@ void MainWindow::persiste()
 
 void MainWindow::restore()
 {
-    qInfo("Restoring main window parameters");
+    qDebug("Restoring main window parameters");
 
     QSettings settings;
 

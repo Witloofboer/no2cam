@@ -55,7 +55,7 @@ IntLineEdit::IntLineEdit(int length, int nDgts)
 bool IntLineEdit::isValid()
 {
     bool ok;
-    locale().toInt(text(), &ok);
+    text().toInt(&ok);
     return ok;
 }
 
@@ -64,7 +64,7 @@ bool IntLineEdit::isValid()
 int IntLineEdit::value()
 {
     bool ok;
-    int d = locale().toInt(text(), &ok);
+    int d = text().toInt(&ok);
 
     Q_ASSERT(ok);
     return d;
@@ -74,7 +74,7 @@ int IntLineEdit::value()
 
 void IntLineEdit::setValue(int value)
 {
-    setText(locale().toString(value));
+    setText(QString("%1").arg(value));
 }
 
 
@@ -83,36 +83,15 @@ void IntLineEdit::setValue(int value)
 //==============================================================================
 
 PosIntLineEdit::PosIntLineEdit(int length, int nDgts)
-    : LineEdit(length, QString("^[1-9]\\d{0,%1}$").arg(nDgts-1))
+    : IntLineEdit(length, nDgts)
 {}
 
 //------------------------------------------------------------------------------
 
 bool PosIntLineEdit::isValid()
 {
-    bool ok;
-    locale().toInt(text(), &ok);
-    return ok;
+    return IntLineEdit::isValid() && value()>0;
 }
-
-//------------------------------------------------------------------------------
-
-int PosIntLineEdit::value()
-{
-    bool ok;
-    int d = locale().toInt(text(), &ok);
-
-    Q_ASSERT(ok);
-    return d;
-}
-
-//------------------------------------------------------------------------------
-
-void PosIntLineEdit::setValue(int value)
-{
-    setText(locale().toString(value));
-}
-
 
 //==============================================================================
 // DoubleLineEdit
@@ -129,7 +108,7 @@ DoubleLineEdit::DoubleLineEdit(int length, int nIntDgts, int nFracDgts)
 bool DoubleLineEdit::isValid()
 {
     bool ok;
-    locale().toDouble(text(), &ok);
+    text().toDouble(&ok);
     return ok;
 }
 
@@ -138,7 +117,7 @@ bool DoubleLineEdit::isValid()
 double DoubleLineEdit::value()
 {
     bool ok;
-    double d = locale().toDouble(text(), &ok);
+    double d = text().toDouble(&ok);
 
     Q_ASSERT(ok);
     return d;
@@ -148,7 +127,7 @@ double DoubleLineEdit::value()
 
 void DoubleLineEdit::setValue(double value)
 {
-    setText(locale().toString(value, 'f', _nFracDgts));
+    setText(QString("%1").arg(value, 1, 'f', _nFracDgts));
 }
 
 //------------------------------------------------------------------------------
@@ -160,7 +139,6 @@ void putInGrid(QWidget* widget,
                const QString &unit)
 {
     grid->addWidget(new QLabel(label+":"), row, 0);
-
     grid->addWidget(widget, row, 1);
 
     if (!unit.isEmpty())

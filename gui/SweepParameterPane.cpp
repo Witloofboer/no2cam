@@ -84,7 +84,7 @@ static const char *wavelengthStepLbl = "Step [nm]";
 
 void SweepParameterPane::persiste() const
 {
-    qInfo("Persisting sweep parameters");
+    qDebug("Persisting sweep parameters");
 
     QSettings settings;
 
@@ -107,7 +107,7 @@ void SweepParameterPane::persiste() const
 
 void SweepParameterPane::restore()
 {
-    qInfo("Restoring sweep parameters");
+    qDebug("Restoring sweep parameters");
 
     QSettings settings;
 

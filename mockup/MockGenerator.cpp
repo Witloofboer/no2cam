@@ -10,20 +10,11 @@ MockGenerator::MockGenerator()
 
 }
 
-
-//------------------------------------------------------------------------------
-
-void MockGenerator::stop()
-{
-    setFrequency(0.0);
-}
-
-
 //------------------------------------------------------------------------------
 
 void MockGenerator::setFrequency(double frequency)
 {
-    qInfo("Generator: set frequency: %.3f MHz", frequency);
+    qDebug("Generator: frequency set to %.3f MHz", frequency);
 }
 
 //------------------------------------------------------------------------------

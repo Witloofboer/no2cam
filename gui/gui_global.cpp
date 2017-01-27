@@ -48,10 +48,10 @@ void init(const QString& version,
 
 void start()
 {
-    qInfo("Moving core layer to core thread");
+    qDebug("Moving core layer to core thread");
     _coreLayer->moveToThread(_coreThr);
 
-    qInfo("Starting core thread");
+    qDebug("Starting core thread");
     _coreThr->start();
 }
 
@@ -59,7 +59,7 @@ void start()
 
 void shutdown()
 {
-    qInfo("Shutting down core thread");
+    qDebug("Shutting down core thread");
     _coreThr->exit();
     _coreThr->wait();
 }

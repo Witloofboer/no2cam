@@ -18,11 +18,20 @@ class CORESHARED_EXPORT AbstractDriver : public QObject
 
 public:
     explicit AbstractDriver();
-    virtual void stop()=0;
     virtual void setPower(double power)=0;
-signals:
+};
 
-public slots:
+//------------------------------------------------------------------------------
+
+class DriverProxy
+{
+public:
+    explicit DriverProxy(AbstractDriver* driver);
+    bool setPower(double power);
+
+private:
+    AbstractDriver *_driver;
+    double _power;
 };
 
 //------------------------------------------------------------------------------

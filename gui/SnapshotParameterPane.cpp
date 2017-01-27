@@ -179,7 +179,7 @@ static const char *powerLbl = "power [mW]";
 
 void SnapshotParameterPane::persiste() const
 {
-    qInfo("Persisting snapshot parameters");
+    qDebug("Persisting snapshot parameters");
 
     QSettings settings;
 
@@ -202,7 +202,7 @@ void SnapshotParameterPane::persiste() const
 
 void SnapshotParameterPane::restore()
 {
-    qInfo("Restoring snapshot parameters");
+    qDebug("Restoring snapshot parameters");
 
     QSettings settings;
 

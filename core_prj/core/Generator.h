@@ -18,8 +18,20 @@ class CORESHARED_EXPORT AbstractGenerator : public QObject
 
 public:
     explicit AbstractGenerator();
-    virtual void stop()=0;
     virtual void setFrequency(double frequency)=0;
+};
+
+//------------------------------------------------------------------------------
+
+class GeneratorProxy
+{
+public:
+    explicit GeneratorProxy(AbstractGenerator* generator);
+    bool setFrequency(double frequency);
+
+private:
+    AbstractGenerator *_generator;
+    double _frequency;
 };
 
 //------------------------------------------------------------------------------

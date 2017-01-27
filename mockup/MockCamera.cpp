@@ -27,7 +27,7 @@ MockCamera::MockCamera()
 
 void MockCamera::takeSnapshot()
 {
-    qInfo("Camera: snapshotting");
+    qDebug("Camera: snapshotting");
 
     _timer->start(_exposure);
 }
@@ -38,7 +38,7 @@ void MockCamera::stop()
 {
     if (_timer->isActive())
     {
-        qInfo("Forcing camera stop");
+        qDebug("Camera stop");
         _timer->stop();
     }
 }
@@ -61,7 +61,7 @@ void MockCamera::copySnapshot(Snapshot &buffer)
 
 void MockCamera::snapshotRdyImpl()
 {
-    qInfo("Camera: snapshot ready");
+    qDebug("Camera: snapshot ready");
     emit snapshotAvailable();
 }
 

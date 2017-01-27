@@ -15,7 +15,7 @@ BaseCamera::BaseCamera()
 void BaseCamera::setExposure(int exposure)
 {
 
-    qInfo("Camera: exposure time set to %d ms", exposure);
+    qDebug("Camera: exposure time set to %d ms", exposure);
     _exposure = exposure;
 }
 
