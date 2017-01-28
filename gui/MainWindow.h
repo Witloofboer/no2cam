@@ -48,7 +48,7 @@ public:
                const QString &devicesNotes);
 
 signals:
-    void stopped();
+    void stopRequested();
     void temperaturePeriodUpdated(int temperaturePeriod);
 
 public slots:

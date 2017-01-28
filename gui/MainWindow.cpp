@@ -250,10 +250,10 @@ MainWindow::MainWindow(core::Crystal *crystal,
     connect(_sweepPane, SweepParameterPane::sweepRequested,
             coreInstance, core::Core::sweep);
 
-    connect(this, stopped, coreInstance, core::Core::stop);
+    connect(this, stopRequested, coreInstance, core::Core::stop);
     connect(this, temperaturePeriodUpdated, coreInstance, core::Core::updateTemperaturePeriod);
     connect(_cameraBtnBox, CameraBtnBox::started, this, start);
-    connect(_cameraBtnBox, CameraBtnBox::stopped, this, stopped);
+    connect(_cameraBtnBox, CameraBtnBox::stopped, this, stopRequested);
 
     connect(coreInstance, core::Core::errorOnFileCreation, this, displayErrorOnFileCreation);
     connect(coreInstance, core::Core::errorOnFileWritting, this, displayErrorOnFileWritting);
@@ -406,6 +406,7 @@ void MainWindow::displayErrorOnFileWritting(QString datafolder,
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    emit stopRequested();
     persiste();
     _configDlg->persiste();
     _snapshotPane->persiste();
