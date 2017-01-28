@@ -21,14 +21,14 @@ namespace core
 BaseCamera::BaseCamera()
     : QObject()
     , _exposure(-1)
-    , _isBusy(false)
+    , _isAvailable(true)
 {}
 
 //------------------------------------------------------------------------------
 
 void BaseCamera::setExposure(int exposure)
 {
-    Q_ASSERT(!_isBusy);
+    Q_ASSERT(_isAvailable);
     qDebug("Camera: exposure time set to %d ms", exposure);
     _exposure = exposure;
 }
@@ -37,9 +37,9 @@ void BaseCamera::setExposure(int exposure)
 
 void BaseCamera::takeSnapshot()
 {
-    Q_ASSERT(!_isBusy);
+    Q_ASSERT(_isAvailable);
     qDebug("Camera: taking snapshot");
-    _isBusy = true;
+    _isAvailable = false;
     takeSnapshotImpl();
 }
 
@@ -47,28 +47,38 @@ void BaseCamera::takeSnapshot()
 
 void BaseCamera::stop()
 {
-    if (_isBusy)
+    if (!_isAvailable)
     {
         qDebug("Camera: stop");
         stopImpl();
+        setAvailable();
     }
 }
 
 //------------------------------------------------------------------------------
 
-void BaseCamera::copySnapshotToBuffer(Snapshot &buffer)
+void BaseCamera::getSnapshot(Snapshot &buffer)
 {
-    Q_ASSERT(!_isBusy);
+    Q_ASSERT(_isAvailable);
 
-    qDebug("Camera: Importing snapshot");
-    copySnapshotToBufferImpl(buffer);
+    qDebug("Camera: getting snapshot");
+    getSnapshotImpl(buffer);
 }
 
 //------------------------------------------------------------------------------
 
-void BaseCamera::notBusy()
+void BaseCamera::snapshotReady()
 {
-    _isBusy = false;
+    qDebug("Camera: snapshot ready");
+    _isAvailable = true;
+    emit snapshotAvailable();
+}
+
+//------------------------------------------------------------------------------
+
+void BaseCamera::setAvailable()
+{
+    _isAvailable = true;
 }
 
 //------------------------------------------------------------------------------
@@ -104,12 +114,11 @@ void MockCamera::takeSnapshotImpl()
 void MockCamera::stopImpl()
 {
     _timer->stop();
-    notBusy();
 }
 
 //------------------------------------------------------------------------------
 
-void MockCamera::copySnapshotToBufferImpl(Snapshot &buffer)
+void MockCamera::getSnapshotImpl(Snapshot &buffer)
 {
     for (int i=0; i<size; ++i)
         for (int j=0; j<size; ++j)
@@ -125,9 +134,7 @@ void MockCamera::copySnapshotToBufferImpl(Snapshot &buffer)
 
 void MockCamera::snapshotRdyImpl()
 {
-    qDebug("Camera: snapshot ready");
-    notBusy();
-    emit snapshotAvailable();
+    snapshotReady();
 }
 
 //------------------------------------------------------------------------------

@@ -29,22 +29,26 @@ public:
     void setExposure(int exposure);
     void takeSnapshot();
     void stop();
-    void copySnapshotToBuffer(Snapshot &buffer);
+    void getSnapshot(Snapshot &buffer);
 
 signals:
     void snapshotAvailable();
 
 protected:
-    void notBusy();
+    void snapshotReady();
+
     virtual void takeSnapshotImpl()=0;
     virtual void stopImpl()=0;
-    virtual void copySnapshotToBufferImpl(Snapshot &buffer)=0;
+    virtual void getSnapshotImpl(Snapshot &buffer)=0;
 
 protected:
     int _exposure;
 
+private slots:
+    void setAvailable();
+
 private:
-    bool _isBusy;
+    bool _isAvailable;
 };
 
 //------------------------------------------------------------------------------
@@ -59,7 +63,7 @@ public:
 protected:
     void takeSnapshotImpl() override;
     void stopImpl() override;
-    void copySnapshotToBufferImpl(Snapshot &buffer) override;
+    void getSnapshotImpl(Snapshot &buffer) override;
 
 private slots:
     void snapshotRdyImpl();

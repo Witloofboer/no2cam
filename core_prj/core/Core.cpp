@@ -290,7 +290,7 @@ void Core::postSnapshotProcess()
 {
     if (_mode==READY) return;
 
-    _camera->copySnapshotToBuffer(_snapshotBuffer);
+    _camera->getSnapshot(_snapshotBuffer);
 
     switch(_mode)
     {
