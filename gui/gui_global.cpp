@@ -6,7 +6,7 @@
 #include "MainWindow.h"
 #include "core/Crystal.h"
 #include "core/Core.h"
-#include "core/BaseCamera.h"
+#include "core/drivers.h"
 
 //------------------------------------------------------------------------------
 
@@ -23,10 +23,10 @@ static MainWindow *_mainWindow = nullptr;
 
 void init(const QString& subversion,
           const QString& devicesNotes,
-          core::BaseTemperatureProbe *crysTempProb,
-          core::BaseCamera *camera,
-          core::BaseGenerator *generator,
-          core::BaseDriver *driver)
+          core::ProbeDriver *probe,
+          core::CameraDriver *camera,
+          core::FrequencyDriver *generator,
+          core::PowerDriver *driver)
 {
     qInfo("Initialisation");
 
@@ -36,7 +36,7 @@ void init(const QString& subversion,
 
     _coreThr = new QThread;
     _crystal = new Crystal;
-    _coreLayer = new Core(_crystal, crysTempProb, camera, generator, driver);
+    _coreLayer = new Core(_crystal, probe, camera, generator, driver);
     _mainWindow = new gui::MainWindow(_crystal, _coreLayer, subversion, devicesNotes);
     _mainWindow->show();
 

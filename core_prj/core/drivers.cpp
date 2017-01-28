@@ -1,38 +1,30 @@
-#include "BaseDriver.h"
+#include "drivers.h"
 
-namespace core
-{
+namespace core {
 
 //------------------------------------------------------------------------------
 
-BaseDriver::BaseDriver()
-    : QObject()
-    , _power(-1.0)
+FrequencyDriver::FrequencyDriver()
+    :QObject()
 {}
 
 //------------------------------------------------------------------------------
 
-bool BaseDriver::setPower(double power)
-{
-    bool isUpdate = _power != power;
-
-    if (isUpdate)
-    {
-        qDebug("Setting acoustic power to %.1f mW", power);
-        _power = power;
-        updatePower();
-    }
-
-    return isUpdate;
-}
+PowerDriver::PowerDriver()
+    :QObject()
+{}
 
 //------------------------------------------------------------------------------
 
-MockDriver::MockDriver() : BaseDriver() {}
+CameraDriver::CameraDriver()
+    :QObject()
+{}
 
 //------------------------------------------------------------------------------
 
-void MockDriver::updatePower() {}
+ProbeDriver::ProbeDriver()
+    :QObject()
+{}
 
 //------------------------------------------------------------------------------
 

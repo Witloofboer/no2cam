@@ -1,9 +1,6 @@
 #include <QApplication>
 
-#include "core/BaseCamera.h"
-#include "core/BaseDriver.h"
-#include "core/BaseGenerator.h"
-#include "core/BaseTemperatureProbe.h"
+#include "core/mockups.h"
 #include "gui/gui_global.h"
 
 //------------------------------------------------------------------------------
@@ -16,7 +13,7 @@ int main(int argc, char *argv[])
 
     init("mockup",
          QObject::tr("<p>Functional mockups are used for all devices.</p>"),
-         new core::MockTemperatureProbe,
+         new core::MockProbe,
          new core::MockCamera,
          new core::MockGenerator,
          new core::MockDriver);

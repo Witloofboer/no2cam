@@ -6,8 +6,6 @@
 
 #include "gui_global.h"
 
-#include "core/BaseCamera.h"
-
 //------------------------------------------------------------------------------
 
 class QAction;

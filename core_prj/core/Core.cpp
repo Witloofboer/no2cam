@@ -4,10 +4,7 @@
 #include <QFile>
 #include <QTimer>
 
-#include "BaseTemperatureProbe.h"
-#include "BaseCamera.h"
-#include "BaseDriver.h"
-#include "BaseGenerator.h"
+#include "controllers.h"
 #include "Crystal.h"
 #include "ImageBuffer.h"
 
@@ -18,31 +15,30 @@ namespace core {
 //------------------------------------------------------------------------------
 
 Core::Core(const Crystal *crystal,
-           BaseTemperatureProbe *crysTempProb,
-           BaseCamera *camera,
-           BaseGenerator *generator,
-           BaseDriver *driver)
+           ProbeDriver *probe,
+           CameraDriver *camera,
+           FrequencyDriver *generator,
+           PowerDriver *driver)
     : QObject()
     , _cooldownT(new QTimer(this))
     , _stabilisationT(new QTimer(this))
     , _temperatureT(new QTimer(this))
     , _crystal(crystal)
-    , _temperatureProbe(crysTempProb)
-    , _camera(camera)
-    , _generator(generator)
-    , _driver(driver)
+    , _camera(new CameraCtrl(this, camera))
+    , _generator(new FrequencyCtrl(this, generator))
+    , _driver(new PowerCtrl(this, driver))
+    , _probe(new ProbeCtrl(this, probe))
     , _mode(READY)
     , _bursting(false)
     , _snapshotBuffer{0}
 {
-    camera->setParent(this); // TODO setParent for the other devices
     _cooldownT->setSingleShot(true);
     _stabilisationT->setSingleShot(true);
 
     connect(_cooldownT, QTimer::timeout, this, setAcousticWave);
     connect(_stabilisationT, QTimer::timeout, this, takeSnapshot);
     connect(_temperatureT, QTimer::timeout, this, updateTemperature);
-    connect(_camera, BaseCamera::snapshotAvailable, this, postSnapshotProcess);
+    connect(_camera, CameraCtrl::snapshotAvailable, this, postSnapshotProcess);
 }
 
 //------------------------------------------------------------------------------
@@ -228,8 +224,8 @@ void Core::setAcousticWave()
         if (p.snapshotCount == 0)
         {
             // First snapshot... initialisation of the observation
-            for(int i=0; i<BaseCamera::size; ++i)
-                for(int j=0; j<BaseCamera::size; ++j)
+            for(int i=0; i<snapshotSize; ++i)
+                for(int j=0; j<snapshotSize; ++j)
                 {
                     p.snapshots[0][i][j] = 0;
                     p.snapshots[1][i][j] = 0;
@@ -280,7 +276,7 @@ void Core::takeSnapshot()
 
 void Core::updateTemperature()
 {
-    _temperature = _temperatureProbe->getTemperature();
+    _temperature = _probe->getTemperature();
     emit temperatureUpdated(_temperature);
 }
 
@@ -341,8 +337,8 @@ void Core::postSnapshotProcess()
         auto &p = _p.obs;
 
         // Add the current snapshot to the consolidated one.
-        for(int i=0; i<BaseCamera::size; ++i)
-            for(int j=0; j<BaseCamera::size; ++j)
+        for(int i=0; i<snapshotSize; ++i)
+            for(int j=0; j<snapshotSize; ++j)
                 p.snapshots[p.idx][i][j] += _snapshotBuffer[i][j];
 
         ++p.snapshotCount;
@@ -363,8 +359,8 @@ void Core::postSnapshotProcess()
                              p.temperature,
                              p.snapshots[i]);
 
-            for(int i=0; i<BaseCamera::size; ++i)
-                for(int j=0; j<BaseCamera::size; ++j)
+            for(int i=0; i<snapshotSize; ++i)
+                for(int j=0; j<snapshotSize; ++j)
                     _snapshotBuffer[i][j]=(p.snapshots[0][i][j]+p.snapshots[1][i][j])/2;
 
             gImageBuffer.set(_snapshotBuffer);
@@ -474,7 +470,7 @@ void Core::saveSnapshot(const QDateTime& dateTime,
                         int snapPerObs,
                         int exposure,
                         double temperature,
-                        BaseCamera::Snapshot& snapshot)
+                        Snapshot& snapshot)
 {
     if (!_record) return;
 
@@ -507,7 +503,7 @@ void Core::saveSnapshot(const QDateTime& dateTime,
     }
 
     auto buf = reinterpret_cast<const char*>(snapshot);
-    const qint64 bufSize = BaseCamera::size*BaseCamera::size*2;
+    const qint64 bufSize = snapshotSize*snapshotSize*2;
 
     const qint64 onDisk = file.write(buf, bufSize);
 

@@ -4,10 +4,11 @@
 #include <QtCore/qglobal.h>
 
 namespace core {
-class BaseTemperatureProbe;
-class BaseCamera;
-class BaseGenerator;
-class BaseDriver;
+class ProbeDriver;
+class CameraDriver;
+class FrequencyDriver;
+class PowerDriver;
+
 }
 
 //------------------------------------------------------------------------------
@@ -30,10 +31,10 @@ class BaseDriver;
  */
 GUISHARED_EXPORT void init(const QString& subversion,
                            const QString& devicesNotes,
-                           core::BaseTemperatureProbe *crysTempProb,
-                           core::BaseCamera *camera,
-                           core::BaseGenerator *generator,
-                           core::BaseDriver *driver);
+                           core::ProbeDriver *probe,
+                           core::CameraDriver *camera,
+                           core::FrequencyDriver *generator,
+                           core::PowerDriver *driver);
 GUISHARED_EXPORT void start();
 GUISHARED_EXPORT void shutdown();
 GUISHARED_EXPORT void finalise();

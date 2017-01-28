@@ -22,20 +22,19 @@ SOURCES += \
     Core.cpp \
     Crystal.cpp \
     ImageBuffer.cpp \
-    BaseCamera.cpp \
-    BaseDriver.cpp \
-    BaseGenerator.cpp \
-    BaseTemperatureProbe.cpp
+    controllers.cpp \
+    mockups.cpp \
+    drivers.cpp
 
 HEADERS += \
     core_global.h \
     Core.h \
     Crystal.h \
     ImageBuffer.h \
-    BaseCamera.h \
-    BaseDriver.h \
-    BaseGenerator.h \
-    BaseTemperatureProbe.h
+    controllers.h \
+    mockups.h \
+    drivers.h \
+    Snapshot.h
 
 unix {
     target.path = /usr/lib

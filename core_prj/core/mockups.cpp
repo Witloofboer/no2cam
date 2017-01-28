@@ -1,6 +1,5 @@
-#include "BaseCamera.h"
+#include "mockups.h"
 
-#include <QDir> // Q_INIT_RESOURCE
 #include <QColor>
 #include <QImage>
 #include <QTimer>
@@ -18,85 +17,56 @@ namespace core
 
 //------------------------------------------------------------------------------
 
-BaseCamera::BaseCamera()
-    : QObject()
-    , _exposure(-1)
-    , _isAvailable(true)
+MockGenerator::MockGenerator(): FrequencyDriver() {}
+
+//------------------------------------------------------------------------------
+
+void MockGenerator::setFrequency(double) {}
+
+//------------------------------------------------------------------------------
+
+MockDriver::MockDriver(): PowerDriver() {}
+
+//------------------------------------------------------------------------------
+
+void MockDriver::setPower(double) {}
+
+//------------------------------------------------------------------------------
+
+MockProbe::MockProbe()
+    : ProbeDriver()
+    , _temperature(20.0)
+    , _delta(0.12)
 {}
 
 //------------------------------------------------------------------------------
 
-void BaseCamera::setExposure(int exposure)
+double MockProbe::getTemperature()
 {
-    Q_ASSERT(_isAvailable);
-    qDebug("Camera: exposure time set to %d ms", exposure);
-    _exposure = exposure;
-}
+    _temperature += _delta;
+    if (_temperature < 18.0) _delta = fabs(_delta);
+    else if (22.0 < _temperature) _delta = -fabs(_delta);
 
-//------------------------------------------------------------------------------
-
-void BaseCamera::takeSnapshot()
-{
-    Q_ASSERT(_isAvailable);
-    qDebug("Camera: taking snapshot");
-    _isAvailable = false;
-    takeSnapshotImpl();
-}
-
-//------------------------------------------------------------------------------
-
-void BaseCamera::stop()
-{
-    if (!_isAvailable)
-    {
-        qDebug("Camera: stop");
-        stopImpl();
-        setAvailable();
-    }
-}
-
-//------------------------------------------------------------------------------
-
-void BaseCamera::getSnapshot(Snapshot &buffer)
-{
-    Q_ASSERT(_isAvailable);
-
-    qDebug("Camera: getting snapshot");
-    getSnapshotImpl(buffer);
-}
-
-//------------------------------------------------------------------------------
-
-void BaseCamera::snapshotReady()
-{
-    qDebug("Camera: snapshot ready");
-    _isAvailable = true;
-    emit snapshotAvailable();
-}
-
-//------------------------------------------------------------------------------
-
-void BaseCamera::setAvailable()
-{
-    _isAvailable = true;
+    return _temperature;
 }
 
 //------------------------------------------------------------------------------
 
 MockCamera::MockCamera()
-    : BaseCamera()
+    : CameraDriver()
+    , _exposure(-1)
     , _timer(new QTimer(this))
     , _shift(0)
 {
     initResource();
 
     _timer->setSingleShot(true);
-    connect(_timer, QTimer::timeout, this, snapshotRdyImpl);
+    connect(_timer, QTimer::timeout, this, snapshotAvailable);
 
     QImage image(":/scene.jpg");
 
-    for (int i=0; i<size; ++i)
-        for (int j=0; j<size; ++j)
+    for (int i=0; i<snapshotSize; ++i)
+        for (int j=0; j<snapshotSize; ++j)
         {
             _scene[i][j] = static_cast<quint16>(qGray(image.pixel(i, j))<<8);
         }
@@ -104,37 +74,37 @@ MockCamera::MockCamera()
 
 //------------------------------------------------------------------------------
 
-void MockCamera::takeSnapshotImpl()
+void core::MockCamera::setExposure(int exposure)
+{
+    _exposure = exposure;
+}
+
+//------------------------------------------------------------------------------
+
+void MockCamera::takeSnapshot()
 {
     _timer->start(_exposure);
 }
 
 //------------------------------------------------------------------------------
 
-void MockCamera::stopImpl()
+void MockCamera::stop()
 {
     _timer->stop();
 }
 
 //------------------------------------------------------------------------------
 
-void MockCamera::getSnapshotImpl(Snapshot &buffer)
+void MockCamera::getSnapshot(Snapshot &buffer)
 {
-    for (int i=0; i<size; ++i)
-        for (int j=0; j<size; ++j)
+    for (int i=0; i<snapshotSize; ++i)
+        for (int j=0; j<snapshotSize; ++j)
         {
-            double pix = (double(_exposure)*_scene[(i+_shift) % size][j]) / 50.0;
+            double pix = (double(_exposure)*_scene[(i+_shift) % snapshotSize][j]) / 50.0;
             buffer[i][j] = pix<65535 ? pix : 65535;
         }
 
-    _shift = (_shift+7) % size;
-}
-
-//------------------------------------------------------------------------------
-
-void MockCamera::snapshotRdyImpl()
-{
-    snapshotReady();
+    _shift = (_shift+7) % snapshotSize;
 }
 
 //------------------------------------------------------------------------------

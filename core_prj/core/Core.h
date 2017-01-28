@@ -5,7 +5,7 @@
 #include <QObject>
 
 #include "core_global.h"
-#include "BaseCamera.h"
+#include "Snapshot.h"
 
 
 class QTimer;
@@ -15,9 +15,14 @@ class QTimer;
 namespace core {
 
 class Crystal;
-class BaseTemperatureProbe;
-class BaseDriver;
-class BaseGenerator;
+class CameraDriver;
+class FrequencyDriver;
+class PowerDriver;
+class ProbeDriver;
+class CameraCtrl;
+class FrequencyCtrl;
+class PowerCtrl;
+class ProbeCtrl;
 
 //------------------------------------------------------------------------------
 
@@ -32,10 +37,10 @@ class CORESHARED_EXPORT Core : public QObject
 
 public:
     Core(const Crystal *crystal,
-         BaseTemperatureProbe *crysTempProb,
-         BaseCamera *camera,
-         BaseGenerator *generator,
-         BaseDriver *driver); // Todo Timer factory
+         ProbeDriver *probe,
+         CameraDriver *camera,
+         FrequencyDriver *generator,
+         PowerDriver *driver);
 
 signals:
     void ready(bool isReady);
@@ -185,7 +190,7 @@ private:
                       int snapPerObs,
                       int exposure,
                       double temperature,
-                      BaseCamera::Snapshot &snapshot);
+                      Snapshot &snapshot);
 
     QTimer *_cooldownT;
     QTimer *_stabilisationT;
@@ -195,17 +200,17 @@ private:
     double _cooldownPwr;
 
     const Crystal *_crystal;
-    BaseTemperatureProbe *_temperatureProbe;
-    BaseCamera *_camera;
+    CameraCtrl *_camera;
+    FrequencyCtrl *_generator;
+    PowerCtrl *_driver;
+    ProbeCtrl *_probe;
 
-    BaseGenerator *_generator;
-    BaseDriver *_driver;
     double _temperature;
 
     Mode _mode;
     int _exposure;
     bool _bursting;
-    BaseCamera::Snapshot _snapshotBuffer;
+    Snapshot _snapshotBuffer;
     QDateTime _snapTime;
     bool _record;
     QString _dataFolder;
@@ -240,7 +245,7 @@ private:
         double temperature;
         double frequency[2];
         double power[2];
-        BaseCamera::Snapshot snapshots[2];
+        Snapshot snapshots[2];
     };
 
     struct SweepParams
