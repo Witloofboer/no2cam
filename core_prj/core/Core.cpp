@@ -4,8 +4,10 @@
 #include <QFile>
 #include <QTimer>
 
+#include "BaseTemperatureProbe.h"
 #include "BaseCamera.h"
-#include "AbstractCrysTempProbe.h"
+#include "BaseDriver.h"
+#include "BaseGenerator.h"
 #include "Crystal.h"
 #include "ImageBuffer.h"
 
@@ -16,10 +18,10 @@ namespace core {
 //------------------------------------------------------------------------------
 
 Core::Core(const Crystal *crystal,
-           AbstractCrysTempProbe *crysTempProb,
+           BaseTemperatureProbe *crysTempProb,
            BaseCamera *camera,
-           AbstractGenerator *generator,
-           AbstractDriver *driver)
+           BaseGenerator *generator,
+           BaseDriver *driver)
     : QObject()
     , _cooldownT(new QTimer(this))
     , _stabilisationT(new QTimer(this))
@@ -31,7 +33,7 @@ Core::Core(const Crystal *crystal,
     , _driver(driver)
     , _mode(READY)
     , _bursting(false)
-    , _snapshot{0}
+    , _snapshotBuffer{0}
 {
     camera->setParent(this); // TODO setParent for the other devices
     _cooldownT->setSingleShot(true);
@@ -154,8 +156,8 @@ void Core::sweep(double wavelength1,
 
 void Core::stop()
 {
-    _generator.setFrequency(0.0);
-    _driver.setPower(0.0);
+    _generator->setFrequency(0.0);
+    _driver->setPower(0.0);
     _camera->stop();
     _cooldownT->stop();
     _stabilisationT->stop();
@@ -288,7 +290,7 @@ void Core::postSnapshotProcess()
 {
     if (_mode==READY) return;
 
-    _camera->copySnapshot(_snapshot);
+    _camera->copySnapshotToBuffer(_snapshotBuffer);
 
     switch(_mode)
     {
@@ -300,7 +302,7 @@ void Core::postSnapshotProcess()
     {
         auto &p = _p.specSnap;
 
-        gImageBuffer.set(_snapshot);
+        gImageBuffer.set(_snapshotBuffer);
         emit snapshotAvailable();
 
         saveSnapshot(_snapTime,
@@ -311,7 +313,7 @@ void Core::postSnapshotProcess()
                      1,
                      _exposure,
                      _temperature,
-                     _snapshot);
+                     _snapshotBuffer);
         break;
     }
 
@@ -319,7 +321,7 @@ void Core::postSnapshotProcess()
     {
         auto &p = _p.acouSnap;
 
-        gImageBuffer.set(_snapshot);
+        gImageBuffer.set(_snapshotBuffer);
         emit snapshotAvailable();
 
         saveSnapshot(_snapTime,
@@ -330,7 +332,7 @@ void Core::postSnapshotProcess()
                      1,
                      _exposure,
                      _temperature,
-                     _snapshot);
+                     _snapshotBuffer);
         break;
     }
 
@@ -341,7 +343,7 @@ void Core::postSnapshotProcess()
         // Add the current snapshot to the consolidated one.
         for(int i=0; i<BaseCamera::size; ++i)
             for(int j=0; j<BaseCamera::size; ++j)
-                p.snapshots[p.idx][i][j] += _snapshot[i][j];
+                p.snapshots[p.idx][i][j] += _snapshotBuffer[i][j];
 
         ++p.snapshotCount;
         p.idx = 1 - p.idx;
@@ -363,9 +365,9 @@ void Core::postSnapshotProcess()
 
             for(int i=0; i<BaseCamera::size; ++i)
                 for(int j=0; j<BaseCamera::size; ++j)
-                    _snapshot[i][j]=(p.snapshots[0][i][j]+p.snapshots[1][i][j])/2;
+                    _snapshotBuffer[i][j]=(p.snapshots[0][i][j]+p.snapshots[1][i][j])/2;
 
-            gImageBuffer.set(_snapshot);
+            gImageBuffer.set(_snapshotBuffer);
             emit snapshotAvailable();
         }
         break;
@@ -383,9 +385,9 @@ void Core::postSnapshotProcess()
                      1,
                      _exposure,
                      _temperature,
-                     _snapshot);
+                     _snapshotBuffer);
 
-        gImageBuffer.set(_snapshot);
+        gImageBuffer.set(_snapshotBuffer);
         emit snapshotAvailable();
 
         if (p.wavelength < p.in_maxWavelength)
@@ -458,7 +460,7 @@ bool Core::mustCooldown() const
 void Core::cooldown()
 {
     qDebug("Cooling down: %dms", _cooldownT->interval());
-    _driver.setPower(_cooldownPwr);
+    _driver->setPower(_cooldownPwr);
     _cooldownT->start();
 }
 
@@ -527,8 +529,8 @@ void Core::requestAcousticWave(double frequency, double power)
 {
     bool waveChanged = false;
 
-    waveChanged |= _generator.setFrequency(frequency);
-    waveChanged |= _driver.setPower(power);
+    waveChanged |= _generator->setFrequency(frequency);
+    waveChanged |= _driver->setPower(power);
 
     if (power != 0.0 && waveChanged)
     {

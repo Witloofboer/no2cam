@@ -20,7 +20,7 @@ class QTimer;
 namespace core {
 class Core;
 class Crystal;
-class AbstractCrysTempProbe;
+class BaseTemperatureProbe;
 }
 
 namespace gui {
@@ -45,7 +45,7 @@ public:
     MainWindow(core::Crystal *crystal,
                core::Core *coreObj,
                const QString &version,
-               const QString &releaseNotes);
+               const QString &devicesNotes);
 
 signals:
     void stopped();
@@ -94,7 +94,7 @@ private:
 
     QString _dataFolder;
     QString _version;
-    QString _releaseNotes;
+    QString _devicesNotes;
 
     SnapshotParameterPane    *_snapshotPane;
     ObservationParameterPane *_observationPane;

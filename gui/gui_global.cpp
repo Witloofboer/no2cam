@@ -21,12 +21,12 @@ static MainWindow *_mainWindow = nullptr;
 
 //------------------------------------------------------------------------------
 
-void init(const QString& version,
-          const QString& releaseNotes,
-          core::AbstractCrysTempProbe *crysTempProb,
+void init(const QString& subversion,
+          const QString& devicesNotes,
+          core::BaseTemperatureProbe *crysTempProb,
           core::BaseCamera *camera,
-          core::AbstractGenerator *generator,
-          core::AbstractDriver *driver)
+          core::BaseGenerator *generator,
+          core::BaseDriver *driver)
 {
     qInfo("Initialisation");
 
@@ -37,7 +37,7 @@ void init(const QString& version,
     _coreThr = new QThread;
     _crystal = new Crystal;
     _coreLayer = new Core(_crystal, crysTempProb, camera, generator, driver);
-    _mainWindow = new gui::MainWindow(_crystal, _coreLayer, version, releaseNotes);
+    _mainWindow = new gui::MainWindow(_crystal, _coreLayer, subversion, devicesNotes);
     _mainWindow->show();
 
     QObject::connect(_coreThr, QThread::finished,

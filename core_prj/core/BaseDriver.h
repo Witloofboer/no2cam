@@ -1,5 +1,5 @@
-#ifndef ABSTRACTGENERATOR_H
-#define ABSTRACTGENERATOR_H
+#ifndef BASEDRIVER_H
+#define BASEDRIVER_H
 
 #include <QObject>
 
@@ -12,30 +12,34 @@ namespace core
 
 //------------------------------------------------------------------------------
 
-class CORESHARED_EXPORT AbstractGenerator : public QObject
+class CORESHARED_EXPORT BaseDriver : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit AbstractGenerator();
-    virtual void setFrequency(double frequency)=0;
+    explicit BaseDriver();
+    bool setPower(double power);
+
+protected:
+    virtual void updatePower()=0;
+    double _power;
 };
 
 //------------------------------------------------------------------------------
 
-class GeneratorProxy
+class CORESHARED_EXPORT MockDriver : public BaseDriver
 {
-public:
-    explicit GeneratorProxy(AbstractGenerator* generator);
-    bool setFrequency(double frequency);
+    Q_OBJECT
 
-private:
-    AbstractGenerator *_generator;
-    double _frequency;
+public:
+    explicit MockDriver();
+
+protected:
+    virtual void updatePower() override;
 };
 
 //------------------------------------------------------------------------------
 
 }
 
-#endif // ABSTRACTGENERATOR_H
+#endif // BASEDRIVER_H

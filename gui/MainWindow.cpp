@@ -33,8 +33,8 @@ namespace gui {
 
 MainWindow::MainWindow(core::Crystal *crystal,
                        core::Core *coreInstance,
-                       const QString &version,
-                       const QString &releaseNotes)
+                       const QString &subversion,
+                       const QString &devicesNotes)
     : QMainWindow()
     , _coreInstance(coreInstance)
     , _configDlg(new ConfigurationDlg(this, crystal))
@@ -45,8 +45,11 @@ MainWindow::MainWindow(core::Crystal *crystal,
     , _sweepModeActn(new QAction("Sweep over &wavelength", this))
     , _configParamActn(new QAction("&Configure", this))
     , _dataFolder()
-    , _version(version)
-    , _releaseNotes(releaseNotes)
+    , _version(tr("0.3.0")
+               + (subversion.isEmpty()
+                  ? QString("")
+                  : QString(" (%1)").arg(subversion)))
+    , _devicesNotes(devicesNotes)
     , _snapshotPane(new SnapshotParameterPane(crystal))
     , _observationPane(new ObservationParameterPane)
     , _sweepPane(new SweepParameterPane)
@@ -470,14 +473,20 @@ void MainWindow::about()
 {
     QMessageBox::about
     ( this
-      , tr("NO2> Camera Command Interface")
-      , tr("<h3>NO<sub>2</sub> Camera Commander</h3>")
-      + "<p>" + tr("Version") + ": " + _version + "</p>"
-      + tr("<p>Author: Didier Pieroux (didier.pieroux@aeronomie.be)</p>")
-      + tr("<p>Copyright 2016-2017 BIRA-IASB</p>")
-      + tr("<p>This program is provided AS IS, with NO WARRANTY OF ANY "
-           "KIND.</p>")
-    );
+      , tr("NO2 Camera Command Interface")
+      , tr("<h3>NO<sub>2</sub> Camera Command Interface</h3>"
+           "<p>Version: %1</p>"
+           "<p>Author: Didier Pieroux (didier.pieroux@aeronomie.be)</p>"
+           "<p>Copyright 2016-2017 BIRA-IASB</p>"
+           "<p>THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY "
+           "KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE "
+           "WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE "
+           "AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT "
+           "HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, "
+           "WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, "
+           "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER "
+           "DEALINGS IN THE SOFTWARE.</p>"
+          ).arg(_version));
 }
 
 //------------------------------------------------------------------------------
@@ -486,10 +495,17 @@ void MainWindow::displayReleaseNotes()
 {
     QMessageBox::information
     ( this
-      , tr("NO<sub>2</sub> Camera Command Interface")
-      , "<h2>" + tr("Release notes of the version") + " " + _version + "</h2>"
-      + "<h3>" + tr("Implemented functionalities") + "</h3>"
-      + _releaseNotes
+      , tr("NO2 Camera Command Interface")
+      , tr("<h2>NO<sub>2</sub> Camera Command Interface</h2>"
+           "<h3> Version: %1 </h3>"
+           "<h3>Functionalities</h3>"
+           "%2"
+           "<h3>Devices</h3>"
+           "%3"
+          )
+      .arg(_version)
+      .arg("<p>All initially foreseen functionalities are implemented.</p>")
+      .arg(_devicesNotes)
       , QMessageBox::Ok);
 }
 
@@ -511,7 +527,6 @@ void MainWindow::persiste()
     QSettings settings;
 
     settings.setValue(dataFolderLbl, _dataFolder);
-
 }
 
 //------------------------------------------------------------------------------
@@ -533,7 +548,8 @@ void MainWindow::restore()
 
 void MainWindow::refreshWindowTitle()
 {
-    setWindowTitle("NO2 Camera - "+ QDir::toNativeSeparators(_dataFolder));
+    setWindowTitle("NO2 Camera " + _version +
+                   " - "+ QDir::toNativeSeparators(_dataFolder));
 }
 
 //------------------------------------------------------------------------------

@@ -6,8 +6,7 @@
 
 #include "core_global.h"
 #include "BaseCamera.h"
-#include "Driver.h"
-#include "Generator.h"
+
 
 class QTimer;
 
@@ -16,9 +15,9 @@ class QTimer;
 namespace core {
 
 class Crystal;
-class AbstractCrysTempProbe;
-class AbstractDriver;
-class AbstractGenerator;
+class BaseTemperatureProbe;
+class BaseDriver;
+class BaseGenerator;
 
 //------------------------------------------------------------------------------
 
@@ -33,10 +32,10 @@ class CORESHARED_EXPORT Core : public QObject
 
 public:
     Core(const Crystal *crystal,
-         AbstractCrysTempProbe *crysTempProb,
+         BaseTemperatureProbe *crysTempProb,
          BaseCamera *camera,
-         AbstractGenerator *generator,
-         AbstractDriver *driver); // Todo Timer factory
+         BaseGenerator *generator,
+         BaseDriver *driver); // Todo Timer factory
 
 signals:
     void ready(bool isReady);
@@ -196,17 +195,17 @@ private:
     double _cooldownPwr;
 
     const Crystal *_crystal;
-    AbstractCrysTempProbe *_temperatureProbe;
+    BaseTemperatureProbe *_temperatureProbe;
     BaseCamera *_camera;
 
-    GeneratorProxy _generator;
-    DriverProxy _driver;
+    BaseGenerator *_generator;
+    BaseDriver *_driver;
     double _temperature;
 
     Mode _mode;
     int _exposure;
     bool _bursting;
-    BaseCamera::Snapshot _snapshot;
+    BaseCamera::Snapshot _snapshotBuffer;
     QDateTime _snapTime;
     bool _record;
     QString _dataFolder;

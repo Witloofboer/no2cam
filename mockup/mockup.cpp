@@ -1,11 +1,10 @@
 #include <QApplication>
 
+#include "core/BaseCamera.h"
+#include "core/BaseDriver.h"
+#include "core/BaseGenerator.h"
+#include "core/BaseTemperatureProbe.h"
 #include "gui/gui_global.h"
-
-#include "MockCamera.h"
-#include "MockDriver.h"
-#include "MockGenerator.h"
-#include "MockTemperatureProbe.h"
 
 //------------------------------------------------------------------------------
 
@@ -13,22 +12,14 @@ int main(int argc, char *argv[])
 {
     qSetMessagePattern("%{time hh:mm:ss.zzz} (%{threadid}) %{type}: %{message}");
 
-    Q_INIT_RESOURCE(scene);
-
     QApplication application(argc, argv);
 
-    QString releaseNotes(
-        "<p> This version contains a full implementation of the GUI (with the "
-        "exception of the data folder selection) and the business logic "
-        "required by the  GUI.</p>"
-        "<p><b>Note that in this version all devices are mockups.</b></p>");
-
-    init("0.3.0 (mockup)",
-         releaseNotes,
-         new MockTemperatureProbe,
-         new MockCamera,
-         new MockGenerator,
-         new MockDriver);
+    init("mockup",
+         QObject::tr("<p>Functional mockups are used for all devices.</p>"),
+         new core::MockTemperatureProbe,
+         new core::MockCamera,
+         new core::MockGenerator,
+         new core::MockDriver);
     start();
     int result = application.exec();
     shutdown();

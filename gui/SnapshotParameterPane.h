@@ -9,7 +9,7 @@ class QRadioButton;
 
 namespace core {
 class Crystal;
-class AbstractCrysTempProbe; // should be set via a signal
+class BaseTemperatureProbe; // should be set via a signal
 }
 
 namespace gui {
@@ -69,7 +69,7 @@ private:
     void restore();
 
     const core::Crystal *_crystal;
-    const core::AbstractCrysTempProbe *_crystalTempProbe;
+    const core::BaseTemperatureProbe *_crystalTempProbe;
 
     double _temperature;
     QRadioButton   *_spectralBtn;
