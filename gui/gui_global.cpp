@@ -5,18 +5,15 @@
 
 #include "MainWindow.h"
 #include "core/Crystal.h"
-#include "core/Core.h"
+#include "core/Manager.h"
 #include "core/drivers.h"
 
 //------------------------------------------------------------------------------
 
-using namespace gui;
-using namespace core;
-
 static QThread *_coreThr = nullptr;
-static Crystal *_crystal = nullptr;
-static Core *_coreLayer = nullptr;
-static MainWindow *_mainWindow = nullptr;
+static core::Crystal *_crystal = nullptr;
+static core::Manager *_coreLayer = nullptr;
+static gui::MainWindow *_mainWindow = nullptr;
 
 
 //------------------------------------------------------------------------------
@@ -35,13 +32,13 @@ void init(const QString& subversion,
     Q_INIT_RESOURCE(resources);
 
     _coreThr = new QThread;
-    _crystal = new Crystal;
-    _coreLayer = new Core(_crystal, probe, camera, generator, driver);
+    _crystal = new core::Crystal;
+    _coreLayer = new core::Manager(_crystal, probe, camera, generator, driver);
     _mainWindow = new gui::MainWindow(_crystal, _coreLayer, subversion, devicesNotes);
     _mainWindow->show();
 
     QObject::connect(_coreThr, QThread::finished,
-                     _coreLayer, Core::threadFinished);
+                     _coreLayer, core::Manager::threadFinished);
 }
 
 //------------------------------------------------------------------------------
@@ -72,7 +69,6 @@ void finalise()
 
     delete _mainWindow;
     _mainWindow = nullptr;
-
 
     delete _coreLayer;
     delete _coreThr;

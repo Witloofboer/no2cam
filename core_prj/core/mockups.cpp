@@ -21,7 +21,10 @@ MockGenerator::MockGenerator(): FrequencyDriver() {}
 
 //------------------------------------------------------------------------------
 
-void MockGenerator::setFrequency(double) {}
+void MockGenerator::setFrequency(double frequency)
+{
+    qDebug("<generator: %.3f MHz>", frequency);
+}
 
 //------------------------------------------------------------------------------
 
@@ -29,7 +32,10 @@ MockDriver::MockDriver(): PowerDriver() {}
 
 //------------------------------------------------------------------------------
 
-void MockDriver::setPower(double) {}
+void MockDriver::setPower(double power)
+{
+    qDebug("<driver: %.1f mW>", power);
+}
 
 //------------------------------------------------------------------------------
 
@@ -46,7 +52,7 @@ double MockProbe::getTemperature()
     _temperature += _delta;
     if (_temperature < 18.0) _delta = fabs(_delta);
     else if (22.0 < _temperature) _delta = -fabs(_delta);
-
+    qDebug("<probe: %.2f degC>", _temperature);
     return _temperature;
 }
 
@@ -61,7 +67,7 @@ MockCamera::MockCamera()
     initResource();
 
     _timer->setSingleShot(true);
-    connect(_timer, QTimer::timeout, this, snapshotAvailable);
+    connect(_timer, QTimer::timeout, this, onSnapshotAvailable);
 
     QImage image(":/scene.jpg");
 
@@ -76,6 +82,7 @@ MockCamera::MockCamera()
 
 void core::MockCamera::setExposure(int exposure)
 {
+    qDebug("<camera: %d ms>", exposure);
     _exposure = exposure;
 }
 
@@ -83,6 +90,7 @@ void core::MockCamera::setExposure(int exposure)
 
 void MockCamera::takeSnapshot()
 {
+    qDebug("<camera: snapshotting>");
     _timer->start(_exposure);
 }
 
@@ -90,13 +98,23 @@ void MockCamera::takeSnapshot()
 
 void MockCamera::stop()
 {
+    qDebug("<camera: stopped>");
     _timer->stop();
+}
+
+//------------------------------------------------------------------------------
+
+void MockCamera::onSnapshotAvailable()
+{
+    qDebug("<camera: snapshot available>");
+    emit snapshotAvailable();
 }
 
 //------------------------------------------------------------------------------
 
 void MockCamera::getSnapshot(Snapshot &buffer)
 {
+    qDebug("<camera: transmitting snapshot>");
     for (int i=0; i<snapshotSize; ++i)
         for (int j=0; j<snapshotSize; ++j)
         {
@@ -106,6 +124,8 @@ void MockCamera::getSnapshot(Snapshot &buffer)
 
     _shift = (_shift+7) % snapshotSize;
 }
+
+
 
 //------------------------------------------------------------------------------
 

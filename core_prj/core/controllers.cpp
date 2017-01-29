@@ -74,7 +74,7 @@ ProbeCtrl::ProbeCtrl(QObject *parent, ProbeDriver *probe)
 double ProbeCtrl::getTemperature()
 {
     double temperature = _probe->getTemperature();
-    qDebug("Probe: reading %f degC", temperature);
+    qDebug("Probe: temperature is %.2f degC", temperature);
     return temperature;
 }
 

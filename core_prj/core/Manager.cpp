@@ -1,4 +1,4 @@
-#include "Core.h"
+#include "Manager.h"
 
 #include <QCoreApplication>
 #include <QFile>
@@ -14,11 +14,11 @@ namespace core {
 
 //------------------------------------------------------------------------------
 
-Core::Core(const Crystal *crystal,
-           ProbeDriver *probe,
-           CameraDriver *camera,
-           FrequencyDriver *generator,
-           PowerDriver *driver)
+Manager::Manager(const Crystal *crystal,
+                 ProbeDriver *probe,
+                 CameraDriver *camera,
+                 FrequencyDriver *generator,
+                 PowerDriver *driver)
     : QObject()
     , _cooldownT(new QTimer(this))
     , _stabilisationT(new QTimer(this))
@@ -43,15 +43,15 @@ Core::Core(const Crystal *crystal,
 
 //------------------------------------------------------------------------------
 
-void Core::spectralSnapshot(double wavelength,
-                            int exposure,
-                            int cooldownTime,
-                            int cooldownPwr,
-                            int stabilisationTime,
-                            bool burst,
-                            bool record,
-                            QString dataFolder,
-                            QString session)
+void Manager::spectralSnapshot(double wavelength,
+                               int exposure,
+                               int cooldownTime,
+                               int cooldownPwr,
+                               int stabilisationTime,
+                               bool burst,
+                               bool record,
+                               QString dataFolder,
+                               QString session)
 {
     qDebug("Spectral snap: wl=%.1f nm", wavelength);
     setCommonParams(SpectralSnap, exposure, cooldownTime, cooldownPwr,
@@ -65,16 +65,16 @@ void Core::spectralSnapshot(double wavelength,
 
 //------------------------------------------------------------------------------
 
-void Core::acousticSnapshot(double frequency,
-                            double power,
-                            int exposure,
-                            int cooldownTime,
-                            int cooldownPwr,
-                            int stabilisationTime,
-                            bool burst,
-                            bool record,
-                            QString dataFolder,
-                            QString session)
+void Manager::acousticSnapshot(double frequency,
+                               double power,
+                               int exposure,
+                               int cooldownTime,
+                               int cooldownPwr,
+                               int stabilisationTime,
+                               bool burst,
+                               bool record,
+                               QString dataFolder,
+                               QString session)
 {
     qDebug("Acoustic: freq=%.1f MHz, power=%.1f mW", frequency, power);
 
@@ -90,17 +90,17 @@ void Core::acousticSnapshot(double frequency,
 
 //------------------------------------------------------------------------------
 
-void Core::observation(double wavelength1,
-                       double wavelength2,
-                       int exposure,
-                       int snapshotPerObs,
-                       int cooldownTime,
-                       int cooldownPwr,
-                       int stabilisationTime,
-                       bool burst,
-                       bool record,
-                       QString dataFolder,
-                       QString session)
+void Manager::observation(double wavelength1,
+                          double wavelength2,
+                          int exposure,
+                          int snapshotPerObs,
+                          int cooldownTime,
+                          int cooldownPwr,
+                          int stabilisationTime,
+                          bool burst,
+                          bool record,
+                          QString dataFolder,
+                          QString session)
 {
     qDebug("Observation: wl1=%.1f nm, wl2=%.1f nm",
            wavelength1, wavelength2);
@@ -121,17 +121,17 @@ void Core::observation(double wavelength1,
 
 //------------------------------------------------------------------------------
 
-void Core::sweep(double wavelength1,
-                 double wavelength2,
-                 double wavelengthStep,
-                 int exposure,
-                 int cooldownTime,
-                 int cooldownPwr,
-                 int stabilisationTime,
-                 bool burst,
-                 bool record,
-                 QString dataFolder,
-                 QString session)
+void Manager::sweep(double wavelength1,
+                    double wavelength2,
+                    double wavelengthStep,
+                    int exposure,
+                    int cooldownTime,
+                    int cooldownPwr,
+                    int stabilisationTime,
+                    bool burst,
+                    bool record,
+                    QString dataFolder,
+                    QString session)
 {
     qDebug("Sweep: wl1=%.1f nm, wl2=%.1f nm, step=%.1f nm",
            wavelength1, wavelength2, wavelengthStep);
@@ -150,13 +150,13 @@ void Core::sweep(double wavelength1,
 
 //------------------------------------------------------------------------------
 
-void Core::stop()
+void Manager::stop()
 {
+    _cooldownT->stop();
+    _stabilisationT->stop();
     _generator->setFrequency(0.0);
     _driver->setPower(0.0);
     _camera->stop();
-    _cooldownT->stop();
-    _stabilisationT->stop();
     _mode = READY;
 
     emit ready(true);
@@ -164,7 +164,7 @@ void Core::stop()
 
 //------------------------------------------------------------------------------
 
-void Core::updateTemperaturePeriod(int temperaturePeriod)
+void Manager::updateTemperaturePeriod(int temperaturePeriod)
 {
     qDebug("Setting temperature probe period to %dms.", temperaturePeriod);
     _temperatureT->stop();
@@ -175,7 +175,7 @@ void Core::updateTemperaturePeriod(int temperaturePeriod)
 
 //------------------------------------------------------------------------------
 
-void Core::threadFinished()
+void Manager::threadFinished()
 {
     qDebug("Moving core layer back to main thread");
     _temperatureT->stop();
@@ -184,7 +184,7 @@ void Core::threadFinished()
 
 //------------------------------------------------------------------------------
 
-void Core::setAcousticWave()
+void Manager::setAcousticWave()
 {
     if (_mode == READY)
         return;
@@ -260,7 +260,7 @@ void Core::setAcousticWave()
 
 //------------------------------------------------------------------------------
 
-void Core::takeSnapshot()
+void Manager::takeSnapshot()
 {
     if (_mode == READY)
         return;
@@ -274,7 +274,7 @@ void Core::takeSnapshot()
 //------------------------------------------------------------------------------
 
 
-void Core::updateTemperature()
+void Manager::updateTemperature()
 {
     _temperature = _probe->getTemperature();
     emit temperatureUpdated(_temperature);
@@ -282,7 +282,7 @@ void Core::updateTemperature()
 
 //------------------------------------------------------------------------------
 
-void Core::postSnapshotProcess()
+void Manager::postSnapshotProcess()
 {
     if (_mode==READY) return;
 
@@ -411,7 +411,7 @@ void Core::postSnapshotProcess()
 
 //------------------------------------------------------------------------------
 
-bool Core::mustContinueAquisition() const
+bool Manager::mustContinueAquisition() const
 {
     switch(_mode)
     {
@@ -433,7 +433,7 @@ bool Core::mustContinueAquisition() const
 
 //------------------------------------------------------------------------------
 
-bool Core::mustCooldown() const
+bool Manager::mustCooldown() const
 {
     switch(_mode)
     {
@@ -453,7 +453,7 @@ bool Core::mustCooldown() const
 
 //------------------------------------------------------------------------------
 
-void Core::cooldown()
+void Manager::cooldown()
 {
     qDebug("Cooling down: %dms", _cooldownT->interval());
     _driver->setPower(_cooldownPwr);
@@ -462,15 +462,15 @@ void Core::cooldown()
 
 //------------------------------------------------------------------------------
 
-void Core::saveSnapshot(const QDateTime& dateTime,
-                        Mode mode,
-                        double wavelength,
-                        double frequency,
-                        double power,
-                        int snapPerObs,
-                        int exposure,
-                        double temperature,
-                        Snapshot& snapshot)
+void Manager::saveSnapshot(const QDateTime& dateTime,
+                           Mode mode,
+                           double wavelength,
+                           double frequency,
+                           double power,
+                           int snapPerObs,
+                           int exposure,
+                           double temperature,
+                           Snapshot& snapshot)
 {
     if (!_record) return;
 
@@ -521,7 +521,7 @@ void Core::saveSnapshot(const QDateTime& dateTime,
 
 //------------------------------------------------------------------------------
 
-void Core::requestAcousticWave(double frequency, double power)
+void Manager::requestAcousticWave(double frequency, double power)
 {
     bool waveChanged = false;
 
@@ -539,20 +539,20 @@ void Core::requestAcousticWave(double frequency, double power)
 
 //------------------------------------------------------------------------------
 
-void Core::setCommonParams(Mode mode,
-                           int exposure,
-                           int cooldownTime,
-                           int cooldownPwr,
-                           int stabilisationTime,
-                           bool burst,
-                           bool record,
-                           const QString &dataFolder,
-                           const QString &session)
+void Manager::setCommonParams(Mode mode,
+                              int exposure,
+                              int cooldownTime,
+                              int cooldownPwr,
+                              int stabilisationTime,
+                              bool burst,
+                              bool record,
+                              const QString &dataFolder,
+                              const QString &session)
 {
     QByteArray s = session.toLatin1();
 
-    qDebug("Exposure=%d ms, cooldownTime=%d ms, %d mW, "
-           "stabilisation time=%d ms, %s, session='%s'",
+    qDebug("Exposure %d ms, cooldown %d ms/%d mW, "
+           "stabilisation %d ms, %s, session '%s'",
            exposure, cooldownTime, cooldownPwr, stabilisationTime,
            burst ? "burst" : "singleshot", s.data());
 

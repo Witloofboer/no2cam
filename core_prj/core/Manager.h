@@ -1,5 +1,5 @@
-#ifndef CORE_H
-#define CORE_H
+#ifndef MANAGER_H
+#define MANAGER_H
 
 #include <QDateTime>
 #include <QObject>
@@ -31,16 +31,16 @@ class ProbeCtrl;
  *
  * It is run by its own thread.
  */
-class CORESHARED_EXPORT Core : public QObject
+class CORESHARED_EXPORT Manager : public QObject
 {
     Q_OBJECT
 
 public:
-    Core(const Crystal *crystal,
-         ProbeDriver *probe,
-         CameraDriver *camera,
-         FrequencyDriver *generator,
-         PowerDriver *driver);
+    Manager(const Crystal *crystal,
+            ProbeDriver *probe,
+            CameraDriver *camera,
+            FrequencyDriver *generator,
+            PowerDriver *driver);
 
 signals:
     void ready(bool isReady);
@@ -270,4 +270,4 @@ private:
 
 }
 
-#endif // CORE_H
+#endif // MANAGER_H

@@ -66,6 +66,9 @@ public:
     void stop() override;
     void getSnapshot(Snapshot &buffer) override;
 
+private slots:
+    void onSnapshotAvailable();
+
 private:
     int _exposure;
     QTimer *_timer;

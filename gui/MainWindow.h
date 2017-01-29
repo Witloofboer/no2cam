@@ -16,7 +16,7 @@ class QStackedWidget;
 class QTimer;
 
 namespace core {
-class Core;
+class Manager;
 class Crystal;
 class BaseTemperatureProbe;
 }
@@ -41,7 +41,7 @@ class GUISHARED_EXPORT MainWindow : public QMainWindow
 
 public:
     MainWindow(core::Crystal *crystal,
-               core::Core *coreObj,
+               core::Manager *coreObj,
                const QString &version,
                const QString &devicesNotes);
 
@@ -80,7 +80,7 @@ private:
     void restore();
     void refreshWindowTitle();
 
-    core::Core *_coreInstance;
+    core::Manager *_coreManager;
 
     ConfigurationDlg *_configDlg;
     QStackedWidget *_stackedWdgt;

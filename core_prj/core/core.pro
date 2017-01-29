@@ -19,22 +19,22 @@ RESOURCES += \
     scene.qrc
 
 SOURCES += \
-    Core.cpp \
     Crystal.cpp \
     ImageBuffer.cpp \
     controllers.cpp \
     mockups.cpp \
-    drivers.cpp
+    drivers.cpp \
+    Manager.cpp
 
 HEADERS += \
     core_global.h \
-    Core.h \
     Crystal.h \
     ImageBuffer.h \
     controllers.h \
     mockups.h \
     drivers.h \
-    Snapshot.h
+    Snapshot.h \
+    Manager.h
 
 unix {
     target.path = /usr/lib
