@@ -24,7 +24,7 @@
 #include "SnapshotWidget.h"
 #include "tooling.h"
 
-#include "core.h"
+#include "core/Manager.h"
 #include "core/Crystal.h"
 
 namespace gui {
