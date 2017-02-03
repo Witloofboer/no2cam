@@ -18,13 +18,11 @@ DESTDIR=../bin
 SOURCES += \
     main.cpp \
     Camera.cpp \
-    CrysTempProbe.cpp \
     Driver.cpp \
     Generator.cpp
 
 HEADERS  += \
     Camera.h \
-    CrysTempProbe.h \
     Driver.h \
     Generator.h
 

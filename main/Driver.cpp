@@ -12,18 +12,18 @@
 //------------------------------------------------------------------------------
 
 Driver::Driver(const Generator *generator)
-    : core::AbstractDriver()
+    : core::PowerDriver()
     , _generator(generator)
 {
-       _serial = new QSerialPort(this);
-       _serial->setPortName("COM12"); // select the correct port to send the data to...
-       _serial->setBaudRate(QSerialPort::Baud9600);
-       _serial->setDataBits(QSerialPort::Data8);
-       _serial->setStopBits(QSerialPort::OneStop);
-       _serial->setParity(QSerialPort::NoParity);
-       _serial->setFlowControl(QSerialPort::NoFlowControl);
-       _serial->open(QSerialPort::ReadWrite);
-       connect(_serial, QSerialPort::readyRead, this, Driver::serialReceived);
+    _serial = new QSerialPort(this);
+    _serial->setPortName("COM12"); // select the correct port to send the data to...
+    _serial->setBaudRate(QSerialPort::Baud9600);
+    _serial->setDataBits(QSerialPort::Data8);
+    _serial->setStopBits(QSerialPort::OneStop);
+    _serial->setParity(QSerialPort::NoParity);
+    _serial->setFlowControl(QSerialPort::NoFlowControl);
+    _serial->open(QSerialPort::ReadWrite);
+    connect(_serial, QSerialPort::readyRead, this, Driver::serialReceived);
 }
 
 void Driver::serialReceived()
@@ -44,17 +44,9 @@ void Driver::serialReceived()
 
 //------------------------------------------------------------------------------
 
-void Driver::stop()
-{
-    //setPower(0.0);
-
-}
-
-//------------------------------------------------------------------------------
-
 void Driver::writeDDS(double power)
 {
-    qInfo("Driver: set power: %.1f mW", power);
+    qInfo("<power: %.1f mW>", power);
 
     const double per_mW = 1.0;
     const double per_MHz = 4294967.296;
@@ -84,8 +76,8 @@ void Driver::writeDDS(double power)
     stream[26] = (freq & 0x00ff0000)>>16;
     stream[25] = (freq & 0xff000000)>>24;
 
-     _serial->write(stream);
-     QThread::msleep(2);
+    _serial->write(stream);
+    QThread::msleep(2);
 }
 
 //------------------------------------------------------------------------------
@@ -170,22 +162,22 @@ void Driver::writePLL()
 
     QByteArray dummy(3,0) ;
 
-     _serial->write(initLatch);
-     _serial->waitForBytesWritten(1);
-     QThread::msleep(1);
+    _serial->write(initLatch);
+    _serial->waitForBytesWritten(1);
+    QThread::msleep(1);
 
-     _serial->write(functionLatch);
-     _serial->waitForBytesWritten(1);
-     QThread::msleep(1);
+    _serial->write(functionLatch);
+    _serial->waitForBytesWritten(1);
+    QThread::msleep(1);
 
-     _serial->write(rCounterLatch);
-     _serial->waitForBytesWritten(1);
-     QThread::msleep(1);
+    _serial->write(rCounterLatch);
+    _serial->waitForBytesWritten(1);
+    QThread::msleep(1);
 
-     _serial->write(abCounterLatch);
-     _serial->waitForBytesWritten(1);
+    _serial->write(abCounterLatch);
+    _serial->waitForBytesWritten(1);
 
-     QThread::msleep(2);
+    QThread::msleep(2);
 }
 
 //------------------------------------------------------------------------------

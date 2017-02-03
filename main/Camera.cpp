@@ -1,22 +1,18 @@
 #include "Camera.h"
 #include <QMessageBox>
-#include <QColor>
-#include <QImage>
-#include <QTimer>
-#include <QThread>
 #include <QString>
 #include "dcamprop.h"
 
 //------------------------------------------------------------------------------
 
 HamamatsuCamera::HamamatsuCamera()
-    : core::BaseCamera()
+    : core::CameraDriver()
 {
 }
 
 //------------------------------------------------------------------------------
 
-HamamatsuCamera::~HamamatsuCamera(){}
+HamamatsuCamera::~HamamatsuCamera() {}
 
 //------------------------------------------------------------------------------
 
@@ -37,24 +33,24 @@ void HamamatsuCamera::init()
     }
     else
     {
-       // once the software is initilized try to open the connected Camera
-       qInfo("NR of Counted devices:");
-       qInfo(QString::number(paraminit.iDeviceCount).toStdString().c_str());
+        // once the software is initilized try to open the connected Camera
+        qInfo("NR of Counted devices:");
+        qInfo(QString::number(paraminit.iDeviceCount).toStdString().c_str());
 
-       DCAMDEV_OPEN	paramopen;
-       memset( &paramopen, 0, sizeof(paramopen) );
-       paramopen.size	= sizeof(paramopen);
-       paramopen.index	= 0;
-       _dcamErr = dcamdev_open( &paramopen );
+        DCAMDEV_OPEN	paramopen;
+        memset( &paramopen, 0, sizeof(paramopen) );
+        paramopen.size	= sizeof(paramopen);
+        paramopen.index	= 0;
+        _dcamErr = dcamdev_open( &paramopen );
 
-       if( failed( _dcamErr ) )
-       {
+        if( failed( _dcamErr ) )
+        {
             qInfo("CAM ERROR ON DEV OPEN:");
             qInfo(QString::number(_dcamErr).toStdString().c_str());
             HamamatsuCamera::uninit();
-       }
-       else
-       {
+        }
+        else
+        {
             // once the camera could be opened succesfully, couple the device ID to the device handler
             qInfo("INIT DCAM SUCCESFULLY!:");
             _hdcam = paramopen.hdcam;
@@ -71,30 +67,30 @@ void HamamatsuCamera::init()
             }
             else
             {
-               qInfo("BUFFER ALLOC SUCCESFULLY!:");
-               // tell the camera it should wait for an event to take a new image (here this is 'frame_ready')
-               memset( &waitopen, 0, sizeof(waitopen) );
-               waitopen.size = sizeof(waitopen);
-               waitopen.hdcam	= _hdcam;
+                qInfo("BUFFER ALLOC SUCCESFULLY!:");
+                // tell the camera it should wait for an event to take a new image (here this is 'frame_ready')
+                memset( &waitopen, 0, sizeof(waitopen) );
+                waitopen.size = sizeof(waitopen);
+                waitopen.hdcam	= _hdcam;
 
-               _dcamErr = dcamwait_open( &waitopen );
+                _dcamErr = dcamwait_open( &waitopen );
 
-               memset( &paramwait, 0, sizeof(paramwait) );
-               paramwait.size		= sizeof(paramwait);
-               paramwait.eventmask	= DCAMCAP_EVENT_FRAMEREADY;
-               paramwait.timeout	= 1000;
+                memset( &paramwait, 0, sizeof(paramwait) );
+                paramwait.size		= sizeof(paramwait);
+                paramwait.eventmask	= DCAMCAP_EVENT_FRAMEREADY;
+                paramwait.timeout	= 1000;
 
-               memset( &frame, 0, sizeof(frame) );
-               frame.size	= sizeof(frame);
-               frame.iFrame= -1;		// latest frame
-               
-               // set binning to 4x4
-               //_dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_BINNING, DCAMPROP_BINNING__4);
+                memset( &frame, 0, sizeof(frame) );
+                frame.size	= sizeof(frame);
+                frame.iFrame= -1;		// latest frame
 
-               _dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_TRIGGERSOURCE, DCAMPROP_TRIGGERSOURCE__SOFTWARE );
-               _dcamErr = dcamcap_start( _hdcam, DCAMCAP_START_SEQUENCE );
+                // set binning to 4x4
+                //_dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_BINNING, DCAMPROP_BINNING__4);
 
-              
+                _dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_TRIGGERSOURCE, DCAMPROP_TRIGGERSOURCE__SOFTWARE );
+                _dcamErr = dcamcap_start( _hdcam, DCAMCAP_START_SEQUENCE );
+
+
 
             }
         }
@@ -114,7 +110,7 @@ void HamamatsuCamera::uninit()
 
 void HamamatsuCamera::setExposure(int exposure)
 {
-    qInfo("Camera: exposure time set to %d ms", exposure);
+    qInfo("<exposure time: %d ms>", exposure);
     _dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_EXPOSURETIME, ((double)exposure)/1000 );
 }
 
@@ -122,7 +118,7 @@ void HamamatsuCamera::setExposure(int exposure)
 
 void HamamatsuCamera::takeSnapshot()
 {
-    qInfo("Camera: snapshotting");
+    qInfo("<snapshotting>");
 
     HDCAMWAIT hwait = waitopen.hwait;
 
@@ -148,14 +144,14 @@ void HamamatsuCamera::stop()
 {
 //    if (_timer->isActive())
 //    {
-        qInfo("Forcing camera stop TO BE IMPLEMENTED");
+    qInfo("Forcing camera stop TO BE IMPLEMENTED");
 //        _timer->stop();
 //    }
 }
 
 //------------------------------------------------------------------------------
 
-void HamamatsuCamera::copySnapshot(Snapshot &buffer)
+void HamamatsuCamera::getSnapshot(core::Snapshot &buffer)
 {
     memcpy(buffer, frame.buf, sizeof buffer);
 }

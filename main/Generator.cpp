@@ -5,23 +5,16 @@
 //------------------------------------------------------------------------------
 
 Generator::Generator()
-    : core::AbstractGenerator()
+    : core::FrequencyDriver()
 {
 
-}
-
-//------------------------------------------------------------------------------
-
-void Generator::stop()
-{
-    //setFrequency(0.0);
 }
 
 //------------------------------------------------------------------------------
 
 void Generator::setFrequency(double frequency)
 {
-    qInfo("Generator: set frequency: %.3f MHz", frequency);
+    qInfo("<frequency: %.3f MHz>", frequency);
     _frequency = frequency;
 }
 

@@ -1,19 +1,20 @@
 #ifndef GENERATOR_H
 #define GENERATOR_H
 
-#include "core/AbstractGenerator.h"
+#include "core/drivers.h"
 
-class Generator : public core::AbstractGenerator
+class Generator : public core::FrequencyDriver
 {
     Q_OBJECT
 
 public:
     Generator();
 
-    virtual void stop() override;
-    virtual void setFrequency(double frequency) override;
+    void setFrequency(double frequency) override;
 
-    double getFrequency() const {return _frequency;}
+    double getFrequency() const {
+        return _frequency;
+    }
 
 private:
     double _frequency;

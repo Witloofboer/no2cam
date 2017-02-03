@@ -8,9 +8,9 @@
 
 class QTimer;
 
-#include "core/BaseCamera.h"
+#include "core/drivers.h"
 
-class HamamatsuCamera: public core::BaseCamera
+class HamamatsuCamera: public core::CameraDriver
 {
     Q_OBJECT
 
@@ -18,17 +18,15 @@ public:
     HamamatsuCamera();
     ~HamamatsuCamera();
 
+    void setExposure(int exposure) override;
     void takeSnapshot() override;
     void stop() override;
-
-    void copySnapshot(Snapshot &buffer) override;
+    void getSnapshot(core::Snapshot &buffer) override;
 
     void init();
     void uninit();
-    void setExposure(int exposure) override;
 
     int my_dcamprop_getvalue( HDCAM _hdcam, int32 idprop, int32& lValue );
-
 
 private:
     DCAMWAIT_OPEN	waitopen;
