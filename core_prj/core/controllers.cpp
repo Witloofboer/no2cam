@@ -14,9 +14,7 @@ FrequencyCtrl::FrequencyCtrl(QObject *parent, FrequencyDriver *generator)
     : QObject(parent)
     , _generator(generator)
     , _frequency(-1)
-{
-    _generator->setParent(this);
-}
+{}
 
 //------------------------------------------------------------------------------
 
@@ -40,9 +38,7 @@ PowerCtrl::PowerCtrl(QObject *parent, PowerDriver *driver)
     : QObject(parent)
     , _driver(driver)
     , _power(-1.0)
-{
-    _driver->setParent(this);
-}
+{}
 
 //------------------------------------------------------------------------------
 
@@ -65,9 +61,7 @@ bool PowerCtrl::setPower(double power)
 ProbeCtrl::ProbeCtrl(QObject *parent, ProbeDriver *probe)
     : QObject(parent)
     , _probe(probe)
-{
-  _probe->setParent(parent);
-}
+{}
 
 //------------------------------------------------------------------------------
 
@@ -86,8 +80,7 @@ CameraCtrl::CameraCtrl(QObject *parent, CameraDriver *cameraDevice)
     , _exposure(-1)
     , _isAvailable(true)
 {
-    _cameraDevice->setParent(this);
-    connect(_cameraDevice, CameraDriver::snapshotAvailable, this, processSnapshot);
+  connect(_cameraDevice, CameraDriver::snapshotAvailable, this, processSnapshot);
 }
 
 //------------------------------------------------------------------------------
