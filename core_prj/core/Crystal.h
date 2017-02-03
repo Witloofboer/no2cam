@@ -31,38 +31,46 @@ public:
      * \param transHeight transduGcer height [mm]
      * \param transLength transducer length [mm]
      */
-     void set(double cutAngle,
-              double lightAngle,
-              double transHeight,
-              double transLength);
+    void set(double cutAngle,
+             double incidentAngle,
+             double transHeight,
+             double transLength);
 
-     double cutAngle() const {return _alphaDeg;}
-     double lightAngle() const {return _thetaDeg;}
-     double transHeight() const {return _h;}
-     double transLength() const {return _l;}
+    double cutAngle() const {
+        return _alphaDeg;
+    }
+    double incidentAngle() const {
+        return _thetaDeg;
+    }
+    double transHeight() const {
+        return _h;
+    }
+    double transLength() const {
+        return _l;
+    }
 
 
-     /**
-      * Returns the acoustic frequency and the power matching an optical
-      * wavelength at a given crystal temperature.
-      *
-      * @param wavelength optical wavelength [nm]
-      * @param T          crystal temperature [°C]
-      * @param freq       corresponding acoustic frequency [MHz]
-      * @param power      corresponding acoustic power [mW]
-      */
-     void computeFreqPow(double wavelength, double T,
-                         double &freq, double &power) const;
+    /**
+     * Returns the acoustic frequency and the power matching an optical
+     * wavelength at a given crystal temperature.
+     *
+     * @param wavelength optical wavelength [nm]
+     * @param T          crystal temperature [°C]
+     * @param freq       corresponding acoustic frequency [MHz]
+     * @param power      corresponding acoustic power [mW]
+     */
+    void computeFreqPow(double wavelength, double T,
+                        double &freq, double &power) const;
 
-     /**
-      * Returns the acoustic frequency matching an optical wavelength at a given
-      * crystal temperature.
-      *
-      * @param wavelength optical wavelength [nm]
-      * @param T          crystal temperature [°C]
-      * @return the acoustic frequency [MHz]
-      */
-     double frequency(double wavelength, double T) const;
+    /**
+     * Returns the acoustic frequency matching an optical wavelength at a given
+     * crystal temperature.
+     *
+     * @param wavelength optical wavelength [nm]
+     * @param T          crystal temperature [°C]
+     * @return the acoustic frequency [MHz]
+     */
+    double frequency(double wavelength, double T) const;
 
     /**
      * Returns the optical wavelength matching an acoustic frequency at a given

@@ -9,7 +9,7 @@ class QRadioButton;
 
 namespace core {
 class Crystal;
-class AbstractCrysTempProbe;
+class BaseTemperatureProbe; // should be set via a signal
 }
 
 namespace gui {
@@ -23,12 +23,17 @@ class SnapshotParameterPane : public BaseParameterPane
 {
     Q_OBJECT
 public:
-    explicit SnapshotParameterPane(MainWindow* mainWindow,
-                                   const core::Crystal *crystal,
-                                   core::AbstractCrysTempProbe *crysTempProbe,
-                                   const double &stabilisationTime);
+    explicit SnapshotParameterPane(const core::Crystal *crystal);
     void updateState(bool isAppReady);
     void persiste() const;
+
+    void start(bool burst,
+               bool record,
+               double stabilisationTime,
+               const QString& session,
+               const QString& dataFolder) override;
+
+    void updateTemperature(double temperature);
 
 signals:
     void spectralSnapshot(double wavelength,
@@ -37,7 +42,9 @@ signals:
                           double cooldownPwr,
                           double stabilisationTime,
                           bool burst,
-                          const QString& session);
+                          bool record,
+                          QString dataFolder,
+                          QString session);
 
     void acousticSnapshot(double frequency,
                           double power,
@@ -46,12 +53,11 @@ signals:
                           double cooldownPwr,
                           double stabilisationTime,
                           bool burst,
-                          const QString& session);
+                          bool record,
+                          QString dataFolder,
+                          QString session);
 public slots:
     void recomputeParams();
-
-protected slots:
-    void start(bool burst, bool record) override;
 
 protected:
     bool areParametersValid() const override;
@@ -63,15 +69,14 @@ private:
     void restore();
 
     const core::Crystal *_crystal;
-    const core::AbstractCrysTempProbe *_crystalTempProbe;
+    const core::BaseTemperatureProbe *_crystalTempProbe;
 
+    double _temperature;
     QRadioButton   *_spectralBtn;
     QRadioButton   *_acousticBtn;
     DoubleLineEdit *_wavelengthEdit;
     DoubleLineEdit *_frequencyEdit;
     IntLineEdit    *_powerEdit;
-
-    const double &_stabilisationTime;
 };
 
 //------------------------------------------------------------------------------

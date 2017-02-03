@@ -3,17 +3,12 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 
-#include "../core/Core.h"
-
-#include "MainWindow.h"
-
 namespace gui {
 
 //------------------------------------------------------------------------------
 
-CameraBtnBox::CameraBtnBox(MainWindow *mainWindow)
+CameraBtnBox::CameraBtnBox()
     : QGroupBox()
-    , _mainWindow(mainWindow)
     , _singleBtn(new QPushButton(QIcon(":/icons/media-one-32.png"), ""))
     , _burstBtn(new QPushButton(QIcon(":/icons/media-burst-32.png"), ""))
     , _recordBtn(new QPushButton(QIcon(":/icons/media-record-32.png"), ""))
@@ -25,12 +20,10 @@ CameraBtnBox::CameraBtnBox(MainWindow *mainWindow)
     _singleBtn->setCheckable(true);
     _singleBtn->setFixedWidth(40);
     _singleBtn->setEnabled(false);
-    connect(_singleBtn, QPushButton::clicked, this, CameraBtnBox::singleClicked);
 
     _burstBtn->setCheckable(true);
     _burstBtn->setFixedWidth(40);
     _burstBtn->setEnabled(false);
-    connect(_burstBtn, QPushButton::clicked, this, CameraBtnBox::burstClicked);
 
     _recordBtn->setFixedWidth(40);
     _recordBtn->setCheckable(true);
@@ -47,8 +40,9 @@ CameraBtnBox::CameraBtnBox(MainWindow *mainWindow)
 
     setLayout(btnLayout);
 
-    connect(this, start, mainWindow, MainWindow::start);
-    connect(_stopBtn, QPushButton::clicked, mainWindow, MainWindow::stop);
+    connect(_singleBtn, QPushButton::clicked, this, start);
+    connect(_burstBtn, QPushButton::clicked, this, start);
+    connect(_stopBtn, QPushButton::clicked, this, stopped);
 }
 
 //------------------------------------------------------------------------------
@@ -79,24 +73,16 @@ void CameraBtnBox::refreshBtns()
     {
         _singleBtn->setChecked(false);
         _burstBtn->setChecked(false);
+        if (!_recordEnabled) _recordBtn->setChecked(false);
     }
 
 }
 
 //------------------------------------------------------------------------------
 
-void CameraBtnBox::singleClicked()
+void CameraBtnBox::start()
 {
-    _mainWindow->updateState(false);
-    emit start(false, _recordBtn->isChecked());
-}
-
-//------------------------------------------------------------------------------
-
-void CameraBtnBox::burstClicked()
-{
-    _mainWindow->updateState(false);
-    emit start(true, _recordBtn->isChecked());
+    emit started(_burstBtn->isChecked(), _recordBtn->isChecked());
 }
 
 //------------------------------------------------------------------------------

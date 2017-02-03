@@ -1,18 +1,21 @@
-#include "AbstractGenerator.h"
+#ifndef SNAPHOT_H
+#define SNAPHOT_H
+
+#include <QtGlobal>
 
 //------------------------------------------------------------------------------
 
-namespace core
-{
+namespace core {
 
 //------------------------------------------------------------------------------
 
-AbstractGenerator::AbstractGenerator()
-    : QObject()
-{
+const qint64 snapshotSize = 2048;
+
+typedef quint16 Pixel;
+typedef Pixel Snapshot[snapshotSize][snapshotSize];
+
+//------------------------------------------------------------------------------
 
 }
 
-//------------------------------------------------------------------------------
-
-}
+#endif // SNAPHOT_H

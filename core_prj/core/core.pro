@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT     -= gui
+QT     += gui core
 CONFIG += c++11
 
 TARGET = core
@@ -15,24 +15,26 @@ DEFINES += CORE_LIBRARY
 OBJECTS_DIR=../../obj
 DESTDIR=../../bin
 
+RESOURCES += \
+    scene.qrc
+
 SOURCES += \
-    Core.cpp \
     Crystal.cpp \
-    AbstractGenerator.cpp \
-    AbstractDriver.cpp \
-    AbstractCrysTempProbe.cpp \
     ImageBuffer.cpp \
-    BaseCamera.cpp
+    controllers.cpp \
+    mockups.cpp \
+    drivers.cpp \
+    Manager.cpp
 
 HEADERS += \
     core_global.h \
-    Core.h \
     Crystal.h \
-    AbstractGenerator.h \
-    AbstractDriver.h \
-    AbstractCrysTempProbe.h \
     ImageBuffer.h \
-    BaseCamera.h
+    controllers.h \
+    mockups.h \
+    drivers.h \
+    Snapshot.h \
+    Manager.h
 
 unix {
     target.path = /usr/lib

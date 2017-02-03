@@ -6,26 +6,28 @@
 
 #include "gui_global.h"
 
-#include "core/BaseCamera.h"
-
 //------------------------------------------------------------------------------
 
 class QAction;
 class QCloseEvent;
+class QLabel;
 class QShowEvent;
 class QStackedWidget;
+class QTimer;
 
 namespace core {
-class Core;
+class Manager;
 class Crystal;
-class AbstractCrysTempProbe;
+class BaseTemperatureProbe;
 }
 
 namespace gui {
 
 class BaseParameterPane;
+class CameraBtnBox;
 class ConfigurationDlg;
 class HistogramWidget;
+class LineEdit;
 class ObservationParameterPane;
 class SnapshotWidget;
 class SnapshotParameterPane;
@@ -39,58 +41,70 @@ class GUISHARED_EXPORT MainWindow : public QMainWindow
 
 public:
     MainWindow(core::Crystal *crystal,
-               core::AbstractCrysTempProbe *crysTempProb,
-               core::Core *coreObj,
-               const QString &_version);
+               core::Manager *coreObj,
+               const QString &version,
+               const QString &devicesNotes);
 
 signals:
-    void start(bool burst, bool record);
-    void stop();
+    void stopRequested();
+    void temperaturePeriodUpdated(int temperaturePeriod);
 
 public slots:
-    void updateState(bool isAppReady);
+    void updateGuiState(bool isAppReady);
     void updateSnapshot();
+    void onInformationMessage(QString msg);
 
 protected:
     void closeEvent(QCloseEvent *event) override;
 
 private slots:
-    void newSession();
-    void loadSession();
-    bool saveSession();
-    bool saveAsSession();
-
+    void start(bool burst, bool record);
     void switchMode();
+    void refreshBtns();
+    void selectFolder();
     void configure();
-    void cameraStatus();
 
-    void releaseNotes();
+    void displayReleaseNotes();
     void about();
 
-private slots:
     void displayConfigurationDlg();
+    void onParametersUpdated();
+    void onTemperatureUpdated(double temperature);
+    void displayErrorOnFileCreation(QString datafolder, QString filename);
+    void displayErrorOnFileWritting(QString datafolder, QString filename);
+    void clearInfoMsg();
 
 private:
-    bool okToContinue();
     BaseParameterPane *currentPane();
+    void persiste();
+    void restore();
+    void refreshWindowTitle();
 
-    core::Core *_coreInstance;
+    core::Manager *_coreManager;
 
     ConfigurationDlg *_configDlg;
     QStackedWidget *_stackedWdgt;
+    QAction *_selectFolderActn;
     QAction *_snapshotModeActn;
     QAction *_observationModeActn;
     QAction *_sweepModeActn;
     QAction *_configParamActn;
 
+    QString _dataFolder;
     QString _version;
+    QString _devicesNotes;
 
-    SnapshotParameterPane *_snapshotPane;
+    SnapshotParameterPane    *_snapshotPane;
     ObservationParameterPane *_observationPane;
-    SweepParameterPane *_sweepPane;
+    SweepParameterPane       *_sweepPane;
+    CameraBtnBox *_cameraBtnBox;
 
-    SnapshotWidget     *_snapshot;
-    HistogramWidget    *_histogram;
+    LineEdit        *_sessionEdit;
+    SnapshotWidget  *_snapshot;
+    HistogramWidget *_histogram;
+    QLabel          *_infoWdgt;
+    QLabel          *_temperatureWdgt;
+    QTimer          *_infoT;
 };
 
 //------------------------------------------------------------------------------

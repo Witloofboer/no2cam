@@ -2,21 +2,18 @@
 #define BASEPARAMETERPANE_H
 
 #include <QWidget>
+#include <QString>
 
 //------------------------------------------------------------------------------
 
 class QGridLayout;
 class QGroupBox;
-class QLabel;
 class QVBoxLayout;
 class QSettings;
 
 namespace gui {
 
-class CameraBtnBox;
 class IntLineEdit;
-class LineEdit;
-class MainWindow;
 
 //------------------------------------------------------------------------------
 
@@ -24,29 +21,33 @@ class BaseParameterPane : public QWidget
 {
     Q_OBJECT
 public:
-    explicit BaseParameterPane(MainWindow* mainWindow);
+    explicit BaseParameterPane();
 
-protected slots:
-    void refreshBtns();
-    virtual void start(bool burst, bool record) =0;
+    virtual void start(bool burst,
+                       bool record,
+                       double stabilisationTime,
+                       const QString& session,
+                       const QString& dataFolder) =0;
+
+    virtual bool areParametersValid() const;
+
+signals:
+    parametersChanged();
+
 
 protected:
     void updateState(bool isAppReady);
     void putInGrid(int &row);
-    virtual bool areParametersValid() const;
 
     void persiste(QSettings &settings) const;
     void restore(QSettings &settings);
 
     QGroupBox    *_parameterBox;
     QGridLayout  *_paramBoxLayout;
-    CameraBtnBox *_cameraBtnBox;
 
     IntLineEdit  *_exposureEdit;
     IntLineEdit  *_cooldownTimeEdit;
     IntLineEdit  *_cooldownPwrEdit;
-
-    LineEdit     *_sessionEdit;
 };
 
 //------------------------------------------------------------------------------

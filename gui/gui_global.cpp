@@ -5,27 +5,25 @@
 
 #include "MainWindow.h"
 #include "core/Crystal.h"
-#include "core/Core.h"
-#include "core/BaseCamera.h"
+#include "core/Manager.h"
+#include "core/drivers.h"
 
 //------------------------------------------------------------------------------
-
-using namespace gui;
-using namespace core;
 
 static QThread *_coreThr = nullptr;
-static Crystal *_crystal = nullptr;
-static Core *_coreLayer = nullptr;
-static MainWindow *_mainWindow = nullptr;
+static core::Crystal *_crystal = nullptr;
+static core::Manager *_coreLayer = nullptr;
+static gui::MainWindow *_mainWindow = nullptr;
 
 
 //------------------------------------------------------------------------------
 
-void init(const char *version,
-          core::AbstractCrysTempProbe *crysTempProb,
-          core::BaseCamera *camera,
-          core::AbstractGenerator *generator,
-          core::AbstractDriver *driver)
+void init(const QString& subversion,
+          const QString& devicesNotes,
+          core::ProbeDriver *probe,
+          core::CameraDriver *camera,
+          core::FrequencyDriver *generator,
+          core::PowerDriver *driver)
 {
     qInfo("Initialisation");
 
@@ -34,23 +32,23 @@ void init(const char *version,
     Q_INIT_RESOURCE(resources);
 
     _coreThr = new QThread;
-    _crystal = new Crystal;
-    _coreLayer = new Core(_crystal, crysTempProb, camera, generator, driver);
-    _mainWindow = new gui::MainWindow(_crystal, crysTempProb, _coreLayer, version);
+    _crystal = new core::Crystal;
+    _coreLayer = new core::Manager(_crystal, probe, camera, generator, driver);
+    _mainWindow = new gui::MainWindow(_crystal, _coreLayer, subversion, devicesNotes);
     _mainWindow->show();
 
     QObject::connect(_coreThr, QThread::finished,
-                     _coreLayer, Core::moveToMainThread);
+                     _coreLayer, core::Manager::threadFinished);
 }
 
 //------------------------------------------------------------------------------
 
 void start()
 {
-    qInfo("Moving core layer to core thread");
+    qDebug("Moving core layer to core thread");
     _coreLayer->moveToThread(_coreThr);
 
-    qInfo("Starting core thread");
+    qDebug("Starting core thread");
     _coreThr->start();
 }
 
@@ -58,7 +56,7 @@ void start()
 
 void shutdown()
 {
-    qInfo("Shutting down core thread");
+    qDebug("Shutting down core thread");
     _coreThr->exit();
     _coreThr->wait();
 }
@@ -71,7 +69,6 @@ void finalise()
 
     delete _mainWindow;
     _mainWindow = nullptr;
-
 
     delete _coreLayer;
     delete _coreThr;

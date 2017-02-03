@@ -1,24 +1,20 @@
 #include "SweepParameterPane.h"
 
-#include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
 #include <QSettings>
 
 #include "tooling.h"
-#include "../core/Core.h"
 
 namespace gui {
 
 //------------------------------------------------------------------------------
 
-SweepParameterPane::SweepParameterPane(MainWindow* mainWindow,
-                                       const double &stabilisationTime)
-    : BaseParameterPane(mainWindow)
+SweepParameterPane::SweepParameterPane()
+    : BaseParameterPane()
     , _wavelength1Edit(new DoubleLineEdit)
     , _wavelength2Edit(new DoubleLineEdit)
     , _wavelengthStepEdit(new DoubleLineEdit)
-    , _stabilisationTime(stabilisationTime)
 {
     // Parameter box -----------------------------------------------------------
     _parameterBox->setTitle(tr("Sweep mode"));
@@ -30,14 +26,10 @@ SweepParameterPane::SweepParameterPane(MainWindow* mainWindow,
 
     BaseParameterPane::putInGrid(row);
 
-    _paramBoxLayout->addWidget(new QLabel("Session:"), row, 0);
-    _paramBoxLayout->addWidget(_sessionEdit, row, 1, 1, 2);
-    ++row;
-
     // Connectors
-    connect(_wavelength1Edit, LineEdit::textChanged, this, refreshBtns);
-    connect(_wavelength2Edit, LineEdit::textChanged, this, refreshBtns);
-    connect(_wavelengthStepEdit, LineEdit::textChanged, this, refreshBtns);
+    connect(_wavelength1Edit, LineEdit::textChanged, this, parametersChanged);
+    connect(_wavelength2Edit, LineEdit::textChanged, this, parametersChanged);
+    connect(_wavelengthStepEdit, LineEdit::textChanged, this, parametersChanged);
 
     restore();
 }
@@ -55,7 +47,11 @@ void SweepParameterPane::updateState(bool isAppReady)
 
 //------------------------------------------------------------------------------
 
-void SweepParameterPane::start(bool burst, bool record)
+void SweepParameterPane::start(bool burst,
+                               bool record,
+                               double stabilisationTime,
+                               const QString &session,
+                               const QString &dataFolder)
 {
     emit sweepRequested(_wavelength1Edit->value(),
                         _wavelength2Edit->value(),
@@ -63,9 +59,11 @@ void SweepParameterPane::start(bool burst, bool record)
                         _exposureEdit->value(),
                         _cooldownTimeEdit->value(),
                         _cooldownPwrEdit->value(),
-                        _stabilisationTime,
+                        stabilisationTime,
                         burst,
-                        record ? _sessionEdit->text() : "");
+                        record,
+                        dataFolder,
+                        session);
 }
 
 //------------------------------------------------------------------------------
@@ -86,7 +84,7 @@ static const char *wavelengthStepLbl = "Step [nm]";
 
 void SweepParameterPane::persiste() const
 {
-    qInfo("Persisting sweep parameters");
+    qDebug("Persisting sweep parameters");
 
     QSettings settings;
 
@@ -109,7 +107,7 @@ void SweepParameterPane::persiste() const
 
 void SweepParameterPane::restore()
 {
-    qInfo("Restoring sweep parameters");
+    qDebug("Restoring sweep parameters");
 
     QSettings settings;
 
@@ -122,7 +120,7 @@ void SweepParameterPane::restore()
     _wavelengthStepEdit->setText(settings.value(wavelengthStepLbl).toString());
     settings.endGroup();
 
-    refreshBtns();
+    emit parametersChanged();
 }
 
 //------------------------------------------------------------------------------

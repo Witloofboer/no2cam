@@ -47,7 +47,7 @@ const double T0  = 21.0;    // Ref. temperature [°]
 const double p44 = -0.044;  // Photo-elastic coefficient []
 
 void Crystal::computeFreqPow(double wavelength, double T,
-                               double &freq, double &power) const
+                             double &freq, double &power) const
 {
     const double c11 = (5.620-0.00148*T)*1e10;
     const double c12 = (5.120-0.00178*T)*1e10;

@@ -40,11 +40,24 @@ class IntLineEdit: public LineEdit
 public:
     IntLineEdit(int length=9, int nDgts=5);
 
-    bool isValid();
+    virtual bool isValid();
     void setValue(int value);
     int value();
 };
 
+//==============================================================================
+// PosIntLineEdit
+//==============================================================================
+
+class PosIntLineEdit: public IntLineEdit
+{
+    Q_OBJECT
+
+public:
+    PosIntLineEdit(int length=9, int nDgts=5);
+
+    bool isValid() override;
+};
 
 //==============================================================================
 // DoubleLineEdit

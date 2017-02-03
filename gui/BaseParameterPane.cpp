@@ -1,12 +1,9 @@
-#include <iterator>
-
 #include <QGridLayout>
+#include <QGroupBox>
 #include <QLabel>
-#include <QPainter>
 #include <QSettings>
 
 #include "BaseParameterPane.h"
-#include "CameraBtnBox.h"
 
 #include "tooling.h"
 
@@ -14,15 +11,13 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-BaseParameterPane::BaseParameterPane(MainWindow *mainWindow)
+BaseParameterPane::BaseParameterPane()
     : QWidget()
     , _parameterBox(new QGroupBox())
     , _paramBoxLayout(new QGridLayout)
-    , _cameraBtnBox(new CameraBtnBox(mainWindow))
     , _exposureEdit(new IntLineEdit)
     , _cooldownTimeEdit(new IntLineEdit)
     , _cooldownPwrEdit(new IntLineEdit)
-    , _sessionEdit(new LineEdit)
 {
     // Layout
     _parameterBox->setLayout(_paramBoxLayout);
@@ -30,17 +25,13 @@ BaseParameterPane::BaseParameterPane(MainWindow *mainWindow)
 
     auto layout = new QVBoxLayout;
     layout->addWidget(_parameterBox);
-    layout->addStretch();
-    layout->addWidget(_cameraBtnBox);
     setLayout(layout);
     layout->setContentsMargins(0,0,0,0);
 
     // Connections
-    connect(_sessionEdit, LineEdit::textChanged, this, refreshBtns);
-    connect(_cameraBtnBox, CameraBtnBox::start, this, start);
-    connect(_exposureEdit, LineEdit::textChanged, this, refreshBtns);
-    connect(_cooldownTimeEdit, LineEdit::textChanged, this, refreshBtns);
-    connect(_cooldownPwrEdit, LineEdit::textChanged, this, refreshBtns);
+    connect(_exposureEdit, LineEdit::textChanged, this, parametersChanged);
+    connect(_cooldownTimeEdit, LineEdit::textChanged, this, parametersChanged);
+    connect(_cooldownPwrEdit, LineEdit::textChanged, this, parametersChanged);
 }
 
 //------------------------------------------------------------------------------
@@ -56,19 +47,9 @@ void BaseParameterPane::putInGrid(int &row)
 
 void BaseParameterPane::updateState(bool isAppReady)
 {
-    _cameraBtnBox->updateState(isAppReady);
     _exposureEdit->setEnabled(isAppReady);
     _cooldownTimeEdit->setEnabled(isAppReady);
     _cooldownPwrEdit->setEnabled(isAppReady);
-    _sessionEdit->setEnabled(isAppReady);
-}
-
-//------------------------------------------------------------------------------
-
-void BaseParameterPane::refreshBtns()
-{
-    _cameraBtnBox->enableBtns(areParametersValid(),
-                              !_sessionEdit->text().isEmpty());
 }
 
 //------------------------------------------------------------------------------

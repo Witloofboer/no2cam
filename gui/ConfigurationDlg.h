@@ -16,6 +16,7 @@ namespace gui {
 class MainWindow;
 class DoubleLineEdit;
 class IntLineEdit;
+class PosIntLineEdit;
 
 //------------------------------------------------------------------------------
 
@@ -30,12 +31,13 @@ public:
     bool isValid() const;
 
 signals:
-    void crystalUpdated();
+    void parametersUpdated();
 
 public slots:
     void display(bool abortEnabled=false);
 
-    const int &stabilisationTime() const;
+    int stabilisingTime() const;
+    int temperaturePeriod() const;
 
 private slots:
     void updateOkBtn();
@@ -49,10 +51,13 @@ private:
     DoubleLineEdit *_cutAngleEdit; // Cut angle
     DoubleLineEdit *_incidentEdit; // Incident angle
     DoubleLineEdit *_heightEdit;   // Transducer height
-    DoubleLineEdit *_lengthEdit;   // Transducer length
+    DoubleLineEdit *_lengthEdit;   // Transducer lenght
 
-    IntLineEdit *_stabilTimeEdit;
-    int _stabilisationTime;
+    IntLineEdit *_stabilisationTimeEdit;
+    int _stabilisingTime;
+
+    PosIntLineEdit *_temperaturePeriodEdit;
+    int _temperaturePeriod;
 
     QDialogButtonBox *_buttonBox;
 

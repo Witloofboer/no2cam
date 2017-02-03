@@ -16,21 +16,9 @@ OBJECTS_DIR=../obj
 DESTDIR=../bin
 
 SOURCES += \
-    mockup.cpp \
-    MockCamera.cpp \
-    MockGenerator.cpp \
-    MockDriver.cpp \
-    MockCrysTempProbe.cpp
+    mockup.cpp
 
-HEADERS  += \
-    MockCamera.h \
-    MockGenerator.h \
-    MockDriver.h \
-    MockCrysTempProbe.h
-
-
-RESOURCES += \
-    scene.qrc
+HEADERS  +=
 
 FORMS    +=
 

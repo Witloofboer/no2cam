@@ -4,6 +4,8 @@
 
 #include <QMutexLocker>
 
+#include "Snapshot.h"
+
 namespace core {
 
 //------------------------------------------------------------------------------
@@ -17,9 +19,9 @@ ImageBuffer::ImageBuffer()
 
 //------------------------------------------------------------------------------
 
-static const int factor = BaseCamera::size / ImageBuffer::size;
+static const int factor = snapshotSize / ImageBuffer::size;
 
-void ImageBuffer::set(const BaseCamera::Snapshot snapshot)
+void ImageBuffer::set(const Snapshot snapshot)
 {
     QMutexLocker lock(_lock);
 

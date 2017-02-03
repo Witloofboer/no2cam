@@ -1,9 +1,10 @@
 #ifndef IMAGEBUFFER_H
 #define IMAGEBUFFER_H
 
-class QMutex;
+#include "core_global.h"
+#include "Snapshot.h"
 
-#include "BaseCamera.h"
+class QMutex;
 
 namespace core {
 
@@ -16,7 +17,7 @@ public:
 
     ImageBuffer();
 
-    void set(const BaseCamera::Snapshot snapshot);
+    void set(const Snapshot snapshot);
     void fill(uchar *pixels);
 
 private:

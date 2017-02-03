@@ -6,11 +6,8 @@
 //------------------------------------------------------------------------------
 
 class QPushButton;
-class QWidget;
 
 namespace gui {
-
-class MainWindow;
 
 //------------------------------------------------------------------------------
 
@@ -19,11 +16,12 @@ class CameraBtnBox : public QGroupBox
     Q_OBJECT
 
 public:
-    explicit CameraBtnBox(MainWindow *mainWindow);
+    explicit CameraBtnBox();
     void updateState(bool isAppReady);
 
 signals:
-    void start(bool burst, bool record);
+    void started(bool burst, bool record);
+    void stopped();
 
 public slots:
     void enableBtns(bool playEnabled, bool recordEnabled);
@@ -32,11 +30,9 @@ private:
     void refreshBtns();
 
 private slots:
-    void singleClicked();
-    void burstClicked();
+    void start();
 
 private:
-    MainWindow *_mainWindow;
     QPushButton *_singleBtn;
     QPushButton *_burstBtn;
     QPushButton *_recordBtn;

@@ -1,11 +1,7 @@
 #include <QApplication>
 
+#include "core/mockups.h"
 #include "gui/gui_global.h"
-
-#include "MockCamera.h"
-#include "MockDriver.h"
-#include "MockGenerator.h"
-#include "MockCrysTempProbe.h"
 
 //------------------------------------------------------------------------------
 
@@ -13,15 +9,14 @@ int main(int argc, char *argv[])
 {
     qSetMessagePattern("%{time hh:mm:ss.zzz} (%{threadid}) %{type}: %{message}");
 
-    Q_INIT_RESOURCE(scene);
-
     QApplication application(argc, argv);
 
-    init("0.2.0 (mockup)",
-         new MockCrysTempProbe,
-         new MockCamera,
-         new MockGenerator,
-         new MockDriver);
+    init("mockup",
+         QObject::tr("<p>Functional mockups are used for all devices.</p>"),
+         new core::MockProbe,
+         new core::MockCamera,
+         new core::MockGenerator,
+         new core::MockDriver);
     start();
     int result = application.exec();
     shutdown();
