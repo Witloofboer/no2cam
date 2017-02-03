@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT += gui serialport
+CONFIG += console
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -14,7 +15,35 @@ TEMPLATE = app
 OBJECTS_DIR=../obj
 DESTDIR=../bin
 
-SOURCES += main.cpp
+SOURCES += \
+    main.cpp \
+    Camera.cpp \
+    CrysTempProbe.cpp \
+    Driver.cpp \
+    Generator.cpp
 
-HEADERS  +=
+HEADERS  += \
+    Camera.h \
+    CrysTempProbe.h \
+    Driver.h \
+    Generator.h
 
+RESOURCES += \
+    scene.qrc
+
+FORMS    +=
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../bin/ -lcore
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../bin/ -lcore
+
+INCLUDEPATH += $$PWD/../core_prj
+DEPENDPATH += $$PWD/../core_prj
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../gui/release/ -lgui
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../gui/debug/ -lgui
+
+INCLUDEPATH += $$PWD/..
+DEPENDPATH += $$PWD/..
+
+INCLUDEPATH += "C:/Program Files (x86)/Hamamatsu/DCAMSDK/2015-11/inc"
+LIBS += -L"C:/Program Files (x86)/Hamamatsu/DCAMSDK/2015-11/lib/win32" -ldcamapi
