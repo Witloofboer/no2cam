@@ -11,16 +11,24 @@ int main(int argc, char *argv[])
 
     QApplication application(argc, argv);
 
+    auto probe = new core::MockProbe;
+    auto camera = new core::MockCamera;
+    auto generator = new core::MockGenerator;
+    auto driver = new core::MockDriver;
+
     init("mockup",
          QObject::tr("<p>Functional mockups are used for all devices.</p>"),
-         new core::MockProbe,
-         new core::MockCamera,
-         new core::MockGenerator,
-         new core::MockDriver);
+         probe, camera, generator, driver);
+
     start();
     int result = application.exec();
     shutdown();
     finalise();
+
+    delete driver;
+    delete generator;
+    delete camera;
+    delete probe;
 
     return result;
 }
