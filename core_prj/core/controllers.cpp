@@ -14,7 +14,9 @@ FrequencyCtrl::FrequencyCtrl(QObject *parent, FrequencyDriver *generator)
     : QObject(parent)
     , _generator(generator)
     , _frequency(-1)
-{}
+{
+  _generator->setParent(this);
+}
 
 //------------------------------------------------------------------------------
 
@@ -38,7 +40,9 @@ PowerCtrl::PowerCtrl(QObject *parent, PowerDriver *driver)
     : QObject(parent)
     , _driver(driver)
     , _power(-1.0)
-{}
+{
+    _driver->setParent(this);
+}
 
 //------------------------------------------------------------------------------
 
@@ -61,7 +65,9 @@ bool PowerCtrl::setPower(double power)
 ProbeCtrl::ProbeCtrl(QObject *parent, ProbeDriver *probe)
     : QObject(parent)
     , _probe(probe)
-{}
+{
+    _probe->setParent(this);
+}
 
 //------------------------------------------------------------------------------
 
@@ -74,13 +80,14 @@ double ProbeCtrl::getTemperature()
 
 //------------------------------------------------------------------------------
 
-CameraCtrl::CameraCtrl(QObject *parent, CameraDriver *cameraDevice)
+CameraCtrl::CameraCtrl(QObject *parent, CameraDriver *camera)
     : QObject(parent)
-    , _cameraDevice(cameraDevice)
+    , _camera(camera)
     , _exposure(-1)
     , _isAvailable(true)
 {
-  connect(_cameraDevice, CameraDriver::snapshotAvailable, this, processSnapshot);
+  _camera->setParent(this);
+  connect(_camera, CameraDriver::snapshotAvailable, this, processSnapshot);
 }
 
 //------------------------------------------------------------------------------
@@ -93,7 +100,7 @@ void CameraCtrl::setExposure(int exposure)
     {
         qDebug("Camera: exposure time set to %d ms", exposure);
         _exposure = exposure;
-        _cameraDevice->setExposure(exposure);
+        _camera->setExposure(exposure);
     }
 }
 
@@ -106,7 +113,7 @@ void CameraCtrl::takeSnapshot()
 
     qDebug("Camera: taking snapshot");
     _isAvailable = false;
-    _cameraDevice->takeSnapshot();
+    _camera->takeSnapshot();
 }
 
 //------------------------------------------------------------------------------
@@ -116,7 +123,7 @@ void CameraCtrl::stop()
     if (!_isAvailable)
     {
         qDebug("Camera: stop");
-        _cameraDevice->stop();
+        _camera->stop();
         _isAvailable = true;
     }
 }
@@ -128,7 +135,7 @@ void CameraCtrl::getSnapshot(Snapshot &buffer)
     Q_ASSERT(_isAvailable);
 
     qDebug("Camera: getting snapshot");
-    _cameraDevice->getSnapshot(buffer);
+    _camera->getSnapshot(buffer);
 }
 
 //------------------------------------------------------------------------------
