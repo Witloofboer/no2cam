@@ -29,15 +29,10 @@ int main(int argc, char *argv[])
     start();
     int result = application.exec();
     shutdown();
-    finalise();
 
     camera->uninit();
 
-    delete camera;
-    delete driver;
-    delete gen;
-    delete probe;
-
+    finalise();
     return result;
 }
 
