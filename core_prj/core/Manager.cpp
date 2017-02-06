@@ -35,6 +35,11 @@ Manager::Manager(const Crystal *crystal,
     _cooldownT->setSingleShot(true);
     _stabilisationT->setSingleShot(true);
 
+    _camera->setParent(this);
+    _generator->setParent(this);
+    _driver->setParent(this);
+    _probe->setParent(this);
+
     connect(_cooldownT, QTimer::timeout, this, setAcousticWave);
     connect(_stabilisationT, QTimer::timeout, this, takeSnapshot);
     connect(_temperatureT, QTimer::timeout, this, updateTemperature);

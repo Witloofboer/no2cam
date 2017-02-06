@@ -71,7 +71,7 @@ class CameraCtrl : public QObject
     Q_OBJECT
 
 public:
-    explicit CameraCtrl(QObject *parent, CameraDriver *cameraDevice);
+    explicit CameraCtrl(QObject *parent, CameraDriver *camera);
 
     void setExposure(int exposure);
     void takeSnapshot();
@@ -85,7 +85,7 @@ private slots:
     void processSnapshot();
 
 private:
-    CameraDriver *_cameraDevice;
+    CameraDriver *_camera;
     int _exposure;
     bool _isAvailable;
 };

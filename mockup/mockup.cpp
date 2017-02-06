@@ -25,11 +25,6 @@ int main(int argc, char *argv[])
     shutdown();
     finalise();
 
-    delete driver;
-    delete generator;
-    delete camera;
-    delete probe;
-
     return result;
 }
 
