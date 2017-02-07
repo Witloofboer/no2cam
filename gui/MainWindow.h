@@ -47,6 +47,7 @@ public:
 
 signals:
     void stopRequested();
+    void shutdownRequested();
     void temperaturePeriodUpdated(int temperaturePeriod);
 
 public slots:

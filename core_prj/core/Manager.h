@@ -154,18 +154,21 @@ public slots:
       */
     void updateTemperaturePeriod(int temperaturePeriod);
 
+    /**
+     * Requests the manager to shut down.
+     */
+    void shutdown();
 
     /**
      * Requests the instance to move to the main thread.
      */
     void threadFinished();
 
-    void postSnapshotProcess();
-
 private slots:
     void setAcousticWave();
     void takeSnapshot();
     void updateTemperature();
+    void postSnapshotProcess();
 
 
 private:
