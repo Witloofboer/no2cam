@@ -146,7 +146,7 @@ void Manager::sweep(double wavelength1,
 
     auto &p = _p.swp;
     p.in_minWavelength = wavelength1;
-    p.in_maxWavelength = wavelength2;
+    p.in_maxWavelength = wavelength2+1e-5; // 1e-5 to account for rounding error
     p.in_wavelengthStep = wavelengthStep;
     p.wavelength = wavelength1;
 
@@ -395,10 +395,9 @@ void Manager::postSnapshotProcess()
         gImageBuffer.set(_snapshotBuffer);
         emit snapshotAvailable();
 
-        if (p.wavelength < p.in_maxWavelength)
+        p.wavelength += p.in_wavelengthStep;
+        if (_bursting && p.in_maxWavelength < p.wavelength)
         {
-            p.wavelength += p.in_wavelengthStep;
-        } else {
             p.wavelength = p.in_minWavelength;
         }
         break;
@@ -435,7 +434,7 @@ bool Manager::mustContinueAquisition() const
         return _bursting || _p.obs.snapshotCount != 0;
 
     case Sweep:
-        return _bursting || _p.swp.wavelength < _p.swp.in_maxWavelength;
+        return _bursting || _p.swp.wavelength <= _p.swp.in_maxWavelength ;
     }
     Q_UNREACHABLE();
 }
