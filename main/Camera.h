@@ -23,7 +23,7 @@ public:
     void stop() override;
     void getSnapshot(core::Snapshot &buffer) override;
 
-    void init();
+    bool init();
     void uninit();
 
     int my_dcamprop_getvalue( HDCAM _hdcam, int32 idprop, int32& lValue );

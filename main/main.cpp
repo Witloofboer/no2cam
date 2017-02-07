@@ -20,7 +20,9 @@ int main(int argc, char *argv[])
     auto driver = new Driver(gen);
     auto camera = new HamamatsuCamera();
 
-    camera->init();
+    bool ok = camera->init();
+
+    if (!ok) return -1;
 
     init("",
          QObject::tr("<p>Actual devices are used.</p>"),
