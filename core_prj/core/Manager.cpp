@@ -204,8 +204,9 @@ void Manager::setAcousticWave()
     {
         auto &p = _p.specSnap;
 
+        _refTemperature = _temperature;
         _crystal->computeFreqPow(p.in_wavelength,
-                                 _temperature,
+                                 _refTemperature,
                                  p.frequency,
                                  p.power);
         requestAcousticWave(p.frequency, p.power);
@@ -216,8 +217,9 @@ void Manager::setAcousticWave()
     {
         auto &p = _p.acouSnap;
 
+        _refTemperature = _temperature;
         p.wavelength = _crystal->wavelength(p.in_frequency,
-                                            _temperature);
+                                            _refTemperature);
         requestAcousticWave(p.in_frequency, p.in_power);
         break;
     }
@@ -229,6 +231,7 @@ void Manager::setAcousticWave()
         if (p.snapshotCount == 0)
         {
             // First snapshot... initialisation of the observation
+            _refTemperature = _temperature;
             for(int i=0; i<snapshotSize; ++i)
                 for(int j=0; j<snapshotSize; ++j)
                 {
@@ -239,7 +242,7 @@ void Manager::setAcousticWave()
             for(int i=0; i<2; ++i)
             {
                 _crystal->computeFreqPow(p.in_wavelengths[i],
-                                         _temperature,
+                                         _refTemperature,
                                          p.frequency[i],
                                          p.power[i]);
             }
@@ -253,8 +256,9 @@ void Manager::setAcousticWave()
     {
         auto &p = _p.swp;
 
+        _refTemperature = _temperature;
         _crystal->computeFreqPow(p.wavelength,
-                                 _temperature,
+                                 _refTemperature,
                                  p.frequency,
                                  p.power);
         requestAcousticWave(p.frequency, p.power);
@@ -313,7 +317,7 @@ void Manager::postSnapshotProcess()
                      p.power,
                      1,
                      _exposure,
-                     _temperature,
+                     _refTemperature,
                      _snapshotBuffer);
         break;
     }
@@ -332,7 +336,7 @@ void Manager::postSnapshotProcess()
                      p.in_power,
                      1,
                      _exposure,
-                     _temperature,
+                     _refTemperature,
                      _snapshotBuffer);
         break;
     }
@@ -361,7 +365,7 @@ void Manager::postSnapshotProcess()
                              p.power[i],
                              p.in_snapshotPerObs,
                              _exposure,
-                             p.temperature,
+                             _refTemperature,
                              p.snapshots[i]);
 
             for(int i=0; i<snapshotSize; ++i)
@@ -385,7 +389,7 @@ void Manager::postSnapshotProcess()
                      p.power,
                      1,
                      _exposure,
-                     _temperature,
+                     _refTemperature,
                      _snapshotBuffer);
 
         gImageBuffer.set(_snapshotBuffer);

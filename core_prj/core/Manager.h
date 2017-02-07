@@ -206,6 +206,7 @@ private:
     ProbeCtrl *_probe;
 
     double _temperature;
+    double _refTemperature;
 
     Mode _mode;
     int _exposure;
@@ -242,7 +243,6 @@ private:
         int in_snapshotPerObs;
         int idx;
         int snapshotCount;
-        double temperature;
         double frequency[2];
         double power[2];
         Snapshot snapshots[2];
