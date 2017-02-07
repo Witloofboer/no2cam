@@ -2,6 +2,7 @@
 
 #include <QCoreApplication>
 #include <QFile>
+#include <QThread>
 #include <QTimer>
 
 #include "controllers.h"
@@ -180,10 +181,19 @@ void Manager::updateTemperaturePeriod(int temperaturePeriod)
 
 //------------------------------------------------------------------------------
 
+void Manager::shutdown()
+{
+    stop();
+    _temperatureT->stop();
+    thread()->exit();
+}
+
+//------------------------------------------------------------------------------
+
 void Manager::threadFinished()
 {
     qDebug("Moving core layer back to main thread");
-    _temperatureT->stop();
+
     moveToThread(QCoreApplication::instance()->thread());
 }
 

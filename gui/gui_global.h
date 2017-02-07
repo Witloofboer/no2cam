@@ -36,7 +36,6 @@ GUISHARED_EXPORT void init(const QString& subversion,
                            core::FrequencyDriver *generator,
                            core::PowerDriver *driver);
 GUISHARED_EXPORT void start();
-GUISHARED_EXPORT void shutdown();
 GUISHARED_EXPORT void finalise();
 
 //------------------------------------------------------------------------------

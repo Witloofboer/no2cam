@@ -12,6 +12,7 @@
 #include <QStackedWidget>
 #include <QStatusBar>
 #include <QTimer>
+#include <QThread>
 #include <QToolBar>
 #include <QVBoxLayout>
 
@@ -251,6 +252,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
             coreInstance, core::Manager::sweep);
 
     connect(this, stopRequested, coreInstance, core::Manager::stop);
+    connect(this, shutdownRequested, coreInstance, core::Manager::shutdown);
     connect(this, temperaturePeriodUpdated, coreInstance, core::Manager::updateTemperaturePeriod);
     connect(_cameraBtnBox, CameraBtnBox::started, this, start);
     connect(_cameraBtnBox, CameraBtnBox::stopped, this, stopRequested);
@@ -406,12 +408,20 @@ void MainWindow::displayErrorOnFileWritting(QString datafolder,
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    emit stopRequested();
+    auto coreThread = _coreManager->thread();
+
+    // It is necessary to record the actual core thread as _coreManager is
+    // moved back to the main application thread upon exiting. Depending on
+    // race conditions, coreThread->wait() could be executed on the main thread.
+
+    emit shutdownRequested();
     persiste();
     _configDlg->persiste();
     _snapshotPane->persiste();
     _observationPane->persiste();
     _sweepPane->persiste();
+    coreThread->wait();
+
     QMainWindow::closeEvent(event);
 }
 

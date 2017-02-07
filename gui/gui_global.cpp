@@ -54,15 +54,6 @@ void start()
 
 //------------------------------------------------------------------------------
 
-void shutdown()
-{
-    qDebug("Shutting down core thread");
-    _coreThr->exit();
-    _coreThr->wait();
-}
-
-//------------------------------------------------------------------------------
-
 void finalise()
 {
     qInfo("Finalisation");
