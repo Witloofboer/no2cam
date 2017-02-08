@@ -115,8 +115,9 @@ void Manager::observation(double wavelength1,
                     stabilisationTime, burst, record, dataFolder, session);
 
     auto &p = _p.obs;
-    p.in_wavelengths[0] = wavelength1;
-    p.in_wavelengths[1] = wavelength2;
+    p.in_wavelengths[0] = 0; // Black snapshot
+    p.in_wavelengths[1] = wavelength1;
+    p.in_wavelengths[2] = wavelength2;
     p.idx = 0;
     p.snapshotCount = 0;
     p.in_snapshotPerObs = snapshotPerObs;
@@ -242,14 +243,17 @@ void Manager::setAcousticWave()
         {
             // First snapshot... initialisation of the observation
             _refTemperature = _temperature;
-            for(int i=0; i<snapshotSize; ++i)
-                for(int j=0; j<snapshotSize; ++j)
-                {
-                    p.snapshots[0][i][j] = 0;
-                    p.snapshots[1][i][j] = 0;
-                }
+            for(int s=0; s<3; ++s)
+                for(int i=0; i<snapshotSize; ++i)
+                    for(int j=0; j<snapshotSize; ++j)
+                    {
+                        p.snapshots[s][i][j] = 0;
+                    }
 
-            for(int i=0; i<2; ++i)
+            p.frequency[0]=0.0;
+            p.power[0]=0.0;
+
+            for(int i=1; i<3; ++i)
             {
                 _crystal->computeFreqPow(p.in_wavelengths[i],
                                          _refTemperature,
@@ -258,7 +262,13 @@ void Manager::setAcousticWave()
             }
         }
 
-        requestAcousticWave(p.frequency[p.idx], p.power[p.idx]);
+        if (p.snapshotCount < p.in_snapshotPerObs)
+        {
+            requestAcousticWave(0.0, 0.0);
+        } else {
+            requestAcousticWave(p.frequency[p.idx], p.power[p.idx]);
+        }
+
         break;
     }
 
@@ -303,7 +313,8 @@ void Manager::updateTemperature()
 
 void Manager::postSnapshotProcess()
 {
-    if (_mode==READY) return;
+    if (_mode==READY)
+        return;
 
     _camera->getSnapshot(_snapshotBuffer);
 
@@ -361,13 +372,25 @@ void Manager::postSnapshotProcess()
                 p.snapshots[p.idx][i][j] += _snapshotBuffer[i][j];
 
         ++p.snapshotCount;
-        p.idx = 1 - p.idx;
 
-        if (p.snapshotCount == 2*p.in_snapshotPerObs)
+        if (p.snapshotCount < p.in_snapshotPerObs)
+        {
+            p.idx = 0;
+        }
+        else if (p.snapshotCount == p.in_snapshotPerObs)
+        {
+            p.idx = 1;
+        }
+        else if  (p.snapshotCount < 3*p.in_snapshotPerObs)
+        {
+            p.idx = 3 - p.idx; // 1->2, 2->1
+        }
+        else
         {
             p.snapshotCount = 0;
+            p.idx = 0;
 
-            for(int i=0; i<2; ++i)
+            for(int i=0; i<3; ++i)
                 saveSnapshot(_snapTime,
                              Obs,
                              p.in_wavelengths[i],
@@ -380,7 +403,8 @@ void Manager::postSnapshotProcess()
 
             for(int i=0; i<snapshotSize; ++i)
                 for(int j=0; j<snapshotSize; ++j)
-                    _snapshotBuffer[i][j]=(p.snapshots[0][i][j]+p.snapshots[1][i][j])/2;
+                    _snapshotBuffer[i][j]=(p.snapshots[1][i][j]
+                                           +p.snapshots[2][i][j])/2;
 
             gImageBuffer.set(_snapshotBuffer);
             emit snapshotAvailable();

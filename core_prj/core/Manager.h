@@ -242,13 +242,13 @@ private:
 
     struct ObservationParams
     {
-        double in_wavelengths[2];
+        double in_wavelengths[3];
         int in_snapshotPerObs;
         int idx;
         int snapshotCount;
-        double frequency[2];
-        double power[2];
-        Snapshot snapshots[2];
+        double frequency[3];
+        double power[3];
+        Snapshot snapshots[3];
     };
 
     struct SweepParams
