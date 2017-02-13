@@ -16,7 +16,7 @@ Driver::Driver(const Generator *generator)
     , _generator(generator)
 {
     _serial = new QSerialPort(this);
-    _serial->setPortName("COM12"); // select the correct port to send the data to...
+    _serial->setPortName("COM14"); // select the correct port to send the data to...
     _serial->setBaudRate(QSerialPort::Baud9600);
     _serial->setDataBits(QSerialPort::Data8);
     _serial->setStopBits(QSerialPort::OneStop);
@@ -28,16 +28,16 @@ Driver::Driver(const Generator *generator)
 
 void Driver::serialReceived()
 {
-    QMessageBox msgBox;
-    QByteArray receivedBytes;
-    receivedBytes =_serial->readAll();
-    QString received;
-    for (auto it=receivedBytes.begin(); it!=receivedBytes.end(); ++it)
-    {
-        printf("%02x ", static_cast<quint8>(*it));
+   //QMessageBox msgBox;
+   // QByteArray receivedBytes;
+   // receivedBytes =_serial->readAll();
+   // QString received;
+   // for (auto it=receivedBytes.begin(); it!=receivedBytes.end(); ++it)
+   // {
+   //     printf("%02x ", static_cast<quint8>(*it));
 //        received += QString("%1").arg(static_cast<quint8>(*it), 2, 16, '0');
-    }
-    printf("\n");
+  //  }
+  //  printf("\n");
 //    msgBox.setText("Received: " + received);
 //    msgBox.exec();
 }
@@ -77,7 +77,9 @@ void Driver::writeDDS(double power)
     stream[25] = (freq & 0xff000000)>>24;
 
     _serial->write(stream);
-    QThread::msleep(2);
+    _serial->flush();
+    qInfo("got here");
+
 }
 
 //------------------------------------------------------------------------------
@@ -197,7 +199,7 @@ void Driver::setPower(double power)
         power = 365;
     }
     double dummy_power = power;
-    power = (0.000008*(pow(dummy_power,3))) - (0.0049*(pow(dummy_power,2))) + (1.3178*dummy_power) - 86.215;
+    power = (8e-6*(pow(dummy_power,3))) - (0.0049*(pow(dummy_power,2))) + (1.3178*dummy_power) - 86.215;
     //writeDDS(power);
     writePLL();
 }
