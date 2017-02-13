@@ -18,16 +18,14 @@ namespace core {
 Manager::Manager(const Crystal *crystal,
                  ProbeDriver *probe,
                  CameraDriver *camera,
-                 FrequencyDriver *generator,
-                 PowerDriver *driver)
+                 AcousticDriver *driver)
     : QObject()
     , _cooldownT(new QTimer(this))
     , _stabilisationT(new QTimer(this))
     , _temperatureT(new QTimer(this))
     , _crystal(crystal)
     , _camera(new CameraCtrl(this, camera))
-    , _generator(new FrequencyCtrl(this, generator))
-    , _driver(new PowerCtrl(this, driver))
+    , _acousticDriver(new AcousticCtrl(this, driver))
     , _probe(new ProbeCtrl(this, probe))
     , _mode(READY)
     , _bursting(false)
@@ -37,8 +35,7 @@ Manager::Manager(const Crystal *crystal,
     _stabilisationT->setSingleShot(true);
 
     _camera->setParent(this);
-    _generator->setParent(this);
-    _driver->setParent(this);
+    _acousticDriver->setParent(this);
     _probe->setParent(this);
 
     connect(_cooldownT, QTimer::timeout, this, setAcousticWave);
@@ -161,8 +158,7 @@ void Manager::stop()
 {
     _cooldownT->stop();
     _stabilisationT->stop();
-    _generator->setFrequency(0.0);
-    _driver->setPower(0.0);
+    _acousticDriver->set(0.0, 0.0);
     _camera->stop();
     _mode = READY;
 
@@ -498,7 +494,7 @@ bool Manager::mustCooldown() const
 void Manager::cooldown()
 {
     qDebug("Cooling down: %dms", _cooldownT->interval());
-    _driver->setPower(_cooldownPwr);
+    _acousticDriver->set(0.0, _cooldownPwr);
     _cooldownT->start();
 }
 
@@ -565,10 +561,7 @@ void Manager::saveSnapshot(const QDateTime& dateTime,
 
 void Manager::requestAcousticWave(double frequency, double power)
 {
-    bool waveChanged = false;
-
-    waveChanged |= _generator->setFrequency(frequency);
-    waveChanged |= _driver->setPower(power);
+    bool waveChanged = _acousticDriver->set(frequency, power);
 
     if (power != 0.0 && waveChanged)
     {

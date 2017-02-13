@@ -10,35 +10,10 @@ namespace core
 
 //------------------------------------------------------------------------------
 
-FrequencyCtrl::FrequencyCtrl(QObject *parent, FrequencyDriver *generator)
-    : QObject(parent)
-    , _generator(generator)
-    , _frequency(-1)
-{
-  _generator->setParent(this);
-}
-
-//------------------------------------------------------------------------------
-
-bool FrequencyCtrl::setFrequency(double frequency)
-{
-    bool isUpdated = _frequency != frequency;
-
-    if (isUpdated)
-    {
-        qDebug("Setting acoustic frequency to %.3f MHz", frequency);
-        _frequency = frequency;
-        _generator->setFrequency(_frequency);
-    }
-
-    return isUpdated;
-}
-
-//------------------------------------------------------------------------------
-
-PowerCtrl::PowerCtrl(QObject *parent, PowerDriver *driver)
+AcousticCtrl::AcousticCtrl(QObject *parent, AcousticDriver *driver)
     : QObject(parent)
     , _driver(driver)
+    , _frequency(-1)
     , _power(-1.0)
 {
     _driver->setParent(this);
@@ -46,15 +21,16 @@ PowerCtrl::PowerCtrl(QObject *parent, PowerDriver *driver)
 
 //------------------------------------------------------------------------------
 
-bool PowerCtrl::setPower(double power)
+bool AcousticCtrl::set(double frequency, double power)
 {
-    bool isUpdated = _power != power;
+    bool isUpdated = (_frequency != frequency) || (_power != power);
 
     if (isUpdated)
     {
-        qDebug("Setting acoustic power to %.1f mW", power);
+        qDebug("Setting acoustic beam to %.3f MHz and %.1f mW", frequency, power);
+        _frequency = frequency;
         _power = power;
-        _driver->setPower(_power);
+        _driver->set(_frequency, _power);
     }
 
     return isUpdated;
@@ -86,8 +62,8 @@ CameraCtrl::CameraCtrl(QObject *parent, CameraDriver *camera)
     , _exposure(-1)
     , _isAvailable(true)
 {
-  _camera->setParent(this);
-  connect(_camera, CameraDriver::snapshotAvailable, this, processSnapshot);
+    _camera->setParent(this);
+    connect(_camera, CameraDriver::snapshotAvailable, this, processSnapshot);
 }
 
 //------------------------------------------------------------------------------

@@ -17,24 +17,13 @@ namespace core
 
 //------------------------------------------------------------------------------
 
-class CORESHARED_EXPORT MockGenerator : public FrequencyDriver
+class CORESHARED_EXPORT MockAcousticDriver : public AcousticDriver
 {
     Q_OBJECT
 
 public:
-    explicit MockGenerator();
-    void setFrequency(double frequency) override;
-};
-
-//------------------------------------------------------------------------------
-
-class CORESHARED_EXPORT MockDriver : public PowerDriver
-{
-    Q_OBJECT
-
-public:
-    explicit MockDriver();
-    virtual void setPower(double power) override;
+    explicit MockAcousticDriver();
+    virtual void set(double frequency, double power) override;
 };
 
 //------------------------------------------------------------------------------

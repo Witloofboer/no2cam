@@ -5,15 +5,13 @@
 #include <QMessageBox>
 #include <QThread>
 #include <string>
-#include "Generator.h"
 #include <math.h>
 #include "windows.h"
 
 //------------------------------------------------------------------------------
 
-Driver::Driver(const Generator *generator)
-    : core::PowerDriver()
-    , _generator(generator)
+Driver::Driver()
+    : core::AcousticDriver()
 {
     _serial = new QSerialPort(this);
     _serial->setPortName("COM12"); // select the correct port to send the data to...
@@ -44,7 +42,7 @@ void Driver::serialReceived()
 
 //------------------------------------------------------------------------------
 
-void Driver::writeDDS(double power)
+void Driver::writeDDS(double frequency, double power)
 {
     qInfo("<power: %.1f mW>", power);
 
@@ -69,7 +67,7 @@ void Driver::writeDDS(double power)
     stream[22] = 0xff;
 
     // lineair correction formula is needed to correct the frequency offset!
-    int freq = round((_generator->getFrequency() * per_MHz)+(224.71*_generator->getFrequency()+263.83));
+    int freq = round((frequency * per_MHz)+(224.71*frequency+263.83));
 
     stream[28] = freq & 0x000000ff;
     stream[27] = (freq & 0x0000ff00)>>8;
@@ -82,14 +80,14 @@ void Driver::writeDDS(double power)
 
 //------------------------------------------------------------------------------
 
-void Driver::writePLL()
+void Driver::writePLL(double frequency)
 {
 
     const double per_MHz = 1e6;
     const double VREF = 40;
     double VCO_freq = 1040;    //choose: NIR=1472, UV=1040, VIS=1152
 
-    VCO_freq = 8*(_generator->getFrequency());
+    VCO_freq = 8*(frequency);
 
     QByteArray functionLatch(3,0);
     QByteArray initLatch(3,0);
@@ -182,8 +180,10 @@ void Driver::writePLL()
 
 //------------------------------------------------------------------------------
 
-void Driver::setPower(double power)
+void Driver::set(double frequency, double power)
 {
+    qDebug("<acoustic wave: %.3f MHz, %.1f mW>", frequency, power);
+
     // chose one of the following options to send data to the correct device
 
     power = 400;
@@ -198,8 +198,8 @@ void Driver::setPower(double power)
     }
     double dummy_power = power;
     power = (0.000008*(pow(dummy_power,3))) - (0.0049*(pow(dummy_power,2))) + (1.3178*dummy_power) - 86.215;
-    //writeDDS(power);
-    writePLL();
+    //writeDDS(frequency, power);
+    writePLL(frequency);
 }
 
 //------------------------------------------------------------------------------

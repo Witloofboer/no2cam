@@ -13,26 +13,14 @@ namespace core
 
 //------------------------------------------------------------------------------
 
-class CORESHARED_EXPORT FrequencyDriver : public QObject
+class CORESHARED_EXPORT AcousticDriver : public QObject
 {
     Q_OBJECT
 
 public:
-    FrequencyDriver();
+    AcousticDriver();
 
-    virtual void setFrequency(double frequency)=0;
-};
-
-//------------------------------------------------------------------------------
-
-class CORESHARED_EXPORT PowerDriver : public QObject
-{
-    Q_OBJECT
-
-public:
-    PowerDriver();
-
-    virtual void setPower(double power)=0;
+    virtual void set(double frequency, double power)=0;
 };
 
 //------------------------------------------------------------------------------

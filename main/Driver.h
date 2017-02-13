@@ -2,26 +2,24 @@
 #define DRIVER_H
 #include "core/drivers.h"
 
-class Generator;
 class QSerialPort;
 
-class Driver : public core::PowerDriver
+class Driver : public core::AcousticDriver
 {
     Q_OBJECT
 
 public:
-    Driver(const Generator* generator);
+    Driver();
 
-    void setPower(double power) override;
-    void writeDDS(double power);
-    void writePLL();
+    void set(double frequency, double power) override;
+    void writeDDS(double frequency, double power);
+    void writePLL(double frequency);
 
 public slots:
     void serialReceived();
 
 private:
     QSerialPort *_serial;
-    const Generator* _generator;
 };
 
 #endif // DRIVER_H

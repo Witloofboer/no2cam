@@ -17,24 +17,13 @@ namespace core
 
 //------------------------------------------------------------------------------
 
-MockGenerator::MockGenerator(): FrequencyDriver() {}
+MockAcousticDriver::MockAcousticDriver(): AcousticDriver() {}
 
 //------------------------------------------------------------------------------
 
-void MockGenerator::setFrequency(double frequency)
+void MockAcousticDriver::set(double frequency, double power)
 {
-    qDebug("<generator: %.3f MHz>", frequency);
-}
-
-//------------------------------------------------------------------------------
-
-MockDriver::MockDriver(): PowerDriver() {}
-
-//------------------------------------------------------------------------------
-
-void MockDriver::setPower(double power)
-{
-    qDebug("<driver: %.1f mW>", power);
+    qDebug("<acoustic wave: %.3f MHz, %.1f mW>", frequency, power);
 }
 
 //------------------------------------------------------------------------------

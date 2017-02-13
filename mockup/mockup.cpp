@@ -13,12 +13,11 @@ int main(int argc, char *argv[])
 
     auto probe = new core::MockProbe;
     auto camera = new core::MockCamera;
-    auto generator = new core::MockGenerator;
-    auto driver = new core::MockDriver;
+    auto driver = new core::MockAcousticDriver;
 
     init("mockup",
          QObject::tr("<p>Functional mockups are used for all devices.</p>"),
-         probe, camera, generator, driver);
+         probe, camera, driver);
 
     start();
     int result = application.exec();

@@ -6,8 +6,7 @@
 namespace core {
 class ProbeDriver;
 class CameraDriver;
-class FrequencyDriver;
-class PowerDriver;
+class AcousticDriver;
 
 }
 
@@ -33,8 +32,7 @@ GUISHARED_EXPORT void init(const QString& subversion,
                            const QString& devicesNotes,
                            core::ProbeDriver *probe,
                            core::CameraDriver *camera,
-                           core::FrequencyDriver *generator,
-                           core::PowerDriver *driver);
+                           core::AcousticDriver *driver);
 GUISHARED_EXPORT void start();
 GUISHARED_EXPORT void finalise();
 

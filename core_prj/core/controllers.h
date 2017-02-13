@@ -14,35 +14,19 @@ namespace core
 
 //------------------------------------------------------------------------------
 
-class FrequencyDriver;
+class AcousticDriver;
 
-class FrequencyCtrl : public QObject
+class AcousticCtrl : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit FrequencyCtrl(QObject *parent, FrequencyDriver *generator);
-    bool setFrequency(double frequency);
+    explicit AcousticCtrl(QObject *parent, AcousticDriver *driver);
+    bool set(double frequency, double power);
 
 private:
-    FrequencyDriver *_generator;
+    AcousticDriver *_driver;
     double _frequency;
-};
-
-//------------------------------------------------------------------------------
-
-class PowerDriver;
-
-class PowerCtrl : public QObject
-{
-    Q_OBJECT
-
-public:
-    explicit PowerCtrl(QObject *parent, PowerDriver *driver);
-    bool setPower(double power);
-
-private:
-    PowerDriver *_driver;
     double _power;
 };
 

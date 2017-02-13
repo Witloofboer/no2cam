@@ -16,12 +16,11 @@ namespace core {
 
 class Crystal;
 class CameraDriver;
-class FrequencyDriver;
-class PowerDriver;
+class AcousticDriver;
 class ProbeDriver;
 class CameraCtrl;
 class FrequencyCtrl;
-class PowerCtrl;
+class AcousticCtrl;
 class ProbeCtrl;
 
 //------------------------------------------------------------------------------
@@ -39,8 +38,7 @@ public:
     Manager(const Crystal *crystal,
             ProbeDriver *probe,
             CameraDriver *camera,
-            FrequencyDriver *generator,
-            PowerDriver *driver);
+            AcousticDriver *driver);
 
 signals:
     void ready(bool isReady);
@@ -204,8 +202,7 @@ private:
 
     const Crystal *_crystal;
     CameraCtrl *_camera;
-    FrequencyCtrl *_generator;
-    PowerCtrl *_driver;
+    AcousticCtrl *_acousticDriver;
     ProbeCtrl *_probe;
 
     double _temperature;

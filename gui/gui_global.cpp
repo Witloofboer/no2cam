@@ -22,8 +22,7 @@ void init(const QString& subversion,
           const QString& devicesNotes,
           core::ProbeDriver *probe,
           core::CameraDriver *camera,
-          core::FrequencyDriver *generator,
-          core::PowerDriver *driver)
+          core::AcousticDriver *driver)
 {
     qInfo("Initialisation");
 
@@ -33,7 +32,7 @@ void init(const QString& subversion,
 
     _coreThr = new QThread;
     _crystal = new core::Crystal;
-    _coreLayer = new core::Manager(_crystal, probe, camera, generator, driver);
+    _coreLayer = new core::Manager(_crystal, probe, camera, driver);
     _mainWindow = new gui::MainWindow(_crystal, _coreLayer, subversion, devicesNotes);
     _mainWindow->show();
 

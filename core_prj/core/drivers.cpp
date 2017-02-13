@@ -4,13 +4,7 @@ namespace core {
 
 //------------------------------------------------------------------------------
 
-FrequencyDriver::FrequencyDriver()
-    :QObject()
-{}
-
-//------------------------------------------------------------------------------
-
-PowerDriver::PowerDriver()
+AcousticDriver::AcousticDriver()
     :QObject()
 {}
 

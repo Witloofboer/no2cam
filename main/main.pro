@@ -18,13 +18,11 @@ DESTDIR=../bin
 SOURCES += \
     main.cpp \
     Camera.cpp \
-    Driver.cpp \
-    Generator.cpp
+    Driver.cpp
 
 HEADERS  += \
     Camera.h \
-    Driver.h \
-    Generator.h
+    Driver.h
 
 RESOURCES += \
     scene.qrc

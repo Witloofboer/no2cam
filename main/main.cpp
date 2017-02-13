@@ -4,7 +4,6 @@
 
 #include "Camera.h"
 #include "Driver.h"
-#include "Generator.h"
 #include "core/mockups.h"
 
 //------------------------------------------------------------------------------
@@ -16,8 +15,7 @@ int main(int argc, char *argv[])
     QApplication application(argc, argv);
 
     auto probe = new core::MockProbe;
-    auto gen = new Generator;
-    auto driver = new Driver(gen);
+    auto driver = new Driver();
     auto camera = new HamamatsuCamera();
 
     bool ok = camera->init();
@@ -26,7 +24,7 @@ int main(int argc, char *argv[])
 
     init("",
          QObject::tr("<p>Actual devices are used.</p>"),
-         probe, camera, gen, driver);
+         probe, camera, driver);
 
     start();
     int result = application.exec();
