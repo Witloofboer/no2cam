@@ -18,11 +18,13 @@ DESTDIR=../bin
 SOURCES += \
     main.cpp \
     Camera.cpp \
-    Driver.cpp
+    Driver.cpp \
+    Probe.cpp
 
 HEADERS  += \
     Camera.h \
-    Driver.h
+    Driver.h \
+    Probe.h
 
 RESOURCES += \
     scene.qrc
@@ -43,3 +45,6 @@ DEPENDPATH += $$PWD/..
 
 INCLUDEPATH += "C:/Program Files (x86)/Hamamatsu/DCAMSDK/2015-11/inc"
 LIBS += -L"C:/Program Files (x86)/Hamamatsu/DCAMSDK/2015-11/lib/win32" -ldcamapi
+
+INCLUDEPATH += "C:/Program Files (x86)/IVI Foundation/VISA/WinNT/Include"
+LIBS += -L"C:/Program Files (x86)/IVI Foundation/VISA/WinNT/lib/msc" -lTLTSP_32 -lvisa32
