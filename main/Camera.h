@@ -4,6 +4,7 @@
 #include <QtGlobal>
 #include "windows.h"
 #include "dcamapi.h"
+#include "qtimer.h"
 
 
 class QTimer;
@@ -23,10 +24,14 @@ public:
     void stop() override;
     void getSnapshot(core::Snapshot &buffer) override;
 
+
     bool init();
     void uninit();
 
     int my_dcamprop_getvalue( HDCAM _hdcam, int32 idprop, int32& lValue );
+
+private slots:
+    void checkFrameReady();
 
 private:
     DCAMWAIT_OPEN	waitopen;
@@ -34,6 +39,9 @@ private:
     DCAMWAIT_START	paramwait;
     DCAMERR	_dcamErr;
     HDCAM _hdcam;
+    QTimer *_timer;
+    int _exposureTime;
+    bool state;
 };
 
 

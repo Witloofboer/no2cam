@@ -17,14 +17,26 @@ ViStatus Probe::find_instruments(ViString findPattern, ViChar **resource)
 
 
 
-void Probe::init()
+bool Probe::init()
 {
-    err = find_instruments(TLTSP_FIND_PATTERN_01, &rscPtr);
+        err = find_instruments(TLTSP_FIND_PATTERN_01, &rscPtr);
+        if (err != VI_SUCCESS)
+        {
+            //qDebug("Error on finding the temperature Probe");
+            return false;
+        }
 
-    err = TLTSP_init(rscPtr, VI_ON, VI_ON, &instrHdl);
 
-    viSetAttribute(instrHdl, VI_ATTR_TMO_VALUE, 5000);
-}
+        err = TLTSP_init(rscPtr, VI_ON, VI_ON, &instrHdl);
+        if (err != VI_SUCCESS)
+        {
+           // qDebug("Error on initializing the temperature Probe");
+            return false;
+        }
+
+        viSetAttribute(instrHdl, VI_ATTR_TMO_VALUE, 5000);
+        return true;
+        }
 
 void Probe::uninit()
 {
@@ -37,7 +49,6 @@ double Probe::getTemperature() {
     ViReal64 temperature_value;
 
     err = TLTSP_measTemperature (instrHdl, TLTSP_MEAS_TEMP2, &temperature_value);
-    qDebug("temperature Value= %f ",temperature_value);
     return temperature_value;
 }
 

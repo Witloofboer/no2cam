@@ -11,6 +11,9 @@ class Driver : public core::AcousticDriver
 public:
     Driver();
 
+    bool init();
+    void uninit();
+
     void set(double frequency, double power) override;
     void writeDDS(double frequency, double power);
     void writePLL(double frequency);

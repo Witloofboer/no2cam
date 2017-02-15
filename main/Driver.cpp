@@ -7,12 +7,18 @@
 #include <string>
 #include <math.h>
 #include "windows.h"
+#include "Driver.h"
 
 //------------------------------------------------------------------------------
 
 Driver::Driver()
     : core::AcousticDriver()
+{}
+
+bool Driver::init()
 {
+    try
+    {
     _serial = new QSerialPort(this);
     _serial->setPortName("COM14"); // select the correct port to send the data to...
     _serial->setBaudRate(QSerialPort::Baud9600);
@@ -22,6 +28,17 @@ Driver::Driver()
     _serial->setFlowControl(QSerialPort::NoFlowControl);
     _serial->open(QSerialPort::ReadWrite);
     connect(_serial, QSerialPort::readyRead, this, Driver::serialReceived);
+    }
+    catch(int e)
+    {
+         //QMessageBox::critical(0, "Aborting", "Failed to connect to Driver COM port.");
+         return false;
+    }
+    if (!_serial->isOpen())
+    {
+        //QMessageBox::critical(0, "Aborting", "Failed to open the Driver COM port.");
+        return false;
+    }
 }
 
 void Driver::serialReceived()
@@ -190,17 +207,16 @@ void Driver::set(double frequency, double power)
 
     power = 400;
 
-    if (power < 92)
+    if (power == 0)
     {
-        power = 92;
+       frequency = 260.0;
     }
-    if (power > 365)
-    {
-        power = 365;
-    }
+
     double dummy_power = power;
 
     power = (8e-6*(pow(dummy_power,3))) - (0.0049*(pow(dummy_power,2))) + (1.3178*dummy_power) - 86.215;
+
+
     //writeDDS(frequency, power);
     writePLL(frequency);
 }

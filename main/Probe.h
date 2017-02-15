@@ -13,7 +13,7 @@ public:
     Probe();
     double getTemperature() override;
 
-    void init();
+    bool init();
     void uninit();
 
     ViStatus find_instruments(ViString findPattern, ViChar **resource);

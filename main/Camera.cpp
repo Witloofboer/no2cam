@@ -1,13 +1,17 @@
 #include "Camera.h"
 #include <QMessageBox>
 #include <QString>
+
 #include "dcamprop.h"
 
 //------------------------------------------------------------------------------
 
 HamamatsuCamera::HamamatsuCamera()
     : core::CameraDriver()
+    , _timer(new QTimer(this))
 {
+    _timer->setSingleShot(true);
+    connect(_timer, QTimer::timeout, this, checkFrameReady);
 }
 
 //------------------------------------------------------------------------------
@@ -52,43 +56,46 @@ bool HamamatsuCamera::init()
     qInfo("INIT DCAM SUCCESFULLY!:");
     _hdcam = paramopen.hdcam;
 
-    // allocate 1 buffer inside the camera to store the image
-    _dcamErr = dcambuf_alloc( _hdcam, 1 );
-
-    if( failed( _dcamErr ) )
-    {
-        qInfo("CAM ERROR ON ATTACH: %d", _dcamErr);
-        dcamdev_close(_hdcam);
-        dcamapi_uninit();
-        return false;
-    }
-
-    qInfo("BUFFER ALLOC SUCCESFULLY!:");
-    // tell the camera it should wait for an event to take a new image (here this is 'frame_ready')
-    memset( &waitopen, 0, sizeof(waitopen) );
-    waitopen.size = sizeof(waitopen);
-    waitopen.hdcam	= _hdcam;
-
-    _dcamErr = dcamwait_open( &waitopen );
-
-    memset( &paramwait, 0, sizeof(paramwait) );
-    paramwait.size		= sizeof(paramwait);
-    paramwait.eventmask	= DCAMCAP_EVENT_FRAMEREADY;
-    paramwait.timeout	= 1000;
-
     memset( &frame, 0, sizeof(frame) );
     frame.size	= sizeof(frame);
     frame.iFrame= -1;		// latest frame
 
+    double value;
     // set binning to 4x4
     //_dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_BINNING, DCAMPROP_BINNING__4);
-
+    _dcamErr = dcamprop_getvalue(_hdcam, DCAM_IDPROP_HIGHDYNAMICRANGE_MODE,&value);
+    qDebug("temp = %f",value);
     _dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_TRIGGERSOURCE, DCAMPROP_TRIGGERSOURCE__SOFTWARE );
-    _dcamErr = dcamcap_start( _hdcam, DCAMCAP_START_SEQUENCE );
+
+    bool state;
+
+
+    state = dcam_precapture(_hdcam, DCAM_CAPTUREMODE_SNAP);
+    state = dcam_allocframe(_hdcam, 1);
+
+
+
 
     return true;
 }
 
+void HamamatsuCamera::checkFrameReady()
+{
+    int32 Status;
+   _dcamErr = dcamcap_status(_hdcam,&Status);
+
+    if(Status == DCAMCAP_STATUS_READY)
+    {
+        _timer->stop();
+        _dcamErr = dcambuf_lockframe(_hdcam, &frame );
+        emit snapshotAvailable();
+    }
+    else
+    {
+        _timer->setInterval(1);
+        _timer->start();
+    }
+}
 //------------------------------------------------------------------------------
 
 void HamamatsuCamera::uninit()
@@ -104,6 +111,7 @@ void HamamatsuCamera::setExposure(int exposure)
 {
     qInfo("<exposure time: %d ms>", exposure);
     _dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_EXPOSURETIME, ((double)exposure)/1000 );
+    _exposureTime = exposure;
 }
 
 //------------------------------------------------------------------------------
@@ -111,41 +119,25 @@ void HamamatsuCamera::setExposure(int exposure)
 void HamamatsuCamera::takeSnapshot()
 {
     qInfo("<snapshotting>");
+    state = dcam_capture(_hdcam);
+    state = dcam_firetrigger(_hdcam);
 
-    HDCAMWAIT hwait = waitopen.hwait;
-
-    //let the software trigger the camera to take a snapshot
-    dcamcap_firetrigger( _hdcam );
-    _dcamErr = dcamwait_start( hwait, &paramwait ); // this function waits until it receives 'frame_ready' event from the camera
-
-    if( failed( _dcamErr ) )
-    {
-        qInfo("CAM ERROR ON CAPTURE:");
-        qInfo(QString::number(_dcamErr).toStdString().c_str());
-    }
-    else
-    {
-        _dcamErr = dcambuf_lockframe(_hdcam, &frame );
-        emit snapshotAvailable();
-    }
+    _timer->setInterval(_exposureTime+35);
+    _timer->start();
 }
 
 //------------------------------------------------------------------------------
 
 void HamamatsuCamera::stop()
 {
-//    if (_timer->isActive())
-//    {
-    qInfo("Forcing camera stop TO BE IMPLEMENTED");
-//        _timer->stop();
-//    }
+    _timer->stop();
 }
 
 //------------------------------------------------------------------------------
 
 void HamamatsuCamera::getSnapshot(core::Snapshot &buffer)
 {
-    memcpy(buffer, frame.buf, sizeof buffer);
+   memcpy(buffer, frame.buf, sizeof buffer);
 }
 
 //------------------------------------------------------------------------------
