@@ -29,6 +29,7 @@ signals:
     void sweepRequested(double wavelength1,
                         double wavelength2,
                         double wavelengthStep,
+                        int    blackSnapshotRate,
                         double exposure,
                         double cooldownTime,
                         double cooldownPwr,
@@ -47,6 +48,7 @@ private:
     DoubleLineEdit *_wavelength1Edit;
     DoubleLineEdit *_wavelength2Edit;
     DoubleLineEdit *_wavelengthStepEdit;
+    IntLineEdit *_blckSnapRateEdit;
 };
 
 //------------------------------------------------------------------------------
