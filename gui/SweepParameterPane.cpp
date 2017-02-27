@@ -15,7 +15,7 @@ SweepParameterPane::SweepParameterPane()
     , _wavelength1Edit(new DoubleLineEdit)
     , _wavelength2Edit(new DoubleLineEdit)
     , _wavelengthStepEdit(new DoubleLineEdit)
-    , _blckSnapRateEdit(new IntLineEdit)
+    , _blckSnapRateEdit(new PosIntLineEdit)
 {
     // Parameter box -----------------------------------------------------------
     _parameterBox->setTitle(tr("Sweep mode"));

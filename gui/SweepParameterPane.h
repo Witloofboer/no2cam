@@ -8,6 +8,7 @@
 namespace gui {
 
 class DoubleLineEdit;
+class PosIntLineEdit;
 
 //------------------------------------------------------------------------------
 
@@ -48,7 +49,7 @@ private:
     DoubleLineEdit *_wavelength1Edit;
     DoubleLineEdit *_wavelength2Edit;
     DoubleLineEdit *_wavelengthStepEdit;
-    IntLineEdit *_blckSnapRateEdit;
+    PosIntLineEdit *_blckSnapRateEdit;
 };
 
 //------------------------------------------------------------------------------
