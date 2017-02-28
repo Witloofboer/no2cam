@@ -24,7 +24,8 @@ SOURCES += \
     controllers.cpp \
     mockups.cpp \
     drivers.cpp \
-    Manager.cpp
+    Manager.cpp \
+    modes.cpp
 
 HEADERS += \
     core_global.h \
@@ -34,7 +35,8 @@ HEADERS += \
     mockups.h \
     drivers.h \
     Snapshot.h \
-    Manager.h
+    Manager.h \
+    modes.h
 
 unix {
     target.path = /usr/lib

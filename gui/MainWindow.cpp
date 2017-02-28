@@ -236,14 +236,14 @@ MainWindow::MainWindow(core::Crystal *crystal,
         QTimer::singleShot(0, this, displayConfigurationDlg); //TODO emit instead of timer?
 
     connect(coreInstance, core::Manager::ready, this, updateGuiState);
-    connect(coreInstance, core::Manager::snapshotAvailable, this, updateSnapshot);
+    connect(coreInstance, core::Manager::snapshotAvailableForGui, this, updateSnapshot);
 
     connect(_snapshotPane, BaseParameterPane::parametersChanged, this, refreshBtns);
     connect(_observationPane, BaseParameterPane::parametersChanged, this, refreshBtns);
     connect(_sweepPane, BaseParameterPane::parametersChanged, this, refreshBtns);
 
-    connect(_snapshotPane, SnapshotParameterPane::spectralSnapshot,
-            coreInstance, core::Manager::spectralSnapshot);
+    connect(_snapshotPane, SnapshotParameterPane::opticalSnapshot,
+            coreInstance, core::Manager::opticalSnapshot);
     connect(_snapshotPane, SnapshotParameterPane::acousticSnapshot,
             coreInstance, core::Manager::acousticSnapshot);
     connect(_observationPane, ObservationParameterPane::observationRequested,

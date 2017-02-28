@@ -146,7 +146,7 @@ void SnapshotParameterPane::start(bool burst,
 {
     if (_spectralBtn->isChecked())
     {
-        emit spectralSnapshot(_wavelengthEdit->value(),
+        emit opticalSnapshot(_wavelengthEdit->value(),
                               _exposureEdit->value(),
                               _cooldownTimeEdit->value(),
                               _cooldownPwrEdit->value(),

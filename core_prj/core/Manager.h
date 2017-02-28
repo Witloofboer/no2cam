@@ -6,7 +6,7 @@
 
 #include "core_global.h"
 #include "Snapshot.h"
-
+#include "modes.h"
 
 class QTimer;
 
@@ -14,6 +14,7 @@ class QTimer;
 
 namespace core {
 
+class BaseMode;
 class Crystal;
 class CameraDriver;
 class AcousticDriver;
@@ -30,7 +31,9 @@ class ProbeCtrl;
  *
  * It is run by its own thread.
  */
-class CORESHARED_EXPORT Manager : public QObject
+class CORESHARED_EXPORT Manager
+    : public QObject
+    , public IModeToManager
 {
     Q_OBJECT
 
@@ -40,9 +43,28 @@ public:
             CameraDriver *camera,
             AcousticDriver *driver);
 
+    ~Manager();
+
+    // IModeToManager
+    double temperature() const override;
+    void setAcousticBeam(double frequency, double power) override;
+    void takeSnapshot() override;
+    void snapshotReadyforGui() override;
+    void saveSnapshot(const QDateTime &dateTime,
+                      char mode,
+                      double wavelength,
+                      double frequency,
+                      double power,
+                      int snapPerObs,
+                      int exposure,
+                      double temperature,
+                      const Snapshot &snapshotBuffer) override;
+    void coolDown() override;
+    void stop() override;
+
 signals:
     void ready(bool isReady);
-    void snapshotAvailable();
+    void snapshotAvailableForGui();
     void errorOnFileCreation(QString dirname, QString filename);
     void errorOnFileWritting(QString dirname, QString filename);
     void temperatureUpdated(double temperature);
@@ -60,15 +82,15 @@ public slots:
      * @param burst single snapshot or burst mode flag
      * @param session name used to prepend record files. No recording if empty.
      */
-    void spectralSnapshot(double wavelength,
-                          int exposure,
-                          int cooldownTime,
-                          int cooldownPwr,
-                          int stabilisationTime,
-                          bool burst,
-                          bool record,
-                          QString dataFolder,
-                          QString session);
+    void opticalSnapshot(double wavelength,
+                         int exposure,
+                         int cooldownTime,
+                         int cooldownPwr,
+                         int stabilisationTime,
+                         bool burst,
+                         bool record,
+                         QString dataFolder,
+                         QString session);
 
     /**
      * Initiate a snapshoting session for a fixed frequency and power.
@@ -106,8 +128,8 @@ public slots:
      */
     void observation(double wavelength1,
                      double wavelength2,
-                     int exposure,
                      int snapshotPerObs,
+                     int exposure,
                      int cooldownTime,
                      int cooldownPwr,
                      int stabilisationTime,
@@ -143,10 +165,6 @@ public slots:
                QString dataFolder,
                QString session);
 
-    /**
-      * Requests the stop of all the devices.
-      */
-    void stop();
 
     /**
       * Update the temperature period
@@ -164,42 +182,36 @@ public slots:
     void threadFinished();
 
 private slots:
-    void setAcousticWave();
-    void takeSnapshot();
+    void cooledDowned();
+    //void setAcousticWave();
+    void acousticBeamReady();
     void updateTemperature();
-    void postSnapshotProcess();
+    //void postSnapshotProcess();
+    void snapshotReady();
 
 
 private:
+    void setMode(BaseMode *mode);
+
     enum Mode {READY, SpectralSnap, AcousticSnap, Obs, Sweep};
     const QString _modeToCode[5] = {"XX", "S", "A", "O", "W"};
-
-    void setCommonParams(Mode mode,
-                         int exposure,
-                         int cooldownTime,
-                         int cooldownPwr,
-                         int stabilisationTime,
-                         bool burst,
-                         bool record,
-                         const QString &dataFolder,
-                         const QString &session);
-
-    void saveSnapshot(const QDateTime &dateTime,
-                      Mode mode,
-                      double wavelength,
-                      double frequency,
-                      double power,
-                      int snapPerObs,
-                      int exposure,
-                      double temperature,
-                      Snapshot &snapshot);
-
+    /*
+        void setCommonParams(Mode mode,
+                             int exposure,
+                             int cooldownTime,
+                             int cooldownPwr,
+                             int stabilisationTime,
+                             bool burst,
+                             bool record,
+                             const QString &dataFolder,
+                             const QString &session);
+    */
     QTimer *_cooldownT;
     QTimer *_stabilisationT;
     QTimer *_temperatureT;
 
 
-    double _cooldownPwr;
+//    double _cooldownPwr;
 
     const Crystal *_crystal;
     CameraCtrl *_camera;
@@ -207,66 +219,67 @@ private:
     ProbeCtrl *_probe;
 
     double _temperature;
-    double _refTemperature;
+//    double _refTemperature;
 
-    Mode _mode;
-    int _exposure;
-    bool _bursting;
+    Mode _swicthMode;
+    /*    int _exposure;
+        bool _bursting;*/
     Snapshot _snapshotBuffer;
-    QDateTime _snapTime;
+    /* QDateTime _snapTime;
     bool _record;
     QString _dataFolder;
     QString _session;
+    */
 
-    void requestAcousticWave(double frequency, double power);
+    //bool mustContinueAquisition() const;
+    //bool mustCooldown() const;
 
-    bool mustContinueAquisition() const;
-    bool mustCooldown() const;
-    void cooldown();
+    /*
+        struct WlSnapshotParams
+        {
+            double in_wavelength;
+            double frequency;
+            double power;
+        };
 
-    struct WlSnapshotParams
-    {
-        double in_wavelength;
-        double frequency;
-        double power;
-    };
+        struct AcousticSnapshotParams
+        {
+            double in_frequency;
+            double in_power;
+            double wavelength;
+        };
 
-    struct AcousticSnapshotParams
-    {
-        double in_frequency;
-        double in_power;
-        double wavelength;
-    };
+        struct ObservationParams
+        {
+            double in_wavelengths[3];
+            int in_snapshotPerObs;
+            int idx;
+            int snapshotCount;
+            double frequency[3];
+            double power[3];
+            Snapshot snapshots[3];
+        };
 
-    struct ObservationParams
-    {
-        double in_wavelengths[3];
-        int in_snapshotPerObs;
-        int idx;
-        int snapshotCount;
-        double frequency[3];
-        double power[3];
-        Snapshot snapshots[3];
-    };
+        struct SweepParams
+        {
+            double in_minWavelength;
+            double in_maxWavelength;
+            double in_wavelengthStep;
+            double wavelength;
+            double frequency;
+            double power;
+            int blackSnapshotRate;
+            int counter;
+        };
 
-    struct SweepParams
-    {
-        double in_minWavelength;
-        double in_maxWavelength;
-        double in_wavelengthStep;
-        double wavelength;
-        double frequency;
-        double power;
-        int blackSnapshotRate;
-        int counter;
-    };
-
-    union {
-        WlSnapshotParams specSnap;
-        AcousticSnapshotParams acouSnap;
-        ObservationParams obs;
-        SweepParams swp;
-    } _p; // parameters
+        union {
+            WlSnapshotParams specSnap;
+            AcousticSnapshotParams acouSnap;
+            ObservationParams obs;
+            SweepParams swp;
+        } _p; // parameters
+    */
+    BaseMode *_mode;
 };
 
 //------------------------------------------------------------------------------

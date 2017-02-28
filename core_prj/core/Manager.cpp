@@ -8,6 +8,7 @@
 #include "controllers.h"
 #include "Crystal.h"
 #include "ImageBuffer.h"
+#include "modes.h"
 
 //------------------------------------------------------------------------------
 
@@ -27,9 +28,10 @@ Manager::Manager(const Crystal *crystal,
     , _camera(new CameraCtrl(this, camera))
     , _acousticDriver(new AcousticCtrl(this, driver))
     , _probe(new ProbeCtrl(this, probe))
-    , _mode(READY)
-    , _bursting(false)
+    , _swicthMode(READY)
+      //, _bursting(false)
     , _snapshotBuffer{0}
+    , _mode(0)
 {
     _cooldownT->setSingleShot(true);
     _stabilisationT->setSingleShot(true);
@@ -38,25 +40,58 @@ Manager::Manager(const Crystal *crystal,
     _acousticDriver->setParent(this);
     _probe->setParent(this);
 
-    connect(_cooldownT, QTimer::timeout, this, setAcousticWave);
+    connect(_cooldownT, QTimer::timeout, this, cooledDowned);
     connect(_stabilisationT, QTimer::timeout, this, takeSnapshot);
     connect(_temperatureT, QTimer::timeout, this, updateTemperature);
-    connect(_camera, CameraCtrl::snapshotAvailable, this, postSnapshotProcess);
+    connect(_camera, CameraCtrl::snapshotAvailable, this, snapshotReady);
 }
 
 //------------------------------------------------------------------------------
 
-void Manager::spectralSnapshot(double wavelength,
-                               int exposure,
-                               int cooldownTime,
-                               int cooldownPwr,
-                               int stabilisationTime,
-                               bool burst,
-                               bool record,
-                               QString dataFolder,
-                               QString session)
+Manager::~Manager()
 {
+    Q_ASSERT(_swicthMode == READY);
+    setMode(0);
+}
+
+//------------------------------------------------------------------------------
+
+
+double Manager::temperature() const
+{
+    return _temperature;
+}
+
+//------------------------------------------------------------------------------
+
+void Manager::opticalSnapshot(double wavelength,
+                              int exposure,
+                              int cooldownTime,
+                              int cooldownPwr,
+                              int stabilisationTime,
+                              bool burst,
+                              bool record,
+                              QString dataFolder,
+                              QString session)
+{
+    Q_ASSERT(_swicthMode == READY);
+
     qDebug("Spectral snap: wl=%.1f nm", wavelength);
+
+    setMode(new OpticalSnapMode(*this,
+                                *_crystal,
+                                wavelength,
+                                exposure,
+                                cooldownTime,
+                                cooldownPwr,
+                                stabilisationTime,
+                                burst,
+                                record,
+                                dataFolder,
+                                session));
+
+    _mode->setAcousticWave();
+    /*
     setCommonParams(SpectralSnap, exposure, cooldownTime, cooldownPwr,
                     stabilisationTime, burst, record, dataFolder, session);
 
@@ -64,6 +99,7 @@ void Manager::spectralSnapshot(double wavelength,
     p.in_wavelength = wavelength;
 
     setAcousticWave();
+    */
 }
 
 //------------------------------------------------------------------------------
@@ -79,24 +115,41 @@ void Manager::acousticSnapshot(double frequency,
                                QString dataFolder,
                                QString session)
 {
+    Q_ASSERT(_swicthMode == READY);
+
     qDebug("Acoustic: freq=%.1f MHz, power=%.1f mW", frequency, power);
 
-    setCommonParams(AcousticSnap, exposure, cooldownTime, cooldownPwr,
-                    stabilisationTime, burst, record, dataFolder, session);
+    setMode(new AcousticSnapMode(*this,
+                                 *_crystal,
+                                 frequency,
+                                 power,
+                                 exposure,
+                                 cooldownTime,
+                                 cooldownPwr,
+                                 stabilisationTime,
+                                 burst,
+                                 record,
+                                 dataFolder,
+                                 session));
+    _mode->setAcousticWave();
+    /*
+        setCommonParams(AcousticSnap, exposure, cooldownTime, cooldownPwr,
+                        stabilisationTime, burst, record, dataFolder, session);
 
-    auto &p = _p.acouSnap;
-    p.in_frequency = frequency;
-    p.in_power = power;
+        auto &p = _p.acouSnap;
+        p.in_frequency = frequency;
+        p.in_power = power;
 
-    setAcousticWave();
+        setAcousticWave();
+        */
 }
 
 //------------------------------------------------------------------------------
 
 void Manager::observation(double wavelength1,
                           double wavelength2,
-                          int exposure,
                           int snapshotPerObs,
+                          int exposure,
                           int cooldownTime,
                           int cooldownPwr,
                           int stabilisationTime,
@@ -105,21 +158,40 @@ void Manager::observation(double wavelength1,
                           QString dataFolder,
                           QString session)
 {
+    Q_ASSERT(_swicthMode == READY);
+
     qDebug("Observation: wl1=%.1f nm, wl2=%.1f nm",
            wavelength1, wavelength2);
 
-    setCommonParams(Obs, exposure, cooldownTime, cooldownPwr,
-                    stabilisationTime, burst, record, dataFolder, session);
 
-    auto &p = _p.obs;
-    p.in_wavelengths[0] = 0; // Black snapshot
-    p.in_wavelengths[1] = wavelength1;
-    p.in_wavelengths[2] = wavelength2;
-    p.idx = 0;
-    p.snapshotCount = 0;
-    p.in_snapshotPerObs = snapshotPerObs;
+    setMode(new ObservationMode(*this,
+                                *_crystal,
+                                wavelength1,
+                                wavelength2,
+                                snapshotPerObs,
+                                exposure,
+                                cooldownTime,
+                                cooldownPwr,
+                                stabilisationTime,
+                                burst,
+                                record,
+                                dataFolder,
+                                session));
+    _mode->setAcousticWave();
+    /*
+        setCommonParams(Obs, exposure, cooldownTime, cooldownPwr,
+                        stabilisationTime, burst, record, dataFolder, session);
 
-    setAcousticWave();
+        auto &p = _p.obs;
+        p.in_wavelengths[0] = 0; // Black snapshot
+        p.in_wavelengths[1] = wavelength1;
+        p.in_wavelengths[2] = wavelength2;
+        p.idx = 0;
+        p.snapshotCount = 0;
+        p.in_snapshotPerObs = snapshotPerObs;
+
+        setAcousticWave();
+        */
 }
 
 
@@ -138,9 +210,28 @@ void Manager::sweep(double wavelength1,
                     QString dataFolder,
                     QString session)
 {
+    Q_ASSERT(_swicthMode == READY);
+
     qDebug("Sweep: wl1=%.1f nm, wl2=%.1f nm, step=%.1f nm",
            wavelength1, wavelength2, wavelengthStep);
 
+    setMode(new SweepMode(*this,
+                          *_crystal,
+                          wavelength1,
+                          wavelength2,
+                          wavelengthStep,
+                          blackSnapshotRate,
+                          exposure,
+                          cooldownTime,
+                          cooldownPwr,
+                          stabilisationTime,
+                          burst,
+                          record,
+                          dataFolder,
+                          session));
+    _mode->setAcousticWave();
+
+    /*
     setCommonParams(Sweep, exposure, cooldownTime, cooldownPwr,
                     stabilisationTime, burst, record, dataFolder, session);
 
@@ -153,6 +244,7 @@ void Manager::sweep(double wavelength1,
     p.counter = 0;
 
     setAcousticWave();
+    */
 }
 
 //------------------------------------------------------------------------------
@@ -163,7 +255,7 @@ void Manager::stop()
     _stabilisationT->stop();
     _acousticDriver->set(0.0, 0.0);
     _camera->stop();
-    _mode = READY;
+    _swicthMode = READY;
 
     emit ready(true);
 }
@@ -199,12 +291,22 @@ void Manager::threadFinished()
 
 //------------------------------------------------------------------------------
 
-void Manager::setAcousticWave()
+void Manager::cooledDowned()
 {
-    if (_mode == READY)
+    if (_swicthMode == READY)
         return;
 
-    switch(_mode)
+    _mode->setAcousticWave();
+}
+
+//------------------------------------------------------------------------------
+/*
+void Manager::setAcousticWave()
+{
+    if (_swicthMode == READY)
+        return;
+
+    switch(_swicthMode)
     {
     case READY:
         Q_UNREACHABLE();
@@ -219,7 +321,7 @@ void Manager::setAcousticWave()
                                  _refTemperature,
                                  p.frequency,
                                  p.power);
-        requestAcousticWave(p.frequency, p.power);
+        setBeamAndTakeSnapshot(p.frequency, p.power);
         break;
     }
 
@@ -230,7 +332,7 @@ void Manager::setAcousticWave()
         _refTemperature = _temperature;
         p.wavelength = _crystal->wavelength(p.in_frequency,
                                             _refTemperature);
-        requestAcousticWave(p.in_frequency, p.in_power);
+        setBeamAndTakeSnapshot(p.in_frequency, p.in_power);
         break;
     }
 
@@ -263,10 +365,10 @@ void Manager::setAcousticWave()
 
         if (p.snapshotCount < p.in_snapshotPerObs)
         {
-            requestAcousticWave(0.0, 0.0);
+            setBeamAndTakeSnapshot(0.0, 0.0);
             // The first 'p.in_snapshotPerObs' are black snapshots
         } else {
-            requestAcousticWave(p.frequency[p.idx], p.power[p.idx]);
+            setBeamAndTakeSnapshot(p.frequency[p.idx], p.power[p.idx]);
         }
 
         break;
@@ -278,54 +380,71 @@ void Manager::setAcousticWave()
 
         if (0 == p.counter)
         {
-            requestAcousticWave(0.0, 0.0); // Black snapshot
+            setBeamAndTakeSnapshot(0.0, 0.0); // Black snapshot
         } else {
             _refTemperature = _temperature;
             _crystal->computeFreqPow(p.wavelength,
                                      _refTemperature,
                                      p.frequency,
                                      p.power);
-            requestAcousticWave(p.frequency, p.power);
+            setBeamAndTakeSnapshot(p.frequency, p.power);
         }
         break;
     }
     }
 }
 
+*/
+//------------------------------------------------------------------------------
+
+void Manager::acousticBeamReady()
+{
+    if (_swicthMode == READY)
+        return;
+
+    _mode->AcousticBeamReady();
+}
 
 //------------------------------------------------------------------------------
 
-
 void Manager::takeSnapshot()
 {
-    if (_mode == READY)
+    if (_swicthMode == READY)
         return;
-
-    if (_mode != Obs || _p.obs.snapshotCount == 0)
-        _snapTime = QDateTime::currentDateTime();
 
     _camera->takeSnapshot();
 }
 
 //------------------------------------------------------------------------------
 
-
-void Manager::updateTemperature()
+void Manager::snapshotReady()
 {
-    _temperature = _probe->getTemperature();
-    emit temperatureUpdated(_temperature);
+    if (_swicthMode==READY)
+        return;
+
+    _camera->getSnapshot(_snapshotBuffer);
+    _mode->processSnapshot(_snapshotBuffer);
+    _mode->proceed();
 }
 
 //------------------------------------------------------------------------------
 
+void Manager::snapshotReadyforGui()
+{
+    emit snapshotAvailableForGui();
+}
+
+//------------------------------------------------------------------------------
+
+/*
 void Manager::postSnapshotProcess()
 {
-    if (_mode==READY)
+    if (_swicthMode==READY)
         return;
 
     _camera->getSnapshot(_snapshotBuffer);
 
-    switch(_mode)
+    switch(_swicthMode)
     {
     case READY:
         Q_UNREACHABLE();
@@ -336,7 +455,7 @@ void Manager::postSnapshotProcess()
         auto &p = _p.specSnap;
 
         gImageBuffer.set(_snapshotBuffer);
-        emit snapshotAvailable();
+        emit snapshotAvailableForGui();
 
         saveSnapshot(_snapTime,
                      SpectralSnap,
@@ -355,7 +474,7 @@ void Manager::postSnapshotProcess()
         auto &p = _p.acouSnap;
 
         gImageBuffer.set(_snapshotBuffer);
-        emit snapshotAvailable();
+        emit snapshotAvailableForGui();
 
         saveSnapshot(_snapTime,
                      AcousticSnap,
@@ -414,7 +533,7 @@ void Manager::postSnapshotProcess()
                                            +p.snapshots[2][i][j])/2;
 
             gImageBuffer.set(_snapshotBuffer);
-            emit snapshotAvailable();
+            emit snapshotAvailableForGui();
         }
         break;
     }
@@ -454,7 +573,7 @@ void Manager::postSnapshotProcess()
         }
 
         gImageBuffer.set(_snapshotBuffer);
-        emit snapshotAvailable();
+        emit snapshotAvailableForGui();
 
         ++p.counter;
         if (p.counter == p.blackSnapshotRate+1)
@@ -476,12 +595,21 @@ void Manager::postSnapshotProcess()
         stop();
     }
 }
+*/
 
 //------------------------------------------------------------------------------
 
+void Manager::setMode(BaseMode *mode)
+{
+    if (_mode) delete _mode;
+    _mode = mode;
+}
+
+//------------------------------------------------------------------------------
+/*
 bool Manager::mustContinueAquisition() const
 {
-    switch(_mode)
+    switch(_swicthMode)
     {
     case READY:
         return false;
@@ -498,12 +626,12 @@ bool Manager::mustContinueAquisition() const
     }
     Q_UNREACHABLE();
 }
-
+*/
 //------------------------------------------------------------------------------
-
+/*
 bool Manager::mustCooldown() const
 {
-    switch(_mode)
+    switch(_swicthMode)
     {
     case READY:
         Q_UNREACHABLE();
@@ -518,10 +646,10 @@ bool Manager::mustCooldown() const
     }
     Q_UNREACHABLE();
 }
-
+*/
 //------------------------------------------------------------------------------
 
-void Manager::cooldown()
+void Manager::coolDown()
 {
     qDebug("Cooling down: %dms", _cooldownT->interval());
     _acousticDriver->set(0.0, _cooldownPwr);
@@ -531,14 +659,14 @@ void Manager::cooldown()
 //------------------------------------------------------------------------------
 
 void Manager::saveSnapshot(const QDateTime& dateTime,
-                           Mode mode,
+                           char mode,
                            double wavelength,
                            double frequency,
                            double power,
                            int snapPerObs,
                            int exposure,
                            double temperature,
-                           Snapshot& snapshot)
+                           const Snapshot &snapshotBuffer)
 {
     if (!_record) return;
 
@@ -551,7 +679,7 @@ void Manager::saveSnapshot(const QDateTime& dateTime,
     auto _filename = QString("%1-%2-%3-%4nm-%5Ghz-%6mW-%7ms-%8degC.dat")
                      . arg(dateTime.toString("yyMMdd-HHmmss.zzz"))
                      . arg(_session.isEmpty() ? "_" : _session)
-                     . arg(_modeToCode[mode])
+                     . arg(mode)
                      . arg(wavelength, 1, 'f', 1, zero)
                      . arg(frequency, 1, 'f', 3, zero)
                      . arg(power, 1, 'f', 0, zero)
@@ -570,7 +698,7 @@ void Manager::saveSnapshot(const QDateTime& dateTime,
         return;
     }
 
-    auto buf = reinterpret_cast<const char*>(snapshot);
+    auto buf = reinterpret_cast<const char*>(snapshotBuffer);
     const qint64 bufSize = snapshotSize*snapshotSize*2;
 
     const qint64 onDisk = file.write(buf, bufSize);
@@ -589,7 +717,15 @@ void Manager::saveSnapshot(const QDateTime& dateTime,
 
 //------------------------------------------------------------------------------
 
-void Manager::requestAcousticWave(double frequency, double power)
+void Manager::updateTemperature()
+{
+    _temperature = _probe->getTemperature();
+    emit temperatureUpdated(_temperature);
+}
+
+//------------------------------------------------------------------------------
+
+void Manager::setAcousticBeam(double frequency, double power)
 {
     bool waveChanged = _acousticDriver->set(frequency, power);
 
@@ -603,7 +739,7 @@ void Manager::requestAcousticWave(double frequency, double power)
 }
 
 //------------------------------------------------------------------------------
-
+/*
 void Manager::setCommonParams(Mode mode,
                               int exposure,
                               int cooldownTime,
@@ -621,7 +757,7 @@ void Manager::setCommonParams(Mode mode,
            exposure, cooldownTime, cooldownPwr, stabilisationTime,
            burst ? "burst" : "singleshot", s.data());
 
-    _mode = mode;
+    _swicthMode = mode;
     _exposure=exposure;
     _camera->setExposure(exposure);
     _cooldownT->setInterval(cooldownTime);
@@ -632,6 +768,7 @@ void Manager::setCommonParams(Mode mode,
     _dataFolder = dataFolder;
     _session = session;
 }
+*/
 
 //------------------------------------------------------------------------------
 
