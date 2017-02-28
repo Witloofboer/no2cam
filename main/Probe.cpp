@@ -12,10 +12,9 @@ ViStatus Probe::find_instruments(ViString findPattern, ViChar **resource)
     err = TLTSP_getDeviceResourceString(VI_NULL, 0, rscStr);
     *resource = rscStr;
     return (err);
-
 }
 
-
+//--------------------------------------------------------------------------------------------//
 
 bool Probe::init()
 {
@@ -25,7 +24,6 @@ bool Probe::init()
             //qDebug("Error on finding the temperature Probe");
             return false;
         }
-
 
         err = TLTSP_init(rscPtr, VI_ON, VI_ON, &instrHdl);
         if (err != VI_SUCCESS)
@@ -38,18 +36,26 @@ bool Probe::init()
         return true;
         }
 
+//--------------------------------------------------------------------------------------------//
+
 void Probe::uninit()
 {
     TLTSP_close(instrHdl);
 }
 
-
+//--------------------------------------------------------------------------------------------//
 
 double Probe::getTemperature() {
-    ViReal64 temperature_value;
+   ViReal64 temperature_value;
+   err = TLTSP_measTemperature (instrHdl, TLTSP_MEAS_TEMP2, &temperature_value);
+   return temperature_value;
 
-    err = TLTSP_measTemperature (instrHdl, TLTSP_MEAS_TEMP2, &temperature_value);
-    return temperature_value;
+}
+
+double Probe::getHumidity() {
+    ViReal64 humidity_value;
+    err = TLTSP_measHumidity(instrHdl, &humidity_value);
+    return humidity_value;
 }
 
 

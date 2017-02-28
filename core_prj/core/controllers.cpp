@@ -1,6 +1,5 @@
 #include "controllers.h"
 #include "drivers.h"
-
 #include <QDir> // Q_INIT_RESOURCE
 
 //------------------------------------------------------------------------------
@@ -109,7 +108,6 @@ void CameraCtrl::stop()
 void CameraCtrl::getSnapshot(Snapshot &buffer)
 {
     Q_ASSERT(_isAvailable);
-
     qDebug("Camera: getting snapshot");
     _camera->getSnapshot(buffer);
 }

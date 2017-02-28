@@ -1,7 +1,6 @@
 #include "Camera.h"
 #include <QMessageBox>
 #include <QString>
-
 #include "dcamprop.h"
 
 //------------------------------------------------------------------------------
@@ -35,7 +34,6 @@ bool HamamatsuCamera::init()
         return false;
     }
 
-
     // once the software is initilized try to open the connected Camera
     qDebug("NR of Counted devices: %d", static_cast<int>(paraminit.iDeviceCount));
 
@@ -44,6 +42,7 @@ bool HamamatsuCamera::init()
     paramopen.size	= sizeof(paramopen);
     paramopen.index	= 0;
     _dcamErr = dcamdev_open( &paramopen );
+    qInfo("debug: %x",_dcamErr);
 
     if( failed( _dcamErr ) )
     {
@@ -53,49 +52,43 @@ bool HamamatsuCamera::init()
     }
 
     // once the camera could be opened succesfully, couple the device ID to the device handler
-    qInfo("INIT DCAM SUCCESFULLY!:");
+    qDebug("INIT DCAM SUCCESFULLY!:");
     _hdcam = paramopen.hdcam;
 
+    // set the frame variable and allocate 1 frame to the camera
     memset( &frame, 0, sizeof(frame) );
     frame.size	= sizeof(frame);
     frame.iFrame= -1;		// latest frame
 
-    double value;
-    // set binning to 4x4
-    //_dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_BINNING, DCAMPROP_BINNING__4);
-    _dcamErr = dcamprop_getvalue(_hdcam, DCAM_IDPROP_HIGHDYNAMICRANGE_MODE,&value);
-    qDebug("temp = %f",value);
+    _dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_BINNING, DCAMPROP_BINNING__2);
+    qInfo("debug: %x",_dcamErr);
+
+    //state = dcam_allocframe(_hdcam, 1);
+    _dcamErr = dcambuf_alloc(_hdcam,1);
+    qInfo("debug: %x",_dcamErr);
+
+    // allow the software to send the trigger pulse to the camera
     _dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_TRIGGERSOURCE, DCAMPROP_TRIGGERSOURCE__SOFTWARE );
+    qInfo("debug: %x",_dcamErr);
 
-    bool state;
-
-
-    state = dcam_precapture(_hdcam, DCAM_CAPTUREMODE_SNAP);
-    state = dcam_allocframe(_hdcam, 1);
+    // set the timer as fast as possible
+    _timer->setInterval(0);
 
 
 
+    //start the capture mode of the camera (exposure will begin once camera receives trigger from software)
+     _dcamErr = dcamcap_start( _hdcam, DCAMCAP_START_SEQUENCE );
+    qInfo("debug: %x",_dcamErr);
 
     return true;
 }
 
 void HamamatsuCamera::checkFrameReady()
 {
-    int32 Status;
-   _dcamErr = dcamcap_status(_hdcam,&Status);
-
-    if(Status == DCAMCAP_STATUS_READY)
-    {
-        _timer->stop();
-        _dcamErr = dcambuf_lockframe(_hdcam, &frame );
-        emit snapshotAvailable();
-    }
-    else
-    {
-        _timer->setInterval(1);
-        _timer->start();
-    }
+    _dcamErr = dcambuf_lockframe(_hdcam, &frame);
+    emit snapshotAvailable();
 }
+
 //------------------------------------------------------------------------------
 
 void HamamatsuCamera::uninit()
@@ -109,7 +102,7 @@ void HamamatsuCamera::uninit()
 
 void HamamatsuCamera::setExposure(int exposure)
 {
-    qInfo("<exposure time: %d ms>", exposure);
+    //qInfo("<exposure time: %d ms>", exposure);
     _dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_EXPOSURETIME, ((double)exposure)/1000 );
     _exposureTime = exposure;
 }
@@ -119,10 +112,10 @@ void HamamatsuCamera::setExposure(int exposure)
 void HamamatsuCamera::takeSnapshot()
 {
     qInfo("<snapshotting>");
-    state = dcam_capture(_hdcam);
     state = dcam_firetrigger(_hdcam);
-
-    _timer->setInterval(_exposureTime+35);
+    time->restart();
+    state = dcam_wait(_hdcam,&dw,1000,NULL);
+    qInfo("time to take snapshot (ms): %d",time->elapsed());
     _timer->start();
 }
 
@@ -137,7 +130,7 @@ void HamamatsuCamera::stop()
 
 void HamamatsuCamera::getSnapshot(core::Snapshot &buffer)
 {
-   memcpy(buffer, frame.buf, sizeof buffer);
+    memcpy(buffer, frame.buf, sizeof buffer);
 }
 
 //------------------------------------------------------------------------------

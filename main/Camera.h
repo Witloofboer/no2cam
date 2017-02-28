@@ -5,7 +5,7 @@
 #include "windows.h"
 #include "dcamapi.h"
 #include "qtimer.h"
-
+#include "QTime"
 
 class QTimer;
 
@@ -34,6 +34,7 @@ private slots:
     void checkFrameReady();
 
 private:
+    QTime *time;
     DCAMWAIT_OPEN	waitopen;
     DCAM_FRAME	frame;
     DCAMWAIT_START	paramwait;
@@ -42,6 +43,11 @@ private:
     QTimer *_timer;
     int _exposureTime;
     bool state;
+    _DWORD	dw = DCAMCAP_EVENT_FRAMEREADY;
+    bool first_run = true;
+
+
+
 };
 
 

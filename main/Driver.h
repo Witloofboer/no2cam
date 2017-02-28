@@ -2,6 +2,7 @@
 #define DRIVER_H
 #include "core/drivers.h"
 
+
 class QSerialPort;
 
 class Driver : public core::AcousticDriver
@@ -23,6 +24,7 @@ public slots:
 
 private:
     QSerialPort *_serial;
+
 };
 
 #endif // DRIVER_H

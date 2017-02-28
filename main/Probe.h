@@ -11,13 +11,16 @@ class Probe : public core::ProbeDriver
 
 public:
     Probe();
+
     double getTemperature() override;
+    double getHumidity();
 
     bool init();
     void uninit();
 
-    ViStatus find_instruments(ViString findPattern, ViChar **resource);
+private:
 
+    ViStatus    find_instruments(ViString findPattern, ViChar **resource);
     ViStatus    err;
     ViChar      *rscPtr;
     ViSession   instrHdl = VI_NULL;
