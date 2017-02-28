@@ -128,6 +128,7 @@ void Manager::observation(double wavelength1,
 void Manager::sweep(double wavelength1,
                     double wavelength2,
                     double wavelengthStep,
+                    int blackSnapshotRate,
                     int exposure,
                     int cooldownTime,
                     int cooldownPwr,
@@ -148,6 +149,8 @@ void Manager::sweep(double wavelength1,
     p.in_maxWavelength = wavelength2+1e-5; // 1e-5 to account for rounding error
     p.in_wavelengthStep = wavelengthStep;
     p.wavelength = wavelength1;
+    p.blackSnapshotRate = blackSnapshotRate;
+    p.counter = 0;
 
     setAcousticWave();
 }
@@ -261,6 +264,7 @@ void Manager::setAcousticWave()
         if (p.snapshotCount < p.in_snapshotPerObs)
         {
             requestAcousticWave(0.0, 0.0);
+            // The first 'p.in_snapshotPerObs' are black snapshots
         } else {
             requestAcousticWave(p.frequency[p.idx], p.power[p.idx]);
         }
@@ -272,18 +276,25 @@ void Manager::setAcousticWave()
     {
         auto &p = _p.swp;
 
-        _refTemperature = _temperature;
-        _crystal->computeFreqPow(p.wavelength,
-                                 _refTemperature,
-                                 p.frequency,
-                                 p.power);
-        requestAcousticWave(p.frequency, p.power);
+        if (0 == p.counter)
+        {
+            requestAcousticWave(0.0, 0.0); // Black snapshot
+        } else {
+            _refTemperature = _temperature;
+            _crystal->computeFreqPow(p.wavelength,
+                                     _refTemperature,
+                                     p.frequency,
+                                     p.power);
+            requestAcousticWave(p.frequency, p.power);
+        }
         break;
     }
     }
 }
 
+
 //------------------------------------------------------------------------------
+
 
 void Manager::takeSnapshot()
 {
@@ -412,24 +423,43 @@ void Manager::postSnapshotProcess()
     {
         auto &p = _p.swp;
 
-        saveSnapshot(_snapTime,
-                     Sweep,
-                     p.wavelength,
-                     p.frequency,
-                     p.power,
-                     1,
-                     _exposure,
-                     _refTemperature,
-                     _snapshotBuffer);
+        if (0 == p.counter)
+        {
+            saveSnapshot(_snapTime,
+                         Sweep,
+                         0.0,
+                         0.0,
+                         0.0,
+                         1,
+                         _exposure,
+                         _refTemperature,
+                         _snapshotBuffer);
+        } else {
+            saveSnapshot(_snapTime,
+                         Sweep,
+                         p.wavelength,
+                         p.frequency,
+                         p.power,
+                         1,
+                         _exposure,
+                         _refTemperature,
+                         _snapshotBuffer);
+
+            p.wavelength += p.in_wavelengthStep;
+            if (_bursting && p.in_maxWavelength < p.wavelength)
+            {
+                p.wavelength = p.in_minWavelength;
+                p.counter = -1; // Will be set to 0 by the ++ operator below.
+            }
+        }
 
         gImageBuffer.set(_snapshotBuffer);
         emit snapshotAvailable();
 
-        p.wavelength += p.in_wavelengthStep;
-        if (_bursting && p.in_maxWavelength < p.wavelength)
-        {
-            p.wavelength = p.in_minWavelength;
-        }
+        ++p.counter;
+        if (p.counter == p.blackSnapshotRate+1)
+            p.counter = 0;
+
         break;
     }
     }
@@ -563,7 +593,7 @@ void Manager::requestAcousticWave(double frequency, double power)
 {
     bool waveChanged = _acousticDriver->set(frequency, power);
 
-    if (power != 0.0 && waveChanged)
+    if (waveChanged)
     {
         qDebug("Acoustic wave stabilisation");
         _stabilisationT->start();

@@ -133,6 +133,7 @@ public slots:
     void sweep(double wavelength1,
                double wavelength2,
                double wavelengthStep,
+               int    blackSnapshotRate,
                int exposure,
                int cooldownTime,
                int cooldownPwr,
@@ -256,6 +257,8 @@ private:
         double wavelength;
         double frequency;
         double power;
+        int blackSnapshotRate;
+        int counter;
     };
 
     union {
