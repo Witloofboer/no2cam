@@ -130,7 +130,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
 
     _infoT->setSingleShot(true);
     _infoT->setInterval(4000);
-    connect(_infoT, QTimer::timeout, this, clearInfoMsg);
+    connect(_infoT, QTimer::timeout, this, onInfoTimer);
 
     statusBar()->hide();
 
@@ -147,13 +147,13 @@ MainWindow::MainWindow(core::Crystal *crystal,
     // Actions
     // -------------------------------------------------------------------------
 
-    connect(_selectFolderActn, QAction::triggered, this, selectFolder);
+    connect(_selectFolderActn, QAction::triggered, this, onSelectFolder);
 
     _configParamActn->setIcon(QIcon(":/icons/C-gold-24.png"));
     _configParamActn->setIconVisibleInMenu(false);
     _configParamActn->setShortcut(QKeySequence("Alt+C"));
     _configParamActn->setStatusTip(tr("Switch to configuration mode"));
-    connect(_configParamActn, QAction::triggered, _configDlg, ConfigurationDlg::display);
+    connect(_configParamActn, QAction::triggered, _configDlg, ConfigurationDlg::onDisplay);
 
     auto exitAction = new QAction("E&xit", this);
     exitAction->setShortcut(QKeySequence("Alt+F4"));
@@ -170,27 +170,27 @@ MainWindow::MainWindow(core::Crystal *crystal,
     _snapshotModeActn->setCheckable(true);
     _snapshotModeActn->setShortcut(QKeySequence("Alt+S"));
     _snapshotModeActn->setStatusTip(tr("Switch to snapshot mode"));
-    connect(_snapshotModeActn, QAction::triggered, this, switchMode);
+    connect(_snapshotModeActn, QAction::triggered, this, onSwitchMode);
 
     _observationModeActn->setIcon(QIcon(":/icons/O-blue-24.png"));
     _observationModeActn->setIconVisibleInMenu(false);
     _observationModeActn->setCheckable(true);
     _observationModeActn->setShortcut(QKeySequence("Alt+O"));
     _observationModeActn->setStatusTip(tr("Switch to observation mode"));
-    connect(_observationModeActn, QAction::triggered, this, switchMode);
+    connect(_observationModeActn, QAction::triggered, this, onSwitchMode);
 
     _sweepModeActn->setIcon(QIcon(":/icons/W-blue-24.png"));
     _sweepModeActn->setIconVisibleInMenu(false);
     _sweepModeActn->setCheckable(true);
     _sweepModeActn->setShortcut(QKeySequence("Alt+W"));
     _sweepModeActn->setStatusTip(tr("Switch to wavelength sweeping mode"));
-    connect(_sweepModeActn, QAction::triggered, this, switchMode);
+    connect(_sweepModeActn, QAction::triggered, this, onSwitchMode);
 
     auto releaseNotesAction = new QAction("&Release Notes", this);
-    connect(releaseNotesAction, QAction::triggered, this, displayReleaseNotes);
+    connect(releaseNotesAction, QAction::triggered, this, onDisplayReleaseNotes);
 
     auto aboutAction = new QAction("&About", this);
-    connect(aboutAction, QAction::triggered, this, about);
+    connect(aboutAction, QAction::triggered, this, onAbout);
 
     // -------------------------------------------------------------------------
     // Menus
@@ -233,38 +233,38 @@ MainWindow::MainWindow(core::Crystal *crystal,
     connect(_configDlg, ConfigurationDlg::parametersUpdated,
             this, onParametersUpdated);
     if (!_configDlg->isValid())
-        QTimer::singleShot(0, this, displayConfigurationDlg); //TODO emit instead of timer?
+        QTimer::singleShot(0, this, onDisplayConfigurationDlg); //TODO emit instead of timer?
 
-    connect(coreInstance, core::Manager::ready, this, updateGuiState);
-    connect(coreInstance, core::Manager::snapshotAvailableForGui, this, updateSnapshot);
+    connect(coreInstance, core::Manager::updateApplicationReadiness, this, onUpdateApplicationReadiness);
+    connect(coreInstance, core::Manager::displaySnapshot, this, onDisplaySnapshot);
 
     connect(_snapshotPane, BaseParameterPane::parametersChanged, this, refreshBtns);
     connect(_observationPane, BaseParameterPane::parametersChanged, this, refreshBtns);
     connect(_sweepPane, BaseParameterPane::parametersChanged, this, refreshBtns);
 
     connect(_snapshotPane, SnapshotParameterPane::opticalSnapshot,
-            coreInstance, core::Manager::opticalSnapshot);
+            coreInstance, core::Manager::onOpticalSnapshot);
     connect(_snapshotPane, SnapshotParameterPane::acousticSnapshot,
-            coreInstance, core::Manager::acousticSnapshot);
+            coreInstance, core::Manager::onAcousticSnapshot);
     connect(_observationPane, ObservationParameterPane::observationRequested,
-            coreInstance, core::Manager::observation);
+            coreInstance, core::Manager::onObservation);
     connect(_sweepPane, SweepParameterPane::sweepRequested,
-            coreInstance, core::Manager::sweep);
+            coreInstance, core::Manager::onSweep);
 
-    connect(this, stopRequested, coreInstance, core::Manager::stop);
-    connect(this, shutdownRequested, coreInstance, core::Manager::shutdown);
-    connect(this, temperaturePeriodUpdated, coreInstance, core::Manager::updateTemperaturePeriod);
-    connect(_cameraBtnBox, CameraBtnBox::started, this, start);
-    connect(_cameraBtnBox, CameraBtnBox::stopped, this, stopRequested);
+    connect(this, onStop, coreInstance, core::Manager::onStop);
+    connect(this, shutdownRequested, coreInstance, core::Manager::onShutdown);
+    connect(this, temperaturePeriodUpdated, coreInstance, core::Manager::onTemperaturePeriodUpdated);
+    connect(_cameraBtnBox, CameraBtnBox::started, this, onStart);
+    connect(_cameraBtnBox, CameraBtnBox::stopped, this, onStop);
 
-    connect(coreInstance, core::Manager::errorOnFileCreation, this, displayErrorOnFileCreation);
-    connect(coreInstance, core::Manager::errorOnFileWritting, this, displayErrorOnFileWritting);
+    connect(coreInstance, core::Manager::fileCreationError, this, onFileCreationError);
+    connect(coreInstance, core::Manager::fileWritingError, this, onFileWritingError);
 
-    connect(coreInstance, core::Manager::temperatureUpdated,
-            this, onTemperatureUpdated);
+    connect(coreInstance, core::Manager::updateTemperature,
+            this, onUpdateTemperature);
 
-    connect(coreInstance, core::Manager::informationMsg,
-            this, onInformationMessage);
+    connect(coreInstance, core::Manager::displayInformation,
+            this, onDisplayInformation);
     refreshBtns();
     restore();
 
@@ -273,7 +273,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
 
 //------------------------------------------------------------------------------
 
-void MainWindow::start(bool burst, bool record)
+void MainWindow::onStart(bool burst, bool record)
 {
     if (record)
     {
@@ -291,12 +291,12 @@ void MainWindow::start(bool burst, bool record)
                            "creation before re-attempting the recording.</p>")
                        ).arg(_dataFolder)
               , QMessageBox::Ok);
-            updateGuiState(true);
+            onUpdateApplicationReadiness(true);
             return;
         }
     }
 
-    updateGuiState(false);
+    onUpdateApplicationReadiness(false);
     currentPane()->start(burst,
                          record,
                          _configDlg->stabilisingTime(),
@@ -306,7 +306,7 @@ void MainWindow::start(bool burst, bool record)
 
 //------------------------------------------------------------------------------
 
-void MainWindow::updateGuiState(bool isAppReady)
+void MainWindow::onUpdateApplicationReadiness(bool isAppReady)
 {
     _snapshotModeActn->setEnabled(isAppReady);
     _observationModeActn->setEnabled(isAppReady);
@@ -321,7 +321,7 @@ void MainWindow::updateGuiState(bool isAppReady)
 
 //------------------------------------------------------------------------------
 
-void MainWindow::updateSnapshot()
+void MainWindow::onDisplaySnapshot()
 {
     _snapshot->update();
     _histogram->update(_snapshot->histogramData());
@@ -329,7 +329,7 @@ void MainWindow::updateSnapshot()
 
 //------------------------------------------------------------------------------
 
-void MainWindow::onInformationMessage(QString msg)
+void MainWindow::onDisplayInformation(QString msg)
 {
     _infoWdgt->setText(msg);
     _infoT->start();
@@ -337,14 +337,14 @@ void MainWindow::onInformationMessage(QString msg)
 
 //------------------------------------------------------------------------------
 
-void MainWindow::clearInfoMsg()
+void MainWindow::onInfoTimer()
 {
     _infoWdgt->setText("");
 }
 
 //------------------------------------------------------------------------------
 
-void MainWindow::displayConfigurationDlg()
+void MainWindow::onDisplayConfigurationDlg()
 {
     QMessageBox::warning
     ( this
@@ -353,7 +353,7 @@ void MainWindow::displayConfigurationDlg()
            "<p>No valid configuration was found from a previous usage.</p>"
            "<p>Therefore, you need to provide the parameters to use the application.</p>")
       , QMessageBox::Ok);
-    _configDlg->display(true);
+    _configDlg->onDisplay(true);
 }
 
 //------------------------------------------------------------------------------
@@ -366,7 +366,7 @@ void MainWindow::onParametersUpdated()
 
 //------------------------------------------------------------------------------
 
-void MainWindow::onTemperatureUpdated(double temperature)
+void MainWindow::onUpdateTemperature(double temperature)
 {
     _snapshotPane->updateTemperature(temperature);
     _temperatureWdgt->setText(QString("%1").arg(temperature, 5, 'f', 2));
@@ -374,8 +374,8 @@ void MainWindow::onTemperatureUpdated(double temperature)
 
 //------------------------------------------------------------------------------
 
-void MainWindow::displayErrorOnFileCreation(QString datafolder,
-        QString filename)
+void MainWindow::onFileCreationError(QString datafolder,
+                                     QString filename)
 {
     QMessageBox::critical
     ( this
@@ -389,8 +389,8 @@ void MainWindow::displayErrorOnFileCreation(QString datafolder,
 
 //------------------------------------------------------------------------------
 
-void MainWindow::displayErrorOnFileWritting(QString datafolder,
-        QString filename)
+void MainWindow::onFileWritingError(QString datafolder,
+                                    QString filename)
 {
     QMessageBox::critical
     ( this
@@ -425,7 +425,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 //------------------------------------------------------------------------------
 
-void MainWindow::switchMode()
+void MainWindow::onSwitchMode()
 {
     if (_snapshotModeActn->isChecked())
     {
@@ -458,7 +458,7 @@ void MainWindow::refreshBtns()
 //------------------------------------------------------------------------------
 
 
-void MainWindow::selectFolder()
+void MainWindow::onSelectFolder()
 {
     _dataFolder = QFileDialog::getExistingDirectory
                   (this,
@@ -471,14 +471,14 @@ void MainWindow::selectFolder()
 
 //------------------------------------------------------------------------------
 
-void MainWindow::configure()
+void MainWindow::onConfigure()
 {
     _configDlg->exec();
 }
 
 //------------------------------------------------------------------------------
 
-void MainWindow::about()
+void MainWindow::onAbout()
 {
     QMessageBox::about
     ( this
@@ -500,7 +500,7 @@ void MainWindow::about()
 
 //------------------------------------------------------------------------------
 
-void MainWindow::displayReleaseNotes()
+void MainWindow::onDisplayReleaseNotes()
 {
     QMessageBox::information
     ( this

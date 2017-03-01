@@ -35,12 +35,18 @@ bool BaseMode::mustContinueAquisition() const
     return false;
 }
 
-
 //------------------------------------------------------------------------------
 
 bool BaseMode::canCooldown() const
 {
     return true;
+}
+
+//------------------------------------------------------------------------------
+
+void BaseMode::start()
+{
+    setAcousticWave();
 }
 
 //------------------------------------------------------------------------------
@@ -268,8 +274,16 @@ void SweepMode::setAcousticWave()
 
     if (0 == _counter)
     {
+        qDebug("Snapshot: black");
         _manager.setAcousticBeam(0.0, 0.0); // Black snapshot
     } else {
+
+        if (_maxWavelength < _wavelength)
+        {
+            _wavelength = _minWavelength;
+        }
+
+        qDebug("Snapshot: %.3f nm", _wavelength);
         _crystal.computeFreqPow(_wavelength,
                                 _refTemperature,
                                 _frequency,
@@ -305,11 +319,6 @@ void SweepMode::processSnapshot(const Snapshot &snapshotBuffer)
                               snapshotBuffer);
 
         _wavelength += _wavelengthStep;
-        if (_maxWavelength < _wavelength)
-        {
-            _wavelength = _minWavelength;
-            _counter = -1; // Will be set to 0 by the ++ operator below.
-        }
     }
 
     ++_counter;

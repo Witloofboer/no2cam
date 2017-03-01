@@ -37,7 +37,7 @@ void init(const QString& subversion,
     _mainWindow->show();
 
     QObject::connect(_coreThr, QThread::finished,
-                     _coreLayer, core::Manager::threadFinished);
+                     _coreLayer, core::Manager::onThreadFinished);
 }
 
 //------------------------------------------------------------------------------

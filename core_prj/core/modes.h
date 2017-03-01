@@ -37,7 +37,7 @@ public:
     /**
       * Requests the stop of all the devices.
     */
-    virtual void stop()=0;
+    virtual void onStop()=0;
 };
 
 //------------------------------------------------------------------------------
@@ -57,6 +57,8 @@ public:
     virtual void processSnapshot(const Snapshot &snapshotBuffer)=0;
     virtual bool mustContinueAquisition() const;
     virtual bool canCooldown() const;
+
+    void start();
 
     IModeToManager &_manager;
     const Crystal &_crystal;

@@ -149,7 +149,7 @@ void ConfigurationDlg::restore()
 
 //------------------------------------------------------------------------------
 
-void ConfigurationDlg::display(bool abortEnabled)
+void ConfigurationDlg::onDisplay(bool abortEnabled)
 {
     _buttonBox->button(QDialogButtonBox::Cancel)->setVisible(!abortEnabled);
     _buttonBox->button(QDialogButtonBox::Abort)->setVisible(abortEnabled);
