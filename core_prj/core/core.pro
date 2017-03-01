@@ -38,7 +38,4 @@ HEADERS += \
     Manager.h \
     modes.h
 
-unix {
-    target.path = /usr/lib
-    INSTALLS += target
-}
+CONFIG(release, debug|release): DEFINES += QT_NO_DEBUG_OUTPUT

@@ -7,7 +7,8 @@ SUBDIRS += \
     core_prj \
     gui \
     main \
-    mockup
+    mockup \
+    profiling
 
 DISTFILES += \
     .astylerc
