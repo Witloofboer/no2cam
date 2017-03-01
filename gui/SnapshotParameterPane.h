@@ -36,10 +36,9 @@ public:
     void updateTemperature(double temperature);
 
 signals:
-    void spectralSnapshot(double wavelength,
+    void opticalSnapshot(double wavelength,
                           double exposure,
                           double cooldownTime,
-                          double cooldownPwr,
                           double stabilisationTime,
                           bool burst,
                           bool record,
@@ -50,7 +49,6 @@ signals:
                           double power,
                           double exposure,
                           double cooldownTime,
-                          double cooldownPwr,
                           double stabilisationTime,
                           bool burst,
                           bool record,

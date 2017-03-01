@@ -46,34 +46,33 @@ public:
                const QString &devicesNotes);
 
 signals:
-    void stopRequested();
+    void onStop();
     void shutdownRequested();
     void temperaturePeriodUpdated(int temperaturePeriod);
-
-public slots:
-    void updateGuiState(bool isAppReady);
-    void updateSnapshot();
-    void onInformationMessage(QString msg);
 
 protected:
     void closeEvent(QCloseEvent *event) override;
 
 private slots:
-    void start(bool burst, bool record);
-    void switchMode();
+    void onStart(bool burst, bool record);
+    void onSwitchMode();
     void refreshBtns();
-    void selectFolder();
-    void configure();
+    void onSelectFolder();
+    void onConfigure();
 
-    void displayReleaseNotes();
-    void about();
+    void onDisplayReleaseNotes();
+    void onAbout();
 
-    void displayConfigurationDlg();
+    void onUpdateTemperature(double temperature);
+    void onUpdateApplicationReadiness(bool isAppReady);
+    void onDisplaySnapshot();
+    void onFileCreationError(QString datafolder, QString filename);
+    void onFileWritingError(QString datafolder, QString filename);
+    void onDisplayInformation(QString msg);
+
+    void onDisplayConfigurationDlg();
     void onParametersUpdated();
-    void onTemperatureUpdated(double temperature);
-    void displayErrorOnFileCreation(QString datafolder, QString filename);
-    void displayErrorOnFileWritting(QString datafolder, QString filename);
-    void clearInfoMsg();
+    void onInfoTimer();
 
 private:
     BaseParameterPane *currentPane();
