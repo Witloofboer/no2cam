@@ -3,6 +3,8 @@
 
 #include "Snapshot.h"
 
+#include <QDateTime>
+
 //------------------------------------------------------------------------------
 
 class QString;
@@ -18,20 +20,19 @@ class Crystal;
 class IModeToManager
 {
 public:
-    virtual double temperature() const =0;
-    virtual void setAcousticBeam(double frequency, double power) =0;
-    virtual void takeSnapshot() =0;
-    virtual void snapshotReadyforGui() =0;
+    virtual double temperature() const=0;
+    virtual void setAcousticBeam(double frequency, double power)=0;
+    virtual void takeSnapshot()=0;
+    virtual void setSnapshotForGui(const Snapshot &snapshotBuffer)=0;
+
     virtual void saveSnapshot(const QDateTime &dateTime,
                               char mode,
                               double wavelength,
                               double frequency,
                               double power,
                               int snapPerObs,
-                              int exposure,
                               double temperature,
                               const Snapshot &snapshotBuffer)=0;
-    virtual void coolDown()=0;
 
     /**
       * Requests the stop of all the devices.
@@ -47,40 +48,19 @@ class BaseMode
 {
 public:
     BaseMode(IModeToManager &manager,
-             const Crystal &crystal,
-             int exposure,
-             int cooldownTime,
-             int cooldownPwr,
-             int stabilisationTime,
-             bool burst,
-             bool record,
-             const QString &dataFolder,
-             const QString &session);
+             const Crystal &crystal);
 
     virtual ~BaseMode();
 
     virtual void setAcousticWave()=0;
     virtual void acousticBeamReady();
     virtual void processSnapshot(const Snapshot &snapshotBuffer)=0;
-    void proceed();
-
-protected:
     virtual bool mustContinueAquisition() const;
-    virtual bool mustCooldown() const;
-
+    virtual bool canCooldown() const;
 
     IModeToManager &_manager;
     const Crystal &_crystal;
-    int _exposure;
-    int _cooldownTime;
-    int _cooldownPwr;
-    int _stabilisationTime;
-    bool _burst;
-    bool _record;
-    const QString &_dataFolder;
-    const QString &_session;
-
-    double _temperature;
+    double _refTemperature;
     QDateTime _snapTime;
 };
 
@@ -93,15 +73,7 @@ class OpticalSnapMode: public BaseMode
 public:
     OpticalSnapMode(IModeToManager &manager,
                     const Crystal &crystal,
-                    double wavelength,
-                    int exposure,
-                    int cooldownTime,
-                    int cooldownPwr,
-                    int stabilisationTime,
-                    bool burst,
-                    bool record,
-                    const QString &dataFolder,
-                    const QString &session);
+                    double wavelength);
 
     void setAcousticWave() override;
     void processSnapshot(const Snapshot &snapshotBuffer) override;
@@ -110,7 +82,6 @@ private:
     const double _wavelength;
     double _frequency;
     double _power;
-
 };
 
 //------------------------------------------------------------------------------
@@ -123,15 +94,7 @@ public:
     AcousticSnapMode(IModeToManager &manager,
                      const Crystal &crystal,
                      double frequency,
-                     double power,
-                     int exposure,
-                     int cooldownTime,
-                     int cooldownPwr,
-                     int stabilisationTime,
-                     bool burst,
-                     bool record,
-                     const QString &dataFolder,
-                     const QString &session);
+                     double power);
 
     void setAcousticWave() override;
     void processSnapshot(const Snapshot &snapshotBuffer) override;
@@ -139,7 +102,6 @@ public:
 private:
     const double _frequency;
     const double _power;
-
     double _wavelength;
 };
 
@@ -154,15 +116,7 @@ public:
                     const Crystal &crystal,
                     double wavelength1,
                     double wavelength2,
-                    int snapshotPerObs,
-                    int exposure,
-                    int cooldownTime,
-                    int cooldownPwr,
-                    int stabilisationTime,
-                    bool burst,
-                    bool record,
-                    const QString &dataFolder,
-                    const QString &session);
+                    int snapshotPerObs);
 
     void setAcousticWave() override;
     void acousticBeamReady() override;
@@ -170,7 +124,7 @@ public:
 
 protected:
     bool mustContinueAquisition() const override;
-    bool mustCooldown() const override;
+    bool canCooldown() const override;
 
 private:
     const double _wavelengths[3];
@@ -196,15 +150,7 @@ public:
               double minWavelength,
               double maxWavelength,
               double wavelengthStep,
-              int blackSnapshotRate,
-              int exposure,
-              int cooldownTime,
-              int cooldownPwr,
-              int stabilisationTime,
-              bool burst,
-              bool record,
-              const QString &dataFolder,
-              const QString &session);
+              int blackSnapshotRate);
 
     void setAcousticWave() override;
     void processSnapshot(const Snapshot &snapshotBuffer) override;
@@ -218,11 +164,10 @@ private:
     const double _wavelengthStep;
     const int _blackSnapshotRate;
 
-    int _counter;
     double _wavelength;
     double _frequency;
     double _power;
-
+    int _counter;
 };
 
 //------------------------------------------------------------------------------

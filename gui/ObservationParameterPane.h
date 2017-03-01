@@ -32,7 +32,6 @@ signals:
                               double exposure,
                               int snapshotPerObs,
                               double cooldownTime,
-                              double cooldownPwr,
                               double stabilisationTime,
                               bool burst,
                               bool record,

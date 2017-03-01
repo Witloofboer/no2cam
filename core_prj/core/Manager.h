@@ -49,17 +49,15 @@ public:
     double temperature() const override;
     void setAcousticBeam(double frequency, double power) override;
     void takeSnapshot() override;
-    void snapshotReadyforGui() override;
+    void setSnapshotForGui(const Snapshot &snapshotBuffer) override;
     void saveSnapshot(const QDateTime &dateTime,
                       char mode,
                       double wavelength,
                       double frequency,
                       double power,
                       int snapPerObs,
-                      int exposure,
                       double temperature,
                       const Snapshot &snapshotBuffer) override;
-    void coolDown() override;
     void stop() override;
 
 signals:
@@ -85,7 +83,6 @@ public slots:
     void opticalSnapshot(double wavelength,
                          int exposure,
                          int cooldownTime,
-                         int cooldownPwr,
                          int stabilisationTime,
                          bool burst,
                          bool record,
@@ -107,7 +104,6 @@ public slots:
                           double power,
                           int exposure,
                           int cooldownTime,
-                          int cooldownPwr,
                           int stabilisationTime,
                           bool burst,
                           bool record,
@@ -131,7 +127,6 @@ public slots:
                      int snapshotPerObs,
                      int exposure,
                      int cooldownTime,
-                     int cooldownPwr,
                      int stabilisationTime,
                      bool burst,
                      bool record,
@@ -158,7 +153,6 @@ public slots:
                int    blackSnapshotRate,
                int exposure,
                int cooldownTime,
-               int cooldownPwr,
                int stabilisationTime,
                bool burst,
                bool record,
@@ -191,7 +185,15 @@ private slots:
 
 
 private:
+    void start();
     void setMode(BaseMode *mode);
+    void setParams(int exposure,
+                   int cooldownTime,
+                   int stabilisationTime,
+                   bool bursting,
+                   bool record,
+                   const QString& dataFolder,
+                   const QString& session);
 
     enum Mode {READY, SpectralSnap, AcousticSnap, Obs, Sweep};
     const QString _modeToCode[5] = {"XX", "S", "A", "O", "W"};
@@ -221,15 +223,15 @@ private:
     double _temperature;
 //    double _refTemperature;
 
-    Mode _swicthMode;
-    /*    int _exposure;
-        bool _bursting;*/
+    //Mode _swicthMode;
+    bool _isReady;
+    int _exposure;
+    bool _bursting;
     Snapshot _snapshotBuffer;
-    /* QDateTime _snapTime;
+    // QDateTime _snapTime;
     bool _record;
     QString _dataFolder;
     QString _session;
-    */
 
     //bool mustContinueAquisition() const;
     //bool mustCooldown() const;

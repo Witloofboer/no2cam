@@ -33,7 +33,6 @@ signals:
                         int    blackSnapshotRate,
                         double exposure,
                         double cooldownTime,
-                        double cooldownPwr,
                         double stabilisationTime,
                         bool burst,
                         bool record,

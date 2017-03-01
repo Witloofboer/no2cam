@@ -9,25 +9,9 @@ namespace core {
 //------------------------------------------------------------------------------
 
 BaseMode::BaseMode(IModeToManager &manager,
-                   const Crystal &crystal,
-                   int exposure,
-                   int cooldownTime,
-                   int cooldownPwr,
-                   int stabilisationTime,
-                   bool burst,
-                   bool record,
-                   const QString &dataFolder,
-                   const QString &session)
+                   const Crystal &crystal)
     : _manager(manager)
     , _crystal(crystal)
-    , _exposure(exposure)
-    , _cooldownTime(cooldownTime)
-    , _cooldownPwr(cooldownPwr)
-    , _stabilisationTime(stabilisationTime)
-    , _burst(burst)
-    , _record(record)
-    , _dataFolder(dataFolder)
-    , _session(session)
 {
 
 }
@@ -41,39 +25,22 @@ BaseMode::~BaseMode() {}
 void BaseMode::acousticBeamReady()
 {
     _snapTime = QDateTime::currentDateTime();
-    _manager->takeSnapshot();
-}
-
-//------------------------------------------------------------------------------
-
-void BaseMode::proceed()
-{
-    if (mustContinueAquisition())
-    {
-        if (mustCooldown())
-        {
-            _manager.cooldown();
-        } else {
-            setAcousticWave();
-        }
-    } else {
-        _manager.stop();
-    }
+    _manager.takeSnapshot();
 }
 
 //------------------------------------------------------------------------------
 
 bool BaseMode::mustContinueAquisition() const
 {
-    return _bursting;
+    return false;
 }
 
 
 //------------------------------------------------------------------------------
 
-bool BaseMode::mustCooldown() const
+bool BaseMode::canCooldown() const
 {
-    return _cooldownT->interval() != 0;
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -82,17 +49,8 @@ bool BaseMode::mustCooldown() const
 
 OpticalSnapMode::OpticalSnapMode(IModeToManager &manager,
                                  const Crystal &crystal,
-                                 double wavelength,
-                                 int exposure,
-                                 int cooldownTime,
-                                 int cooldownPwr,
-                                 int stabilisationTime,
-                                 bool burst,
-                                 bool record,
-                                 const QString &dataFolder,
-                                 const QString &session)
-    : BaseMode(manager, crystal, exposure, cooldownTime, cooldownPwr,
-               stabilisationTime, burst, record, dataFolder, session)
+                                 double wavelength)
+    : BaseMode(manager, crystal)
     , _wavelength(wavelength)
 {
 
@@ -102,9 +60,9 @@ OpticalSnapMode::OpticalSnapMode(IModeToManager &manager,
 
 void OpticalSnapMode::setAcousticWave()
 {
-    _temperature = _manager.temperature();
+    _refTemperature = _manager.temperature();
     _crystal.computeFreqPow(_wavelength,
-                            _temperature,
+                            _refTemperature,
                             _frequency,
                             _power);
     _manager.setAcousticBeam(_frequency, _power);
@@ -114,15 +72,13 @@ void OpticalSnapMode::setAcousticWave()
 
 void OpticalSnapMode::processSnapshot(const Snapshot &snapshotBuffer)
 {
-    gImageBuffer.set(snapshotBuffer);
-    _manager.snapshotReadyforGui();
+    _manager.setSnapshotForGui(snapshotBuffer);
     _manager.saveSnapshot(_snapTime,
                           'S',
                           _wavelength,
                           _frequency,
                           _power,
                           1,
-                          _exposure,
                           _refTemperature,
                           snapshotBuffer);
 
@@ -135,17 +91,8 @@ void OpticalSnapMode::processSnapshot(const Snapshot &snapshotBuffer)
 AcousticSnapMode::AcousticSnapMode(IModeToManager &manager,
                                    const Crystal &crystal,
                                    double frequency,
-                                   double power,
-                                   int exposure,
-                                   int cooldownTime,
-                                   int cooldownPwr,
-                                   int stabilisationTime,
-                                   bool burst,
-                                   bool record,
-                                   const QString &dataFolder,
-                                   const QString &session)
-    : BaseMode(manager, crystal, exposure, cooldownTime, cooldownPwr,
-               stabilisationTime, burst, record, dataFolder, session)
+                                   double power)
+    : BaseMode(manager, crystal)
     , _frequency(frequency)
     , _power(power)
 {
@@ -156,8 +103,8 @@ AcousticSnapMode::AcousticSnapMode(IModeToManager &manager,
 
 void AcousticSnapMode::setAcousticWave()
 {
-    _temperature = _manager.temperature();
-    _wavelength = _crystal.wavelength(_frequency, _temperature);
+    _refTemperature = _manager.temperature();
+    _wavelength = _crystal.wavelength(_frequency, _refTemperature);
     _manager.setAcousticBeam(_frequency, _power);
 }
 
@@ -165,15 +112,13 @@ void AcousticSnapMode::setAcousticWave()
 
 void AcousticSnapMode::processSnapshot(const Snapshot &snapshotBuffer)
 {
-    gImageBuffer.set(snapshotBuffer);
-    _manager.snapshotReadyforGui();
+    _manager.setSnapshotForGui(snapshotBuffer);
     _manager.saveSnapshot(_snapTime,
                           'A',
                           _wavelength,
                           _frequency,
                           _power,
                           1,
-                          _exposure,
                           _refTemperature,
                           snapshotBuffer);
 }
@@ -186,24 +131,13 @@ ObservationMode::ObservationMode(IModeToManager &manager,
                                  const Crystal &crystal,
                                  double wavelength1,
                                  double wavelength2,
-                                 int snapshotPerObs,
-                                 int exposure,
-                                 int cooldownTime,
-                                 int cooldownPwr,
-                                 int stabilisationTime,
-                                 bool burst,
-                                 bool record,
-                                 const QString &dataFolder,
-                                 const QString &session)
-    : BaseMode(manager, crystal, exposure, cooldownTime, cooldownPwr,
-               stabilisationTime, burst, record, dataFolder, session)
+                                 int snapshotPerObs)
+    : BaseMode(manager, crystal)
     , _wavelengths{0, wavelength1, wavelength2}
     , _snapshotPerObs(snapshotPerObs)
     , _idx(0)
     , _snapshotCount(0)
 {
-    _frequency[0]=0.0;
-    _power[0]=0.0;
 }
 
 //------------------------------------------------------------------------------
@@ -213,7 +147,7 @@ void ObservationMode::setAcousticWave()
     if (_snapshotCount == 0)
     {
         // First snapshot... initialisation of the observation
-        _temperature = _manager.temperature();
+        _refTemperature = _manager.temperature();
 
         for(int s=0; s<3; ++s)
             for(int i=0; i<snapshotSize; ++i)
@@ -221,11 +155,11 @@ void ObservationMode::setAcousticWave()
                     _snapshotBuffers[s][i][j] = 0;
 
         _crystal.computeFreqPow(_wavelengths[1],
-                                _temperature,
+                                _refTemperature,
                                 _frequency[1],
                                 _power[1]);
         _crystal.computeFreqPow(_wavelengths[2],
-                                _temperature,
+                                _refTemperature,
                                 _frequency[2],
                                 _power[2]);
     }
@@ -245,7 +179,7 @@ void ObservationMode::acousticBeamReady()
 {
     if (_snapshotCount == 0)
         _snapTime = QDateTime::currentDateTime();
-    _manager->takeSnapshot();
+    _manager.takeSnapshot();
 }
 
 //------------------------------------------------------------------------------
@@ -277,18 +211,16 @@ void ObservationMode::processSnapshot(const Snapshot &snapshotBuffer)
         _idx = 0;
 
         for(int i=0; i<3; ++i)
-            saveSnapshot(_snapTime,
-                         'O',
-                         _wavelengths[i],
-                         _frequency[i],
-                         _power[i],
-                         _snapshotPerObs,
-                         _exposure,
-                         _refTemperature,
-                         _snapshotBuffers[i]);
+            _manager.saveSnapshot(_snapTime,
+                                  'O',
+                                  _wavelengths[i],
+                                  _frequency[i],
+                                  _power[i],
+                                  _snapshotPerObs,
+                                  _refTemperature,
+                                  _snapshotBuffers[i]);
 
-        gImageBuffer.set(_snapshotBuffers[1]);
-        _manager.snapshotReadyforGui();
+        _manager.setSnapshotForGui(_snapshotBuffers[1]);
     }
 }
 
@@ -296,15 +228,15 @@ void ObservationMode::processSnapshot(const Snapshot &snapshotBuffer)
 
 bool ObservationMode::mustContinueAquisition() const
 {
-    return BaseMode::mustContinueAquisition() || _snapshotCount != 0;
+    return _snapshotCount != 0;
     // An observation continues until is is done.
 }
 
 //------------------------------------------------------------------------------
 
-bool ObservationMode::mustCooldown() const
+bool ObservationMode::canCooldown() const
 {
-    return BaseMode::mustCooldown() && _snapshotCount == 0;
+    return _snapshotCount == 0;
     // No cooldown within an observation
 }
 
@@ -317,21 +249,13 @@ SweepMode::SweepMode(IModeToManager &manager,
                      double minWavelength,
                      double maxWavelength,
                      double wavelengthStep,
-                     int    blackSnapshotRate,
-                     int exposure,
-                     int cooldownTime,
-                     int cooldownPwr,
-                     int stabilisationTime,
-                     bool burst,
-                     bool record,
-                     const QString &dataFolder,
-                     const QString &session)
-    : BaseMode(manager, crystal, exposure, cooldownTime, cooldownPwr,
-               stabilisationTime, burst, record, dataFolder, session)
+                     int    blackSnapshotRate)
+    : BaseMode(manager, crystal)
     , _minWavelength(minWavelength)
     , _maxWavelength(maxWavelength+1e-5) // 1e-5 to account for rounding error
     , _wavelengthStep(wavelengthStep)
     , _blackSnapshotRate(blackSnapshotRate)
+    , _wavelength(minWavelength)
     , _counter(0)
 {
 }
@@ -340,14 +264,14 @@ SweepMode::SweepMode(IModeToManager &manager,
 
 void SweepMode::setAcousticWave()
 {
-    _temperature = _manager.temperature();
+    _refTemperature = _manager.temperature();
 
     if (0 == _counter)
     {
         _manager.setAcousticBeam(0.0, 0.0); // Black snapshot
     } else {
         _crystal.computeFreqPow(_wavelength,
-                                _temperature,
+                                _refTemperature,
                                 _frequency,
                                 _power);
         _manager.setAcousticBeam(_frequency, _power);
@@ -358,38 +282,35 @@ void SweepMode::setAcousticWave()
 
 void SweepMode::processSnapshot(const Snapshot &snapshotBuffer)
 {
+    _manager.setSnapshotForGui(snapshotBuffer);
+
     if (0 == _counter)
     {
-        saveSnapshot(_snapTime,
-                     'W',
-                     0.0,
-                     0.0,
-                     0.0,
-                     1,
-                     _exposure,
-                     _refTemperature,
-                     _snapshotBuffer);
+        _manager.saveSnapshot(_snapTime,
+                              'W',
+                              0.0,
+                              0.0,
+                              0.0,
+                              1,
+                              _refTemperature,
+                              snapshotBuffer);
     } else {
-        saveSnapshot(_snapTime,
-                     Sweep,
-                     _wavelength,
-                     _frequency,
-                     _power,
-                     1,
-                     _exposure,
-                     _refTemperature,
-                     _snapshotBuffer);
+        _manager.saveSnapshot(_snapTime,
+                              'W',
+                              _wavelength,
+                              _frequency,
+                              _power,
+                              1,
+                              _refTemperature,
+                              snapshotBuffer);
 
         _wavelength += _wavelengthStep;
-        if (_bursting && _maxWavelength < _wavelength)
+        if (_maxWavelength < _wavelength)
         {
             _wavelength = _minWavelength;
             _counter = -1; // Will be set to 0 by the ++ operator below.
         }
     }
-
-    gImageBuffer.set(_snapshotBuffer);
-    _manager.snapshotReadyforGui();
 
     ++_counter;
     if (_counter == _blackSnapshotRate+1)
@@ -400,8 +321,7 @@ void SweepMode::processSnapshot(const Snapshot &snapshotBuffer)
 
 bool SweepMode::mustContinueAquisition() const
 {
-    return BaseMode::mustContinueAquisition()
-           || _wavelength <= _maxWavelength;
+    return _wavelength <= _maxWavelength;
 }
 
 //------------------------------------------------------------------------------

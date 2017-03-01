@@ -58,8 +58,6 @@ ConfigurationDlg::ConfigurationDlg(MainWindow* mainWindow,
         0,
         crystalGrid->itemAtPosition(2,0)->minimumSize().width());
 
-
-
     auto boardBox = new QGroupBox(tr("Functional parameters"));
     boardBox->setLayout(paramGrid);
 
@@ -138,8 +136,11 @@ void ConfigurationDlg::restore()
     settings.endGroup();
 
     settings.beginGroup("Parameters");
-    _stabilisationTimeEdit->setText(settings.value(stabilisingTimeLbl,  "1").toString());
-    _temperaturePeriodEdit->setText(settings.value(temperaturePeriodLbl, "500").toString());
+    _stabilisationTimeEdit->setText(settings.value(stabilisingTimeLbl,  "5").toString());
+    _temperaturePeriodEdit->setText(settings.value(temperaturePeriodLbl, "1000").toString());
+    _stabilisingTime = _stabilisationTimeEdit->value();
+    _temperaturePeriod = _temperaturePeriodEdit->value();
+
     settings.endGroup();
 
     if (isValid())

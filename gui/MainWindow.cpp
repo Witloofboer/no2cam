@@ -268,7 +268,6 @@ MainWindow::MainWindow(core::Crystal *crystal,
     refreshBtns();
     restore();
 
-
     onParametersUpdated();
 }
 
