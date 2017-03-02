@@ -43,7 +43,7 @@ public:
             CameraDriver *camera,
             AcousticDriver *driver);
 
-    ~Manager();
+    virtual ~Manager();
 
     // IModeToManager
     double temperature() const override;
@@ -181,7 +181,7 @@ private slots:
     void onAcousticBeamReady();
     void onSnapshotAvailable(const Snapshot &buffer);
 
-private:
+protected:
     void setParams(int exposure,
                    int cooldownTime,
                    int stabilisationTime,

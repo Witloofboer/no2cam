@@ -69,7 +69,7 @@ void Manager::setAcousticBeam(double frequency, double power)
         qDebug("Acoustic wave stabilisation: %d ms", _stabilisationT->interval());
         _stabilisationT->start();
     } else {
-        takeSnapshot();
+        onAcousticBeamReady();
     }
 }
 
