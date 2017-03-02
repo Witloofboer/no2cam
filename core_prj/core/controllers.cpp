@@ -37,18 +37,18 @@ bool AcousticCtrl::set(double frequency, double power)
 
 //------------------------------------------------------------------------------
 
-ProbeCtrl::ProbeCtrl(QObject *parent, ProbeDriver *probe)
+ThermometerCtrl::ThermometerCtrl(QObject *parent, ThermometerDriver *thermometer)
     : QObject(parent)
-    , _probe(probe)
+    , _thermometer(thermometer)
 {
-    _probe->setParent(this);
+    _thermometer->setParent(this);
 }
 
 //------------------------------------------------------------------------------
 
-double ProbeCtrl::getTemperature()
+double ThermometerCtrl::getTemperature()
 {
-    double temperature = _probe->getTemperature();
+    double temperature = _thermometer->getTemperature();
     qDebug("Probe: temperature is %.2f degC", temperature);
     return temperature;
 }

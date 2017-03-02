@@ -16,7 +16,7 @@ CameraDriver::CameraDriver()
 
 //------------------------------------------------------------------------------
 
-ProbeDriver::ProbeDriver()
+ThermometerDriver::ThermometerDriver()
     :QObject()
 {}
 

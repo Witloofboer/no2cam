@@ -93,7 +93,7 @@ static const char *incidentLbl = "incident angle [deg]";
 static const char *transHeightLbl = "transducer height [mm]";
 static const char *transLengthLbl = "transducer length [mm]";
 static const char *stabilisingTimeLbl = "board stabilisation [ms]";
-static const char *temperaturePeriodLbl = "T probe period [ms]";
+static const char *temperaturePeriodLbl = "thermometer period [ms]";
 
 //------------------------------------------------------------------------------
 

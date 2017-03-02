@@ -4,7 +4,7 @@
 #include <QtCore/qglobal.h>
 
 namespace core {
-class ProbeDriver;
+class ThermometerDriver;
 class CameraDriver;
 class AcousticDriver;
 
@@ -30,7 +30,7 @@ class AcousticDriver;
  */
 GUISHARED_EXPORT void init(const QString& subversion,
                            const QString& devicesNotes,
-                           core::ProbeDriver *probe,
+                           core::ThermometerDriver *thermometer,
                            core::CameraDriver *camera,
                            core::AcousticDriver *driver);
 GUISHARED_EXPORT void start();

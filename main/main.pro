@@ -24,7 +24,7 @@ SOURCES += \
 HEADERS  += \
     Camera.h \
     Driver.h \
-    Probe.h
+    Thermometer.h
 
 RESOURCES += \
     scene.qrc

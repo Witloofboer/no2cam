@@ -13,13 +13,13 @@ int main(int argc, char *argv[])
 
     QApplication application(argc, argv);
 
-    auto probe = new core::MockProbe;
+    auto thermometer = new core::MockThermometer;
     auto camera = new core::MockCamera;
     auto driver = new core::MockAcousticDriver;
 
     init("mockup",
          QObject::tr("<p>Functional mockups are used for all devices.</p>"),
-         probe, camera, driver);
+         thermometer, camera, driver);
 
     start();
     int result = application.exec();

@@ -36,20 +36,20 @@ void MockAcousticDriver::set(double frequency, double power)
 
 //------------------------------------------------------------------------------
 
-MockProbe::MockProbe()
-    : ProbeDriver()
+MockThermometer::MockThermometer()
+    : ThermometerDriver()
     , _temperature(20.0)
     , _delta(0.12)
 {}
 
 //------------------------------------------------------------------------------
 
-double MockProbe::getTemperature()
+double MockThermometer::getTemperature()
 {
     _temperature += _delta;
     if (_temperature < 18.0) _delta = fabs(_delta);
     else if (22.0 < _temperature) _delta = -fabs(_delta);
-    qDebug("<probe: %.2f degC>", _temperature);
+    qDebug("<temperature: %.2f degC>", _temperature);
     return _temperature;
 }
 

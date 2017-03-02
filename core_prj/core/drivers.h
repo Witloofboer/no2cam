@@ -43,12 +43,12 @@ signals:
 
 //------------------------------------------------------------------------------
 
-class CORESHARED_EXPORT ProbeDriver : public QObject
+class CORESHARED_EXPORT ThermometerDriver : public QObject
 {
     Q_OBJECT
 
 public:
-    ProbeDriver();
+    ThermometerDriver();
 
     virtual double getTemperature()=0;
 };

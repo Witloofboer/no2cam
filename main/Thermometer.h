@@ -1,16 +1,16 @@
-#ifndef PROBE_H
-#define PROBE_H
+#ifndef THERMOMETER_H
+#define THERMOMETER_H
 
 #include "visa.h"
 #include "TLTSP.h"
 #include "core/drivers.h"
 
-class Probe : public core::ProbeDriver
+class Thermometer : public core::ThermometerDriver
 {
     Q_OBJECT
 
 public:
-    Probe();
+    Thermometer();
 
     double getTemperature() override;
     double getHumidity();
@@ -31,4 +31,4 @@ private:
 
 
 
-#endif // PROBE_H
+#endif // THERMOMETER_H

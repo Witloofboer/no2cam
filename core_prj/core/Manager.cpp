@@ -17,7 +17,7 @@ namespace core {
 //------------------------------------------------------------------------------
 
 Manager::Manager(const Crystal *crystal,
-                 ProbeDriver *probe,
+                 ThermometerDriver *thermometer,
                  CameraDriver *camera,
                  AcousticDriver *driver)
     : QObject()
@@ -27,7 +27,7 @@ Manager::Manager(const Crystal *crystal,
     , _crystal(crystal)
     , _cameraCtrl(new CameraCtrl(this, camera))
     , _acousticCtrl(new AcousticCtrl(this, driver))
-    , _probeCtrl(new ProbeCtrl(this, probe))
+    , _thermometerCtrl(new ThermometerCtrl(this, thermometer))
     , _snapshotBuffer{0}
     , _mode(0)
 {
@@ -36,7 +36,7 @@ Manager::Manager(const Crystal *crystal,
 
     _cameraCtrl->setParent(this);
     _acousticCtrl->setParent(this);
-    _probeCtrl->setParent(this);
+    _thermometerCtrl->setParent(this);
 
     connect(_cooldownT, QTimer::timeout, this, onCooldownTimer);
     connect(_stabilisationT, QTimer::timeout, this, onAcousticBeamReady);
@@ -268,7 +268,7 @@ void Manager::onTemperaturePeriodUpdated(int temperaturePeriod)
 {
     if (temperaturePeriod != _temperatureT->interval())
     {
-        qDebug("Setting temperature probe period to %dms.", temperaturePeriod);
+        qDebug("Setting thermometer period to %dms.", temperaturePeriod);
         _temperatureT->stop();
         onTemperatureTimer();
         _temperatureT->start(temperaturePeriod);
@@ -297,7 +297,7 @@ void Manager::onThreadFinished()
 
 void Manager::onTemperatureTimer()
 {
-    _temperature = _probeCtrl->getTemperature();
+    _temperature = _thermometerCtrl->getTemperature();
     emit updateTemperature(_temperature);
 }
 

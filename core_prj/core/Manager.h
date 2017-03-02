@@ -18,11 +18,11 @@ class BaseMode;
 class Crystal;
 class CameraDriver;
 class AcousticDriver;
-class ProbeDriver;
+class ThermometerDriver;
 class CameraCtrl;
 class FrequencyCtrl;
 class AcousticCtrl;
-class ProbeCtrl;
+class ThermometerCtrl;
 
 //------------------------------------------------------------------------------
 
@@ -39,7 +39,7 @@ class CORESHARED_EXPORT Manager
 
 public:
     Manager(const Crystal *crystal,
-            ProbeDriver *probe,
+            ThermometerDriver *thermometer,
             CameraDriver *camera,
             AcousticDriver *driver);
 
@@ -197,7 +197,7 @@ private:
     const Crystal *_crystal;
     CameraCtrl *_cameraCtrl;
     AcousticCtrl *_acousticCtrl;
-    ProbeCtrl *_probeCtrl;
+    ThermometerCtrl *_thermometerCtrl;
 
     double _temperature;
 

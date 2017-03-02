@@ -28,12 +28,12 @@ public:
 
 //------------------------------------------------------------------------------
 
-class CORESHARED_EXPORT MockProbe : public ProbeDriver
+class CORESHARED_EXPORT MockThermometer : public ThermometerDriver
 {
     Q_OBJECT
 
 public:
-    MockProbe();
+    MockThermometer();
     double getTemperature() override;
 
 private:
