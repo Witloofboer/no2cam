@@ -8,6 +8,8 @@ namespace core
 {
 
 //------------------------------------------------------------------------------
+// AcousticCtrl
+//------------------------------------------------------------------------------
 
 AcousticCtrl::AcousticCtrl(QObject *parent, AcousticDriver *driver)
     : QObject(parent)
@@ -36,6 +38,8 @@ bool AcousticCtrl::set(double frequency, double power)
 }
 
 //------------------------------------------------------------------------------
+// ThermometerCtrl
+//------------------------------------------------------------------------------
 
 ThermometerCtrl::ThermometerCtrl(QObject *parent, ThermometerDriver *thermometer)
     : QObject(parent)
@@ -54,22 +58,24 @@ double ThermometerCtrl::getTemperature()
 }
 
 //------------------------------------------------------------------------------
+// CameraCtrl
+//------------------------------------------------------------------------------
 
 CameraCtrl::CameraCtrl(QObject *parent, CameraDriver *camera)
     : QObject(parent)
     , _camera(camera)
     , _exposure(-1)
-    , _isAvailable(true)
+    , _isBusy(false)
 {
     _camera->setParent(this);
-    connect(_camera, CameraDriver::snapshotAvailable, this, processSnapshot);
+    connect(_camera, CameraDriver::snapshotAvailable, this, onSnapshotAvailable);
 }
 
 //------------------------------------------------------------------------------
 
 void CameraCtrl::setExposure(int exposure)
 {
-    Q_ASSERT(_isAvailable);
+    Q_ASSERT(!_isBusy);
 
     if (_exposure != exposure)
     {
@@ -83,11 +89,11 @@ void CameraCtrl::setExposure(int exposure)
 
 void CameraCtrl::takeSnapshot()
 {
-    Q_ASSERT(_isAvailable);
+    Q_ASSERT(!_isBusy);
     Q_ASSERT(0 <= _exposure);
 
     qDebug("Camera: taking snapshot");
-    _isAvailable = false;
+    _isBusy = true;
     _camera->takeSnapshot();
 }
 
@@ -95,30 +101,20 @@ void CameraCtrl::takeSnapshot()
 
 void CameraCtrl::stop()
 {
-    if (!_isAvailable)
+    if (_isBusy)
     {
         qDebug("Camera: stop");
         _camera->stop();
-        _isAvailable = true;
+        _isBusy = false;
     }
 }
 
 //------------------------------------------------------------------------------
 
-void CameraCtrl::getSnapshot(Snapshot &buffer)
+void CameraCtrl::onSnapshotAvailable(const Snapshot &buffer)
 {
-    Q_ASSERT(_isAvailable);
-    qDebug("Camera: getting snapshot");
-    _camera->getSnapshot(buffer);
-}
-
-//------------------------------------------------------------------------------
-
-void CameraCtrl::processSnapshot()
-{
-    qDebug("Camera: snapshot ready");
-    _isAvailable = true;
-    emit snapshotAvailable();
+    _isBusy = false;
+    emit snapshotAvailable(buffer);
 }
 
 //------------------------------------------------------------------------------

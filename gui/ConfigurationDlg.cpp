@@ -52,7 +52,7 @@ ConfigurationDlg::ConfigurationDlg(MainWindow* mainWindow,
     auto paramGrid = new QGridLayout();
     row = 0;
     putInGrid(_stabilisationTimeEdit, paramGrid, row, "Stabilisation", "[ms]");
-    putInGrid(_temperaturePeriodEdit, paramGrid, row, "T° probing period", "[ms]");
+    putInGrid(_temperaturePeriodEdit, paramGrid, row, "Thermometer period", "[ms]");
 
     paramGrid->setColumnMinimumWidth(
         0,

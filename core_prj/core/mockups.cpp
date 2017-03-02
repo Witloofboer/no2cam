@@ -57,6 +57,7 @@ double MockThermometer::getTemperature()
 
 MockCamera::MockCamera()
     : CameraDriver()
+    , _buffer{0}
     , _exposure(-1)
     , _timer(new QTimer(this))
     , _shift(0)
@@ -104,22 +105,17 @@ void MockCamera::stop()
 void MockCamera::onSnapshotAvailable()
 {
     qDebug("<camera: snapshot available>");
-    emit snapshotAvailable();
-}
 
-//------------------------------------------------------------------------------
-
-void MockCamera::getSnapshot(Snapshot &buffer)
-{
-    qDebug("<camera: transmitting snapshot>");
     for (int i=0; i<snapshotSize; ++i)
         for (int j=0; j<snapshotSize; ++j)
         {
             double pix = (double(_exposure)*_scene[(i+_shift) % snapshotSize][j]) / 50.0;
-            buffer[i][j] = isBlackImage ? 0 : (pix<65535 ? pix : 65535);
+            _buffer[i][j] = isBlackImage ? 0 : (pix<65535 ? pix : 65535);
         }
 
     _shift = (_shift+7) % snapshotSize;
+
+    emit snapshotAvailable(_buffer);
 }
 
 //------------------------------------------------------------------------------

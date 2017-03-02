@@ -179,7 +179,7 @@ private slots:
     void onTemperatureTimer();
     void onCooldownTimer();
     void onAcousticBeamReady();
-    void onSnapshotAvailable();
+    void onSnapshotAvailable(const Snapshot &buffer);
 
 private:
     void setParams(int exposure,

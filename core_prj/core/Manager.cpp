@@ -317,12 +317,11 @@ void Manager::onAcousticBeamReady()
 
 //------------------------------------------------------------------------------
 
-void Manager::onSnapshotAvailable()
+void Manager::onSnapshotAvailable(const Snapshot& buffer)
 {
     if (_mode)
     {
-        _cameraCtrl->getSnapshot(_snapshotBuffer);
-        _mode->processSnapshot(_snapshotBuffer);
+        _mode->processSnapshot(buffer);
 
         if (_bursting || _mode->mustContinueAquisition())
         {

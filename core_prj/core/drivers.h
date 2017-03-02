@@ -35,10 +35,9 @@ public:
     virtual void setExposure(int exposure)=0;
     virtual void takeSnapshot()=0;
     virtual void stop()=0;
-    virtual void getSnapshot(Snapshot &buffer)=0;
 
 signals:
-    void snapshotAvailable();
+    void snapshotAvailable(const Snapshot &buffer);
 };
 
 //------------------------------------------------------------------------------

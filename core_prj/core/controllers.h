@@ -60,18 +60,17 @@ public:
     void setExposure(int exposure);
     void takeSnapshot();
     void stop();
-    void getSnapshot(Snapshot &buffer);
 
 signals:
-    void snapshotAvailable();
+    void snapshotAvailable(const Snapshot &buffer);
 
 private slots:
-    void processSnapshot();
+    void onSnapshotAvailable(const Snapshot &buffer);
 
 private:
     CameraDriver *_camera;
     int _exposure;
-    bool _isAvailable;
+    bool _isBusy;
 };
 
 //------------------------------------------------------------------------------
