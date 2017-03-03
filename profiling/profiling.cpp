@@ -43,6 +43,8 @@ int main(int argc, char *argv[])
     auto _mainWindow = new gui::MainWindow(_crystal, _coreLayer, "(optim)", "");
     _mainWindow->show();
 
+    _coreLayer->mainWindow(_mainWindow);
+
     QObject::connect(_coreThr, QThread::finished,
                      _coreLayer, core::Manager::onThreadFinished);
 

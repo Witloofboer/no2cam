@@ -118,7 +118,7 @@ void Manager::saveSnapshot(const QDateTime& dateTime,
                      . arg(temperature, 1, 'f', 1, zero);
 
     QFile file(_dataFolder+"/"+_filename);
-    qInfo("Dumping snapshot to %s", _filename.toLatin1().constData());
+    qDebug("Dumping snapshot to %s", _filename.toLatin1().constData());
 
     const bool ok = file.open(QIODevice::WriteOnly);
 

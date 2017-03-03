@@ -5,6 +5,12 @@
 #include <QElapsedTimer>
 #include "core/Snapshot.h"
 
+namespace gui
+{
+class MainWindow;
+}
+
+
 class InstrumentedManager : public core::Manager
 {
 public:
@@ -12,6 +18,8 @@ public:
                         core::ThermometerDriver *thermometer,
                         core::CameraDriver *camera,
                         core::AcousticDriver *driver);
+
+    void mainWindow(gui::MainWindow* mainWindow);
 
     void saveSnapshot(const QDateTime &dateTime,
                       char mode,
@@ -28,6 +36,7 @@ private:
     QElapsedTimer _chrono;
     int _counter;
     core::Snapshot _buffer;
+    gui::MainWindow* _mainWindow;
 };
 
 #endif // INSTRUMENTEDMANAGER_H

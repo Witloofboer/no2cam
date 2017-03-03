@@ -1,6 +1,9 @@
 #include "InstrumentedManager.h"
 #include <QtGlobal>
 #include <cstring>
+#include <QApplication>
+
+#include "gui/MainWindow.h"
 
 using namespace core;
 
@@ -15,12 +18,18 @@ InstrumentedManager::InstrumentedManager(const Crystal *crystal,
 {
 }
 
+void InstrumentedManager::mainWindow(gui::MainWindow *mainWindow)
+{
+    _mainWindow = mainWindow;
+}
+
 void InstrumentedManager::runScenario()
 {
     qInfo("Running scenario");
     _counter=0;
     _chrono.start();
-    onOpticalSnapshot(500, 0, 0, 0, true, true, "h:/cam_data", "test");
+    //onOpticalSnapshot(500, 0, 0, 0, true, false, "h:/cam_data", "test");
+    onObservation(450, 550, 4, 0, 0, 0, true, false, "h:/cam_data", "test");
 }
 
 void InstrumentedManager::saveSnapshot(const QDateTime& dateTime,
@@ -35,13 +44,11 @@ void InstrumentedManager::saveSnapshot(const QDateTime& dateTime,
     Manager::saveSnapshot(dateTime, mode,
                           wavelength, frequency, power, snapPerObs,
                           temperature, snapshotBuffer);
-
-    std::memcpy(_buffer, snapshotBuffer, sizeof _buffer);
-
     ++_counter;
-    if (_counter==10)
+    if (_counter==600)
     {
-        qInfo("Result: %.3f ms/snap", ((double)_chrono.elapsed())/10);
+        qInfo("Result: %.3f ms/snap", ((double)_chrono.elapsed())/600);
         _bursting = false;
+        _mainWindow->close();
     }
 }

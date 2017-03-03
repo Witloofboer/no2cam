@@ -21,17 +21,18 @@ ImageBuffer::ImageBuffer()
 
 static const int factor = snapshotSize / ImageBuffer::size;
 
-void ImageBuffer::set(const Snapshot snapshot)
+void ImageBuffer::set(const Snapshot& snapshot)
 {
     QMutexLocker lock(_lock);
 
     uchar *pt=_buffer;
-
-    for(int i=0; i<ImageBuffer::size; ++i)
-        for(int j=0; j<ImageBuffer::size; ++j)
+    for(int i=0, ix=0; i<ImageBuffer::size; ++i, ix+=factor)
+    {
+        for(int j=0, jx=0; j<ImageBuffer::size; ++j, jx+=factor)
         {
-            *pt++ = snapshot[factor*j][factor*i] >> 8;
+            *pt++ = snapshot[jx][ix] >> 8;
         }
+    }
 }
 
 //------------------------------------------------------------------------------
