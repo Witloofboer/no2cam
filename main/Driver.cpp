@@ -20,20 +20,22 @@ bool Driver::init()
 {
     try
     {
-    _serial = new QSerialPort(this);
-    _serial->setPortName("COM12"); // select the correct port to send the data to...
-    _serial->setBaudRate(QSerialPort::Baud9600);
-    _serial->setDataBits(QSerialPort::Data8);
-    _serial->setStopBits(QSerialPort::OneStop);
-    _serial->setParity(QSerialPort::NoParity);
-    _serial->setFlowControl(QSerialPort::NoFlowControl);
-    _serial->open(QSerialPort::ReadWrite);
-    connect(_serial, QSerialPort::readyRead, this, Driver::serialReceived);
+        _serial = new QSerialPort(this);
+        // TODO: find the com port to which the probe is connect.
+
+        _serial->setPortName("COM12"); // select the correct port to send the data to...
+        _serial->setBaudRate(QSerialPort::Baud9600);
+        _serial->setDataBits(QSerialPort::Data8);
+        _serial->setStopBits(QSerialPort::OneStop);
+        _serial->setParity(QSerialPort::NoParity);
+        _serial->setFlowControl(QSerialPort::NoFlowControl);
+        _serial->open(QSerialPort::ReadWrite);
+        return true;
     }
     catch(int e)
     {
-         //QMessageBox::critical(0, "Aborting", "Failed to connect to Driver COM port.");
-         return false;
+        //QMessageBox::critical(0, "Aborting", "Failed to connect to Driver COM port.");
+        return false;
     }
 
     if (!_serial->isOpen())
@@ -41,32 +43,12 @@ bool Driver::init()
         //QMessageBox::critical(0, "Aborting", "Failed to open the Driver COM port.");
         return false;
     }
-
-}
-
-void Driver::serialReceived()
-{
-    //QMessageBox msgBox;
-    // QByteArray receivedBytes;
-    // receivedBytes =_serial->readAll();
-    // QString received;
-    // for (auto it=receivedBytes.begin(); it!=receivedBytes.end(); ++it)
-    // {
-    //     printf("%02x ", static_cast<quint8>(*it));
-//        received += QString("%1").arg(static_cast<quint8>(*it), 2, 16, '0');
-    //  }
-    //  printf("\n");
-//    msgBox.setText("Received: " + received);
-//    msgBox.exec();
 }
 
 //------------------------------------------------------------------------------
 
-void Driver::writeDDS(double frequency, double power)
+void Driver::writeDDS(double frequency, quint8 level)
 {
-    qInfo("<power: %.1f mW>", power);
-
-    const double per_mW = 1.0;
     const double per_MHz = 4294967.296;
 
     QByteArray stream(29, 0);
@@ -81,13 +63,13 @@ void Driver::writeDDS(double frequency, double power)
     stream[13] = 0x41;
     stream[14] = 0x50;
     stream[15] = 0x03;
-    stream[19] = static_cast<quint8> (round(power * per_mW));
+    stream[19] = static_cast<quint8> (round(level));
     stream[20] = 0x0e;
     stream[21] = 0x3f;
     stream[22] = 0xff;
 
     // lineair correction formula is needed to correct the frequency offset!
-    int freq = round((frequency * per_MHz)+(224.71*frequency+263.83));
+    int freq = round(frequency*(per_MHz+ 224.71) + 263.83);
 
     stream[28] = freq & 0x000000ff;
     stream[27] = (freq & 0x0000ff00)>>8;
@@ -96,8 +78,6 @@ void Driver::writeDDS(double frequency, double power)
 
     _serial->write(stream);
     _serial->flush();
-    qInfo("got here");
-
 }
 
 //------------------------------------------------------------------------------
@@ -142,47 +122,30 @@ void Driver::writePLL(double frequency)
     quint8  aCounter = (quint8)(nCounter%32);
 
     //set up the function latch register
-    functionLatch[0] = functionLatch[0] | (prescalerIndex<<6);
-    functionLatch[0] = functionLatch[0] | (powerdown2<<5);
-    functionLatch[0] = functionLatch[0] | (CPset2<<2);
-    functionLatch[0] = functionLatch[0] | (CPset1>>1);
+    functionLatch[0] = (prescalerIndex<<6) | (powerdown2<<5) | (CPset2<<2) | (CPset1>>1);
 
-    functionLatch[1] = functionLatch[1] | (CPset1<<7);
-    functionLatch[1] = functionLatch[1] | (timerCounter<<3);
-    functionLatch[1] = functionLatch[1] | (fastLock<<1);
-    functionLatch[1] = functionLatch[1] | (CPoutput);
+    functionLatch[1] = (CPset1<<7)| (timerCounter<<3)| (fastLock<<1) | (CPoutput);
 
-    functionLatch[2] = functionLatch[2] | (pfdPolarity<<7);
-    functionLatch[2] = functionLatch[2] | (muxOut<<4);
-    functionLatch[2] = functionLatch[2] | (powerdown1<<3);
-    functionLatch[2] = functionLatch[2] | (counterReset<<2) | 0b10;
+    functionLatch[2] = (pfdPolarity<<7) | (muxOut<<4) | (powerdown1<<3) | (counterReset<<2) | 2;
 
     //set up the initialisation latch register
     initLatch[0] = functionLatch [0];
     initLatch[1] = functionLatch [1];
-    initLatch[2] = functionLatch [2] | 0b1;
+    initLatch[2] = functionLatch [2] | 1;
 
     //set up the r-Counter register
-    rCounterLatch[0] = rCounterLatch[0] | (lockDetectprecision<<4);
-    rCounterLatch[0] = rCounterLatch[0] | (abpw);
+    rCounterLatch[0] = (lockDetectprecision<<4) | abpw;
 
-    rCounterLatch[1] = rCounterLatch[1] | (((rCounter<<2) & 0xff00)>>8);
+    rCounterLatch[1] = ((rCounter<<2) & 0xff00)>>8;
 
-    rCounterLatch[2] = rCounterLatch[2] | (((rCounter) & 0x00ff))<<2 | 0b00;
+    rCounterLatch[2] = ((rCounter) & 0x00ff)<<2;
 
     //set up the ab-Counter register
-    abCounterLatch[0] = abCounterLatch[0] | (CPgain<<5);
-    abCounterLatch[0] = abCounterLatch[0] | ((bCounter)>>8);
-
-    abCounterLatch[1] = abCounterLatch[1] | (bCounter& 0xff);
-
-    abCounterLatch[2] = abCounterLatch[2] | (aCounter& 0x3f)<<2 | 0b01;
+    abCounterLatch[0] = (CPgain<<5) | ((bCounter)>>8);
+    abCounterLatch[1] = bCounter & 0xff;
+    abCounterLatch[2] = (aCounter & 0x3f)<<2 | 1;
 
     //write the 4 registers to the selected serial port
-
-
-    QByteArray dummy(3,0) ;
-
     _serial->write(initLatch);
     _serial->waitForBytesWritten(1);
     QThread::msleep(1);
@@ -209,20 +172,19 @@ void Driver::set(double frequency, double power)
 
     // chose one of the following options to send data to the correct device
 
-
+    quint8 step;
 
     if (power == 0)
     {
-        frequency = 232.61;
-        power = 0;
+        frequency = 232.61; // This frequency is cut-off by a filter
+        step = 0;
     }
     else
     {
-        double dummy_power = power;
-        power = (8e-6*(pow(dummy_power,3))) - (0.0049*(pow(dummy_power,2))) + (1.3178*dummy_power) - 86.215;
+        step = round(((8e-6*power-0.0049)*power+1.3178)*power-86.215);
     }
 
-    writeDDS(frequency, power);
+    writeDDS(frequency, step);
     //writePLL(frequency);
 }
 

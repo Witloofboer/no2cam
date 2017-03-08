@@ -9,7 +9,7 @@ namespace core {
 
 //------------------------------------------------------------------------------
 
-const qint64 snapshotSize = 2048;
+const qint64 snapshotSize = 512;
 
 typedef quint16 Pixel;
 typedef Pixel Snapshot[snapshotSize][snapshotSize];

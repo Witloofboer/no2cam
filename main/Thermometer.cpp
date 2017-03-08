@@ -18,43 +18,43 @@ ViStatus Thermometer::find_instruments(ViString findPattern, ViChar **resource)
 
 bool Thermometer::init()
 {
-        err = find_instruments(TLTSP_FIND_PATTERN_01, &rscPtr);
-        if (err != VI_SUCCESS)
-        {
-            //qDebug("Error on finding the temperature Probe");
-            return false;
-        }
+    _err = find_instruments(TLTSP_FIND_PATTERN_01, &_rscPtr);
+    if (_err != VI_SUCCESS)
+    {
+        qWarning("Error on finding the temperature Probe");
+        return false;
+    }
 
-        err = TLTSP_init(rscPtr, VI_ON, VI_ON, &instrHdl);
-        if (err != VI_SUCCESS)
-        {
-           // qDebug("Error on initializing the temperature Probe");
-            return false;
-        }
+    _err = TLTSP_init(_rscPtr, VI_ON, VI_ON, &_instrHdl);
+    if (_err != VI_SUCCESS)
+    {
+        qWarning("Error on initializing the temperature Probe");
+        return false;
+    }
 
-        viSetAttribute(instrHdl, VI_ATTR_TMO_VALUE, 5000);
-        return true;
-        }
+    viSetAttribute(_instrHdl, VI_ATTR_TMO_VALUE, 5000);
+    return true;
+}
 
 //--------------------------------------------------------------------------------------------//
 
 void Thermometer::uninit()
 {
-    TLTSP_close(instrHdl);
+    TLTSP_close(_instrHdl);
 }
 
 //--------------------------------------------------------------------------------------------//
 
 double Thermometer::getTemperature() {
-   ViReal64 temperature_value;
-   err = TLTSP_measTemperature (instrHdl, TLTSP_MEAS_TEMP2, &temperature_value);
-   return temperature_value;
+    ViReal64 temperature_value;
+    _err = TLTSP_measTemperature (_instrHdl, TLTSP_MEAS_TEMP2, &temperature_value);
+    return temperature_value;
 
 }
 
 double Thermometer::getHumidity() {
     ViReal64 humidity_value;
-    err = TLTSP_measHumidity(instrHdl, &humidity_value);
+    _err = TLTSP_measHumidity(_instrHdl, &humidity_value);
     return humidity_value;
 }
 

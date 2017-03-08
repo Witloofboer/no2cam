@@ -21,9 +21,9 @@ public:
 private:
 
     ViStatus    find_instruments(ViString findPattern, ViChar **resource);
-    ViStatus    err;
-    ViChar      *rscPtr;
-    ViSession   instrHdl = VI_NULL;
+    ViStatus    _err;
+    ViChar      *_rscPtr;
+    ViSession   _instrHdl = VI_NULL;
 
 };
 

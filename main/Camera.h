@@ -39,10 +39,9 @@ private:
     DCAMERR	_dcamErr;
     HDCAM _hdcam;
     QTimer *_timer;
-    int _exposureTime;
     bool state;
     _DWORD	dw = DCAMCAP_EVENT_FRAMEREADY;
-    bool first_run = true;
+    //bool first_run = true;
 
 
 

@@ -2,6 +2,7 @@
 #define DRIVER_H
 #include "core/drivers.h"
 
+#include <QtGlobal>
 
 class QSerialPort;
 
@@ -16,11 +17,10 @@ public:
     void uninit();
 
     void set(double frequency, double power) override;
-    void writeDDS(double frequency, double power);
-    void writePLL(double frequency);
 
-public slots:
-    void serialReceived();
+private:
+    void writeDDS(double frequency, quint8 level);
+    void writePLL(double frequency);
 
 private:
     QSerialPort *_serial;

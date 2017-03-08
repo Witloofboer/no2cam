@@ -72,7 +72,7 @@ bool HamamatsuCamera::init()
     qInfo("debug: %x",_dcamErr);
 
     // set the timer as fast as possible
-    _timer->setInterval(0);
+    //_timer->setInterval(0);
 
 
 
@@ -82,14 +82,6 @@ bool HamamatsuCamera::init()
 
     return true;
 }
-
-void HamamatsuCamera::checkFrameReady()
-{
-    _dcamErr = dcambuf_lockframe(_hdcam, &frame);
-    emit snapshotAvailable(reinterpret_cast<const core::Snapshot&>(frame.buf));
-}
-
-//------------------------------------------------------------------------------
 
 void HamamatsuCamera::uninit()
 {
@@ -104,7 +96,7 @@ void HamamatsuCamera::setExposure(int exposure)
 {
     //qInfo("<exposure time: %d ms>", exposure);
     _dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_EXPOSURETIME, ((double)exposure)/1000 );
-    _exposureTime = exposure;
+    _timer->setInterval(exposure);
 }
 
 //------------------------------------------------------------------------------
@@ -113,10 +105,21 @@ void HamamatsuCamera::takeSnapshot()
 {
     qInfo("<snapshotting>");
     state = dcam_firetrigger(_hdcam);
-    time->restart();
-    state = dcam_wait(_hdcam,&dw,1000,NULL);
-    qInfo("time to take snapshot (ms): %d", time->elapsed());
     _timer->start();
+
+//    time->restart();
+//    state = dcam_wait(_hdcam,&dw,1000,NULL);
+//    qDebug("time to take snapshot (ms): %d", time->elapsed());
+//    _timer->start();
+}
+
+//------------------------------------------------------------------------------
+
+void HamamatsuCamera::checkFrameReady()
+{
+    state = dcam_wait(_hdcam, &dw, 100, NULL);
+    _dcamErr = dcambuf_lockframe(_hdcam, &frame);
+    emit snapshotAvailable(reinterpret_cast<const core::Snapshot&>(frame.buf));
 }
 
 //------------------------------------------------------------------------------
@@ -124,6 +127,12 @@ void HamamatsuCamera::takeSnapshot()
 void HamamatsuCamera::stop()
 {
     _timer->stop();
+
+    state = dcam_idle(_hdcam); // back to idle mode
+    qDebug("Camera back to IDLE, error code = %d", state);
+
+    _dcamErr = dcamcap_start( _hdcam, DCAMCAP_START_SEQUENCE );
+    qDebug("Camera back to CAPTURE, error code = %x", _dcamErr);
 }
 
 //------------------------------------------------------------------------------

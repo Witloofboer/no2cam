@@ -72,7 +72,7 @@ MockCamera::MockCamera()
     for (int i=0; i<snapshotSize; ++i)
         for (int j=0; j<snapshotSize; ++j)
         {
-            _scene[i][j] = isBlackImage ? 0 : static_cast<quint16>(qGray(image.pixel(i, j))<<8);
+            _scene[i][j] = isBlackImage ? 0 : static_cast<quint16>(qGray(image.pixel(i*4, j*4))<<8);
         }
 }
 

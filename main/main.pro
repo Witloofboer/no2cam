@@ -19,7 +19,7 @@ SOURCES += \
     main.cpp \
     Camera.cpp \
     Driver.cpp \
-    Probe.cpp
+    Thermometer.cpp
 
 HEADERS  += \
     Camera.h \
