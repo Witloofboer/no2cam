@@ -105,6 +105,7 @@ void Driver::writeDDS(double frequency, double power)
 void Driver::writePLL(double frequency)
 {
 
+
     const double per_MHz = 1e6;
     const double VREF = 40;
     double VCO_freq = 1040;    //choose: NIR=1472, UV=1040, VIS=1152
@@ -208,19 +209,21 @@ void Driver::set(double frequency, double power)
 
     // chose one of the following options to send data to the correct device
 
-    power = 400;
+
 
     if (power == 0)
     {
-       frequency = 260.0;
+        frequency = 232.61;
+        power = 0;
+    }
+    else
+    {
+        double dummy_power = power;
+        power = (8e-6*(pow(dummy_power,3))) - (0.0049*(pow(dummy_power,2))) + (1.3178*dummy_power) - 86.215;
     }
 
-    double dummy_power = power;
-
-    power = (8e-6*(pow(dummy_power,3))) - (0.0049*(pow(dummy_power,2))) + (1.3178*dummy_power) - 86.215;
-
-    //writeDDS(frequency, power);
-    writePLL(frequency);
+    writeDDS(frequency, power);
+    //writePLL(frequency);
 }
 
 //------------------------------------------------------------------------------

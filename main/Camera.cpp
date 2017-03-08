@@ -60,7 +60,7 @@ bool HamamatsuCamera::init()
     frame.size	= sizeof(frame);
     frame.iFrame= -1;		// latest frame
 
-    _dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_BINNING, DCAMPROP_BINNING__2);
+    _dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_BINNING, DCAMPROP_BINNING__4);
     qInfo("debug: %x",_dcamErr);
 
     //state = dcam_allocframe(_hdcam, 1);
