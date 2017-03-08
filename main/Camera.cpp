@@ -77,7 +77,7 @@ bool HamamatsuCamera::init()
 
 
     //start the capture mode of the camera (exposure will begin once camera receives trigger from software)
-     _dcamErr = dcamcap_start( _hdcam, DCAMCAP_START_SEQUENCE );
+    _dcamErr = dcamcap_start( _hdcam, DCAMCAP_START_SEQUENCE );
     qInfo("debug: %x",_dcamErr);
 
     return true;
@@ -86,7 +86,7 @@ bool HamamatsuCamera::init()
 void HamamatsuCamera::checkFrameReady()
 {
     _dcamErr = dcambuf_lockframe(_hdcam, &frame);
-    emit snapshotAvailable();
+    emit snapshotAvailable(reinterpret_cast<const core::Snapshot&>(frame.buf));
 }
 
 //------------------------------------------------------------------------------
@@ -115,7 +115,7 @@ void HamamatsuCamera::takeSnapshot()
     state = dcam_firetrigger(_hdcam);
     time->restart();
     state = dcam_wait(_hdcam,&dw,1000,NULL);
-    qInfo("time to take snapshot (ms): %d",time->elapsed());
+    qInfo("time to take snapshot (ms): %d", time->elapsed());
     _timer->start();
 }
 
@@ -124,13 +124,6 @@ void HamamatsuCamera::takeSnapshot()
 void HamamatsuCamera::stop()
 {
     _timer->stop();
-}
-
-//------------------------------------------------------------------------------
-
-void HamamatsuCamera::getSnapshot(core::Snapshot &buffer)
-{
-    memcpy(buffer, frame.buf, sizeof buffer);
 }
 
 //------------------------------------------------------------------------------

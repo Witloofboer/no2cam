@@ -22,8 +22,6 @@ public:
     void setExposure(int exposure) override;
     void takeSnapshot() override;
     void stop() override;
-    void getSnapshot(core::Snapshot &buffer) override;
-
 
     bool init();
     void uninit();

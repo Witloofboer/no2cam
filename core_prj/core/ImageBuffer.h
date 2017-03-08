@@ -17,7 +17,7 @@ public:
 
     ImageBuffer();
 
-    void set(const Snapshot snapshot);
+    void set(const Snapshot &snapshot);
     void fill(uchar *pixels);
 
 private:

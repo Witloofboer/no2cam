@@ -15,33 +15,41 @@ static inline void initResource() {
 namespace core
 {
 
+static bool isBlackImage = false;
+// Bridge between the camera and the acoustic driver, as they normally don't
+// interact together. This flag is our part of our model of the real world:
+// without power, the image is dark.
+
 //------------------------------------------------------------------------------
 
-MockAcousticDriver::MockAcousticDriver(): AcousticDriver() {}
+MockAcousticDriver::MockAcousticDriver()
+    : AcousticDriver()
+{}
 
 //------------------------------------------------------------------------------
 
 void MockAcousticDriver::set(double frequency, double power)
 {
     qDebug("<acoustic wave: %.3f MHz, %.1f mW>", frequency, power);
+    isBlackImage = power == 0;
 }
 
 //------------------------------------------------------------------------------
 
-MockProbe::MockProbe()
-    : ProbeDriver()
+MockThermometer::MockThermometer()
+    : ThermometerDriver()
     , _temperature(20.0)
     , _delta(0.12)
 {}
 
 //------------------------------------------------------------------------------
 
-double MockProbe::getTemperature()
+double MockThermometer::getTemperature()
 {
     _temperature += _delta;
     if (_temperature < 18.0) _delta = fabs(_delta);
     else if (22.0 < _temperature) _delta = -fabs(_delta);
-    qDebug("<probe: %.2f degC>", _temperature);
+    qDebug("<temperature: %.2f degC>", _temperature);
     return _temperature;
 }
 
@@ -49,6 +57,7 @@ double MockProbe::getTemperature()
 
 MockCamera::MockCamera()
     : CameraDriver()
+    , _buffer{0}
     , _exposure(-1)
     , _timer(new QTimer(this))
     , _shift(0)
@@ -63,7 +72,7 @@ MockCamera::MockCamera()
     for (int i=0; i<snapshotSize; ++i)
         for (int j=0; j<snapshotSize; ++j)
         {
-            _scene[i][j] = static_cast<quint16>(qGray(image.pixel(i, j))<<8);
+            _scene[i][j] = isBlackImage ? 0 : static_cast<quint16>(qGray(image.pixel(i, j))<<8);
         }
 }
 
@@ -96,25 +105,18 @@ void MockCamera::stop()
 void MockCamera::onSnapshotAvailable()
 {
     qDebug("<camera: snapshot available>");
-    emit snapshotAvailable();
-}
 
-//------------------------------------------------------------------------------
-
-void MockCamera::getSnapshot(Snapshot &buffer)
-{
-    qDebug("<camera: transmitting snapshot>");
     for (int i=0; i<snapshotSize; ++i)
         for (int j=0; j<snapshotSize; ++j)
         {
             double pix = (double(_exposure)*_scene[(i+_shift) % snapshotSize][j]) / 50.0;
-            buffer[i][j] = pix<65535 ? pix : 65535;
+            _buffer[i][j] = isBlackImage ? 0 : (pix<65535 ? pix : 65535);
         }
 
     _shift = (_shift+7) % snapshotSize;
+
+    emit snapshotAvailable(_buffer);
 }
-
-
 
 //------------------------------------------------------------------------------
 

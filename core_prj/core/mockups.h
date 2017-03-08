@@ -28,12 +28,12 @@ public:
 
 //------------------------------------------------------------------------------
 
-class CORESHARED_EXPORT MockProbe : public ProbeDriver
+class CORESHARED_EXPORT MockThermometer : public ThermometerDriver
 {
     Q_OBJECT
 
 public:
-    MockProbe();
+    MockThermometer();
     double getTemperature() override;
 
 private:
@@ -53,12 +53,12 @@ public:
     void setExposure(int exposure) override;
     void takeSnapshot() override;
     void stop() override;
-    void getSnapshot(Snapshot &buffer) override;
 
 private slots:
     void onSnapshotAvailable();
 
 private:
+    Snapshot _buffer;
     int _exposure;
     QTimer *_timer;
     Snapshot _scene;

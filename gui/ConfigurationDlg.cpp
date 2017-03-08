@@ -52,13 +52,11 @@ ConfigurationDlg::ConfigurationDlg(MainWindow* mainWindow,
     auto paramGrid = new QGridLayout();
     row = 0;
     putInGrid(_stabilisationTimeEdit, paramGrid, row, "Stabilisation", "[ms]");
-    putInGrid(_temperaturePeriodEdit, paramGrid, row, "T° probing period", "[ms]");
+    putInGrid(_temperaturePeriodEdit, paramGrid, row, "Thermometer period", "[ms]");
 
     paramGrid->setColumnMinimumWidth(
         0,
         crystalGrid->itemAtPosition(2,0)->minimumSize().width());
-
-
 
     auto boardBox = new QGroupBox(tr("Functional parameters"));
     boardBox->setLayout(paramGrid);
@@ -95,7 +93,7 @@ static const char *incidentLbl = "incident angle [deg]";
 static const char *transHeightLbl = "transducer height [mm]";
 static const char *transLengthLbl = "transducer length [mm]";
 static const char *stabilisingTimeLbl = "board stabilisation [ms]";
-static const char *temperaturePeriodLbl = "T probe period [ms]";
+static const char *temperaturePeriodLbl = "thermometer period [ms]";
 
 //------------------------------------------------------------------------------
 
@@ -138,8 +136,11 @@ void ConfigurationDlg::restore()
     settings.endGroup();
 
     settings.beginGroup("Parameters");
-    _stabilisationTimeEdit->setText(settings.value(stabilisingTimeLbl,  "1").toString());
-    _temperaturePeriodEdit->setText(settings.value(temperaturePeriodLbl, "500").toString());
+    _stabilisationTimeEdit->setText(settings.value(stabilisingTimeLbl,  "5").toString());
+    _temperaturePeriodEdit->setText(settings.value(temperaturePeriodLbl, "1000").toString());
+    _stabilisingTime = _stabilisationTimeEdit->value();
+    _temperaturePeriod = _temperaturePeriodEdit->value();
+
     settings.endGroup();
 
     if (isValid())
@@ -148,7 +149,7 @@ void ConfigurationDlg::restore()
 
 //------------------------------------------------------------------------------
 
-void ConfigurationDlg::display(bool abortEnabled)
+void ConfigurationDlg::onDisplay(bool abortEnabled)
 {
     _buttonBox->button(QDialogButtonBox::Cancel)->setVisible(!abortEnabled);
     _buttonBox->button(QDialogButtonBox::Abort)->setVisible(abortEnabled);

@@ -34,7 +34,7 @@ signals:
     void parametersUpdated();
 
 public slots:
-    void display(bool abortEnabled=false);
+    void onDisplay(bool abortEnabled=false);
 
     int stabilisingTime() const;
     int temperaturePeriod() const;

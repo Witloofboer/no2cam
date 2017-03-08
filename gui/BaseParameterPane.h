@@ -47,7 +47,6 @@ protected:
 
     IntLineEdit  *_exposureEdit;
     IntLineEdit  *_cooldownTimeEdit;
-    IntLineEdit  *_cooldownPwrEdit;
 };
 
 //------------------------------------------------------------------------------

@@ -32,18 +32,18 @@ private:
 
 //------------------------------------------------------------------------------
 
-class ProbeDriver;
+class ThermometerDriver;
 
-class ProbeCtrl : public QObject
+class ThermometerCtrl : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit ProbeCtrl(QObject *parent, ProbeDriver *probe);
+    explicit ThermometerCtrl(QObject *parent, ThermometerDriver *thermometer);
     double getTemperature();
 
 protected:
-    ProbeDriver *_probe;
+    ThermometerDriver *_thermometer;
 };
 
 //------------------------------------------------------------------------------
@@ -60,18 +60,17 @@ public:
     void setExposure(int exposure);
     void takeSnapshot();
     void stop();
-    void getSnapshot(Snapshot &buffer);
 
 signals:
-    void snapshotAvailable();
+    void snapshotAvailable(const Snapshot &buffer);
 
 private slots:
-    void processSnapshot();
+    void onSnapshotAvailable(const Snapshot &buffer);
 
 private:
     CameraDriver *_camera;
     int _exposure;
-    bool _isAvailable;
+    bool _isBusy;
 };
 
 //------------------------------------------------------------------------------

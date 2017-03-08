@@ -24,6 +24,6 @@ HEADERS += \
 INCLUDEPATH += $$PWD/../core
 DEPENDPATH += $$PWD/../core
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../bin/ -lcore
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../bin/ -lcore
-else:unix: LIBS += -L$$OUT_PWD/../bin/ -lcore
+LIBS += -L$$OUT_PWD/../../bin/ -lcore
+
+CONFIG(release, debug|release): DEFINES += QT_NO_DEBUG_OUTPUT

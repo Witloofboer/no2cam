@@ -1,6 +1,6 @@
-#include "Probe.h"
+#include "Thermometer.h"
 
-ViStatus Probe::find_instruments(ViString findPattern, ViChar **resource)
+ViStatus Thermometer::find_instruments(ViString findPattern, ViChar **resource)
 {
     ViStatus       err;
     ViUInt32       findCnt;
@@ -16,7 +16,7 @@ ViStatus Probe::find_instruments(ViString findPattern, ViChar **resource)
 
 //--------------------------------------------------------------------------------------------//
 
-bool Probe::init()
+bool Thermometer::init()
 {
         err = find_instruments(TLTSP_FIND_PATTERN_01, &rscPtr);
         if (err != VI_SUCCESS)
@@ -38,27 +38,27 @@ bool Probe::init()
 
 //--------------------------------------------------------------------------------------------//
 
-void Probe::uninit()
+void Thermometer::uninit()
 {
     TLTSP_close(instrHdl);
 }
 
 //--------------------------------------------------------------------------------------------//
 
-double Probe::getTemperature() {
+double Thermometer::getTemperature() {
    ViReal64 temperature_value;
    err = TLTSP_measTemperature (instrHdl, TLTSP_MEAS_TEMP2, &temperature_value);
    return temperature_value;
 
 }
 
-double Probe::getHumidity() {
+double Thermometer::getHumidity() {
     ViReal64 humidity_value;
     err = TLTSP_measHumidity(instrHdl, &humidity_value);
     return humidity_value;
 }
 
 
-Probe::Probe()
-    : core::ProbeDriver()
+Thermometer::Thermometer()
+    : core::ThermometerDriver()
 {}

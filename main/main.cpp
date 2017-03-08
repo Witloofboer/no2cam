@@ -5,7 +5,7 @@
 #include "Camera.h"
 #include "Driver.h"
 #include "core/mockups.h"
-#include "Probe.h"
+#include "Thermometer.h"
 
 
 
@@ -18,8 +18,8 @@ int main(int argc, char *argv[])
 
     QApplication application(argc, argv);
 
-    auto probe = new Probe;                 // comment for fake Probe
-    //auto probe = new core::MockProbe;     // uncomment for fake Probe
+    auto thermometer = new Thermometer;     // comment for fake Probe
+    //auto thermometer = new core::MockThermometer;     // uncomment for fake Probe
     auto driver = new Driver;
     auto camera = new HamamatsuCamera();    // comment for fake camera
     //auto camera = new core::MockCamera(); // uncomment for fake camera
@@ -27,11 +27,11 @@ int main(int argc, char *argv[])
     bool ok = camera->init();               // comment for fake camera
     if (!ok) return -1;                     // comment for fake camera
 
-    bool probeOK = probe->init();           // comment for fake Probe
-    if (!probeOK)                           // comment 'if structure' for fake Probe
+    bool thermometerOK = thermometer->init();           // comment for fake Probe
+    if (!thermometerOK)                           // comment 'if structure' for fake Probe
     {
-       QMessageBox::critical(0, "Aborting", "Failed to connect to Temperature Sensor.");
-       return -1;
+        QMessageBox::critical(0, "Aborting", "Failed to connect to Temperature Sensor.");
+        return -1;
     }
 
     bool driverOK = driver->init();
@@ -43,13 +43,13 @@ int main(int argc, char *argv[])
 
     init("",
          QObject::tr("<p>Actual devices are used.</p>"),
-         probe, camera, driver);
+         thermometer, camera, driver);
 
     start();
     int result = application.exec();
 
     camera->uninit();                      // comment for fake camera
-    probe-> uninit();                      // comment for fake Probe
+    thermometer-> uninit();                      // comment for fake Probe
     finalise();
     return result;
 }

@@ -6,7 +6,7 @@
 
 #include "core_global.h"
 #include "Snapshot.h"
-
+#include "modes.h"
 
 class QTimer;
 
@@ -14,14 +14,15 @@ class QTimer;
 
 namespace core {
 
+class BaseMode;
 class Crystal;
 class CameraDriver;
 class AcousticDriver;
-class ProbeDriver;
+class ThermometerDriver;
 class CameraCtrl;
 class FrequencyCtrl;
 class AcousticCtrl;
-class ProbeCtrl;
+class ThermometerCtrl;
 
 //------------------------------------------------------------------------------
 
@@ -30,23 +31,42 @@ class ProbeCtrl;
  *
  * It is run by its own thread.
  */
-class CORESHARED_EXPORT Manager : public QObject
+class CORESHARED_EXPORT Manager
+    : public QObject
+    , public IModeToManager
 {
     Q_OBJECT
 
 public:
     Manager(const Crystal *crystal,
-            ProbeDriver *probe,
+            ThermometerDriver *thermometer,
             CameraDriver *camera,
             AcousticDriver *driver);
 
+    virtual ~Manager();
+
+    // IModeToManager
+    double temperature() const override;
+    void setAcousticBeam(double frequency, double power) override;
+    void takeSnapshot() override;
+    void setSnapshotForGui(const Snapshot &snapshotBuffer) override;
+    void saveSnapshot(const QDateTime &dateTime,
+                      char mode,
+                      double wavelength,
+                      double frequency,
+                      double power,
+                      int snapPerObs,
+                      double temperature,
+                      const Snapshot &snapshotBuffer) override;
+    void onStop() override;
+
 signals:
-    void ready(bool isReady);
-    void snapshotAvailable();
-    void errorOnFileCreation(QString dirname, QString filename);
-    void errorOnFileWritting(QString dirname, QString filename);
-    void temperatureUpdated(double temperature);
-    void informationMsg(QString msg);
+    void updateTemperature(double temperature);
+    void updateApplicationReadiness(bool isReady);
+    void displaySnapshot();
+    void fileCreationError(QString dirname, QString filename);
+    void fileWritingError(QString dirname, QString filename);
+    void displayInformation(QString msg);
 
 public slots:
     /**
@@ -60,15 +80,14 @@ public slots:
      * @param burst single snapshot or burst mode flag
      * @param session name used to prepend record files. No recording if empty.
      */
-    void spectralSnapshot(double wavelength,
-                          int exposure,
-                          int cooldownTime,
-                          int cooldownPwr,
-                          int stabilisationTime,
-                          bool burst,
-                          bool record,
-                          QString dataFolder,
-                          QString session);
+    void onOpticalSnapshot(double wavelength,
+                           int exposure,
+                           int cooldownTime,
+                           int stabilisationTime,
+                           bool burst,
+                           bool record,
+                           QString dataFolder,
+                           QString session);
 
     /**
      * Initiate a snapshoting session for a fixed frequency and power.
@@ -81,16 +100,15 @@ public slots:
      * @param burst single snapshot or burst mode flag
      * @param session name used to prepend record files. No recording if empty.
      */
-    void acousticSnapshot(double frequency,
-                          double power,
-                          int exposure,
-                          int cooldownTime,
-                          int cooldownPwr,
-                          int stabilisationTime,
-                          bool burst,
-                          bool record,
-                          QString dataFolder,
-                          QString session);
+    void onAcousticSnapshot(double frequency,
+                            double power,
+                            int exposure,
+                            int cooldownTime,
+                            int stabilisationTime,
+                            bool burst,
+                            bool record,
+                            QString dataFolder,
+                            QString session);
 
     /**
      * Initiate an observation
@@ -104,17 +122,16 @@ public slots:
      * @param burst single snapshot or burst mode flag
      * @param session name used to prepend record files. No recording if empty.
      */
-    void observation(double wavelength1,
-                     double wavelength2,
-                     int exposure,
-                     int snapshotPerObs,
-                     int cooldownTime,
-                     int cooldownPwr,
-                     int stabilisationTime,
-                     bool burst,
-                     bool record,
-                     QString dataFolder,
-                     QString session);
+    void onObservation(double wavelength1,
+                       double wavelength2,
+                       int snapshotPerObs,
+                       int exposure,
+                       int cooldownTime,
+                       int stabilisationTime,
+                       bool burst,
+                       bool record,
+                       QString dataFolder,
+                       QString session);
 
 
     /**
@@ -130,143 +147,69 @@ public slots:
      * @param session name used to prepend record files. No recording if empty.
      * @param crystal crystal used
      */
-    void sweep(double wavelength1,
-               double wavelength2,
-               double wavelengthStep,
-               int    blackSnapshotRate,
-               int exposure,
-               int cooldownTime,
-               int cooldownPwr,
-               int stabilisationTime,
-               bool burst,
-               bool record,
-               QString dataFolder,
-               QString session);
+    void onSweep(double wavelength1,
+                 double wavelength2,
+                 double wavelengthStep,
+                 int    blackSnapshotRate,
+                 int exposure,
+                 int cooldownTime,
+                 int stabilisationTime,
+                 bool burst,
+                 bool record,
+                 QString dataFolder,
+                 QString session);
 
-    /**
-      * Requests the stop of all the devices.
-      */
-    void stop();
 
     /**
       * Update the temperature period
       */
-    void updateTemperaturePeriod(int temperaturePeriod);
+    void onTemperaturePeriodUpdated(int temperaturePeriod);
 
     /**
      * Requests the manager to shut down.
      */
-    void shutdown();
+    void onShutdown();
 
     /**
      * Requests the instance to move to the main thread.
      */
-    void threadFinished();
+    void onThreadFinished();
 
 private slots:
-    void setAcousticWave();
-    void takeSnapshot();
-    void updateTemperature();
-    void postSnapshotProcess();
+    void onTemperatureTimer();
+    void onCooldownTimer();
+    void onAcousticBeamReady();
+    void onSnapshotAvailable(const Snapshot &buffer);
 
-
-private:
-    enum Mode {READY, SpectralSnap, AcousticSnap, Obs, Sweep};
-    const QString _modeToCode[5] = {"XX", "S", "A", "O", "W"};
-
-    void setCommonParams(Mode mode,
-                         int exposure,
-                         int cooldownTime,
-                         int cooldownPwr,
-                         int stabilisationTime,
-                         bool burst,
-                         bool record,
-                         const QString &dataFolder,
-                         const QString &session);
-
-    void saveSnapshot(const QDateTime &dateTime,
-                      Mode mode,
-                      double wavelength,
-                      double frequency,
-                      double power,
-                      int snapPerObs,
-                      int exposure,
-                      double temperature,
-                      Snapshot &snapshot);
+protected:
+    void setParams(int exposure,
+                   int cooldownTime,
+                   int stabilisationTime,
+                   bool bursting,
+                   bool record,
+                   const QString& dataFolder,
+                   const QString& session);
 
     QTimer *_cooldownT;
     QTimer *_stabilisationT;
     QTimer *_temperatureT;
 
-
-    double _cooldownPwr;
-
     const Crystal *_crystal;
-    CameraCtrl *_camera;
-    AcousticCtrl *_acousticDriver;
-    ProbeCtrl *_probe;
+    CameraCtrl *_cameraCtrl;
+    AcousticCtrl *_acousticCtrl;
+    ThermometerCtrl *_thermometerCtrl;
 
     double _temperature;
-    double _refTemperature;
 
-    Mode _mode;
     int _exposure;
     bool _bursting;
     Snapshot _snapshotBuffer;
-    QDateTime _snapTime;
+
     bool _record;
     QString _dataFolder;
     QString _session;
 
-    void requestAcousticWave(double frequency, double power);
-
-    bool mustContinueAquisition() const;
-    bool mustCooldown() const;
-    void cooldown();
-
-    struct WlSnapshotParams
-    {
-        double in_wavelength;
-        double frequency;
-        double power;
-    };
-
-    struct AcousticSnapshotParams
-    {
-        double in_frequency;
-        double in_power;
-        double wavelength;
-    };
-
-    struct ObservationParams
-    {
-        double in_wavelengths[3];
-        int in_snapshotPerObs;
-        int idx;
-        int snapshotCount;
-        double frequency[3];
-        double power[3];
-        Snapshot snapshots[3];
-    };
-
-    struct SweepParams
-    {
-        double in_minWavelength;
-        double in_maxWavelength;
-        double in_wavelengthStep;
-        double wavelength;
-        double frequency;
-        double power;
-        int blackSnapshotRate;
-        int counter;
-    };
-
-    union {
-        WlSnapshotParams specSnap;
-        AcousticSnapshotParams acouSnap;
-        ObservationParams obs;
-        SweepParams swp;
-    } _p; // parameters
+    BaseMode *_mode;
 };
 
 //------------------------------------------------------------------------------

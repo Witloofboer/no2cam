@@ -4,23 +4,26 @@
 #
 #-------------------------------------------------
 
-QT     += gui
-CONFIG += console
+QT     += gui core widgets
+CONFIG += c++11 console
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
-TARGET = mockup
+TARGET = profiling
 TEMPLATE = app
 
 OBJECTS_DIR=../obj
 DESTDIR=../bin
 
 SOURCES += \
-    mockup.cpp
+    profiling.cpp \
+    InstrumentedManager.cpp
 
-HEADERS  +=
+HEADERS  += \
+    InstrumentedManager.h
 
 FORMS    +=
+
+RESOURCES += \
+    $$PWD/../gui/resources.qrc
 
 LIBS += -L$$OUT_PWD/../bin/ -lcore
 
