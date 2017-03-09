@@ -63,7 +63,6 @@ bool HamamatsuCamera::init()
     _dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_BINNING, DCAMPROP_BINNING__4);
     qInfo("debug: %x",_dcamErr);
 
-    //state = dcam_allocframe(_hdcam, 1);
     _dcamErr = dcambuf_alloc(_hdcam,1);
     qInfo("debug: %x",_dcamErr);
 
@@ -94,7 +93,7 @@ void HamamatsuCamera::uninit()
 
 void HamamatsuCamera::setExposure(int exposure)
 {
-    //qInfo("<exposure time: %d ms>", exposure);
+    qDebug("<exposure time: %d ms>", exposure);
     _dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_EXPOSURETIME, ((double)exposure)/1000 );
     _timer->setInterval(exposure);
 }
@@ -103,14 +102,9 @@ void HamamatsuCamera::setExposure(int exposure)
 
 void HamamatsuCamera::takeSnapshot()
 {
-    qInfo("<snapshotting>");
+    qDebug("<snapshotting>");
     state = dcam_firetrigger(_hdcam);
     _timer->start();
-
-//    time->restart();
-//    state = dcam_wait(_hdcam,&dw,1000,NULL);
-//    qDebug("time to take snapshot (ms): %d", time->elapsed());
-//    _timer->start();
 }
 
 //------------------------------------------------------------------------------
@@ -119,13 +113,20 @@ void HamamatsuCamera::checkFrameReady()
 {
     state = dcam_wait(_hdcam, &dw, 100, NULL);
     _dcamErr = dcambuf_lockframe(_hdcam, &frame);
-    emit snapshotAvailable(reinterpret_cast<const core::Snapshot&>(frame.buf));
+
+    core::Pixel *from = reinterpret_cast<core::Pixel *>(frame.buf);
+    for(int i=0; i<512; ++i)
+        for(int j=0; j<512; ++j)
+            _snap[i][j] = *from++;
+
+    emit snapshotAvailable(_snap);
 }
 
 //------------------------------------------------------------------------------
 
 void HamamatsuCamera::stop()
 {
+    qDebug("<camera stop>");
     _timer->stop();
 
     state = dcam_idle(_hdcam); // back to idle mode

@@ -6,6 +6,7 @@
 #include "dcamapi.h"
 #include "qtimer.h"
 #include "QTime"
+#include "core/Snapshot.h"
 
 class QTimer;
 
@@ -41,6 +42,7 @@ private:
     QTimer *_timer;
     bool state;
     _DWORD	dw = DCAMCAP_EVENT_FRAMEREADY;
+    core::Snapshot _snap;
     //bool first_run = true;
 
 
