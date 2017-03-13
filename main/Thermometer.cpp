@@ -1,49 +1,40 @@
 #include "Thermometer.h"
 
-ViStatus Thermometer::find_instruments(ViString findPattern, ViChar **resource)
+#include <QMessageBox>
+
+//--------------------------------------------------------------------------------------------//
+
+Thermometer::Thermometer()
+    : core::ThermometerDriver()
+{}
+
+//--------------------------------------------------------------------------------------------//
+
+Thermometer::~Thermometer()
 {
-    ViStatus       err;
-    ViUInt32       findCnt;
-    static ViChar  rscStr[VI_FIND_BUFLEN];
-
-    //err = TLTSP_getDeviceCount(VI_NULL, );
-    err = TLTSP_getDeviceCount((ViSession) VI_NULL,&findCnt);
-
-    err = TLTSP_getDeviceResourceString(VI_NULL, 0, rscStr);
-    *resource = rscStr;
-    return (err);
+    TLTSP_close(_instrHdl);
 }
 
 //--------------------------------------------------------------------------------------------//
 
 bool Thermometer::init()
 {
-    _err = find_instruments(TLTSP_FIND_PATTERN_01, &_rscPtr);
-    if (_err != VI_SUCCESS)
-    {
-        qWarning("Error on finding the temperature Probe");
-        return false;
-    }
+    ViStatus      status;
+    static ViChar rscStr[VI_FIND_BUFLEN];
 
-    _err = TLTSP_init(_rscPtr, VI_ON, VI_ON, &_instrHdl);
-    if (_err != VI_SUCCESS)
-    {
-        qWarning("Error on initializing the temperature Probe");
+    status = TLTSP_getDeviceResourceString(VI_NULL, 0, rscStr);
+    if (status != VI_SUCCESS)
         return false;
-    }
+
+    status = TLTSP_init(_rscPtr, VI_ON, VI_ON, &_instrHdl);
+    if (status != VI_SUCCESS)
+        return false;
 
     viSetAttribute(_instrHdl, VI_ATTR_TMO_VALUE, 5000);
     return true;
 }
 
-//--------------------------------------------------------------------------------------------//
-
-void Thermometer::uninit()
-{
-    TLTSP_close(_instrHdl);
-}
-
-//--------------------------------------------------------------------------------------------//
+//------------------------------------------------------------------------------
 
 double Thermometer::getTemperature() {
     ViReal64 temperature_value;
@@ -52,13 +43,12 @@ double Thermometer::getTemperature() {
 
 }
 
+//------------------------------------------------------------------------------
+
 double Thermometer::getHumidity() {
     ViReal64 humidity_value;
     _err = TLTSP_measHumidity(_instrHdl, &humidity_value);
     return humidity_value;
 }
 
-
-Thermometer::Thermometer()
-    : core::ThermometerDriver()
-{}
+//------------------------------------------------------------------------------

@@ -19,6 +19,7 @@ class CORESHARED_EXPORT AcousticDriver : public QObject
 
 public:
     AcousticDriver();
+    virtual ~AcousticDriver() {}
 
     virtual void set(double frequency, double power)=0;
 };
@@ -31,6 +32,7 @@ class CORESHARED_EXPORT CameraDriver : public QObject
 
 public:
     CameraDriver();
+    virtual ~CameraDriver() {}
 
     virtual void setExposure(int exposure)=0;
     virtual void takeSnapshot()=0;
@@ -48,6 +50,7 @@ class CORESHARED_EXPORT ThermometerDriver : public QObject
 
 public:
     ThermometerDriver();
+    virtual ~ThermometerDriver() {}
 
     virtual double getTemperature()=0;
 };

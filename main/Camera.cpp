@@ -2,6 +2,7 @@
 #include <QMessageBox>
 #include <QString>
 #include "dcamprop.h"
+#include <stdlib.h>
 
 //------------------------------------------------------------------------------
 
@@ -15,9 +16,12 @@ HamamatsuCamera::HamamatsuCamera()
 
 //------------------------------------------------------------------------------
 
-HamamatsuCamera::~HamamatsuCamera() {}
-
-//------------------------------------------------------------------------------
+HamamatsuCamera::~HamamatsuCamera()
+{
+    dcambuf_release( _hdcam );
+    dcamdev_close( _hdcam );
+    dcamapi_uninit();
+}
 
 bool HamamatsuCamera::init()
 {
@@ -30,7 +34,10 @@ bool HamamatsuCamera::init()
 
     if( failed( _dcamErr ) )
     {
-        qInfo("CAM ERROR ON INIT: %d", _dcamErr); // TODO Error
+        QMessageBox::critical(
+            0, "Aborting",
+            tr("<p>Camera init has failed.</p>"
+               "<p>dcamapi_init error code: %1").arg(_dcamErr));
         return false;
     }
 
@@ -42,17 +49,18 @@ bool HamamatsuCamera::init()
     paramopen.size	= sizeof(paramopen);
     paramopen.index	= 0;
     _dcamErr = dcamdev_open( &paramopen );
-    qInfo("debug: %x",_dcamErr);
 
     if( failed( _dcamErr ) )
     {
-        qInfo("CAM ERROR ON DEV OPEN: %d", _dcamErr);
+        QMessageBox::critical(
+            0, "Aborting",
+            tr("<p>Camera open has failed.</p>"
+               "<p>dcamdev_open error code: %1").arg(_dcamErr));
         dcamapi_uninit();
         return false;
     }
 
     // once the camera could be opened succesfully, couple the device ID to the device handler
-    qDebug("INIT DCAM SUCCESFULLY!:");
     _hdcam = paramopen.hdcam;
 
     // set the frame variable and allocate 1 frame to the camera
@@ -61,32 +69,56 @@ bool HamamatsuCamera::init()
     frame.iFrame= -1;		// latest frame
 
     _dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_BINNING, DCAMPROP_BINNING__4);
-    qInfo("debug: %x",_dcamErr);
+    if( failed( _dcamErr ) )
+    {
+        QMessageBox::critical(
+            0, "Aborting",
+            tr("<p>Camera binning setting has failed.</p>"
+               "<p>dcamprop_setvalue error code: %1").arg(_dcamErr));
+        dcamdev_close( _hdcam );
+        dcamapi_uninit();
+        return false;
+    }
 
     _dcamErr = dcambuf_alloc(_hdcam,1);
-    qInfo("debug: %x",_dcamErr);
+    if( failed( _dcamErr ) )
+    {
+        QMessageBox::critical(
+            0, "Aborting",
+            tr("<p>Camera buffer allocation has failed.</p>"
+               "<p>dcambuf_alloc error code: %1").arg(_dcamErr));
+        dcamdev_close( _hdcam );
+        dcamapi_uninit();
+        return false;
+    }
 
     // allow the software to send the trigger pulse to the camera
     _dcamErr = dcamprop_setvalue(_hdcam, DCAM_IDPROP_TRIGGERSOURCE, DCAMPROP_TRIGGERSOURCE__SOFTWARE );
-    qInfo("debug: %x",_dcamErr);
-
-    // set the timer as fast as possible
-    //_timer->setInterval(0);
-
-
+    if( failed( _dcamErr ) )
+    {
+        QMessageBox::critical(
+            0, "Aborting",
+            tr("<p>Camera trigger setting has failed.</p>"
+               "<p>dcamprop_setvalue error code: %1").arg(_dcamErr));
+        dcambuf_release( _hdcam );
+        dcamdev_close( _hdcam );
+        dcamapi_uninit();
+        return false;
+    }
 
     //start the capture mode of the camera (exposure will begin once camera receives trigger from software)
     _dcamErr = dcamcap_start( _hdcam, DCAMCAP_START_SEQUENCE );
-    qInfo("debug: %x",_dcamErr);
-
-    return true;
-}
-
-void HamamatsuCamera::uninit()
-{
-    dcambuf_release( _hdcam );
-    dcamdev_close( _hdcam );
-    dcamapi_uninit();
+    if( failed( _dcamErr ) )
+    {
+        QMessageBox::critical(
+            0, "Aborting",
+            tr("<p>Camera start has failed.</p>"
+               "<p>dcamcap_start error code: %1").arg(_dcamErr));
+        dcambuf_release( _hdcam );
+        dcamdev_close( _hdcam );
+        dcamapi_uninit();
+        return false;
+    }
 }
 
 //------------------------------------------------------------------------------

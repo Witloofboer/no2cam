@@ -20,12 +20,11 @@ public:
     HamamatsuCamera();
     ~HamamatsuCamera();
 
+    bool init();
+
     void setExposure(int exposure) override;
     void takeSnapshot() override;
     void stop() override;
-
-    bool init();
-    void uninit();
 
     int my_dcamprop_getvalue( HDCAM _hdcam, int32 idprop, int32& lValue );
 

@@ -11,12 +11,12 @@ class Thermometer : public core::ThermometerDriver
 
 public:
     Thermometer();
+    virtual ~Thermometer() override;
 
     double getTemperature() override;
     double getHumidity();
 
     bool init();
-    void uninit();
 
 private:
 
