@@ -37,22 +37,12 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("NO2 Camera Command Interface");
     Q_INIT_RESOURCE(resources);
 
-    auto _coreThr = new QThread;
     auto _crystal = new core::Crystal;
     auto _coreLayer = new InstrumentedManager(_crystal, thermometer, camera, driver);
     auto _mainWindow = new gui::MainWindow(_crystal, _coreLayer, "(optim)", "");
     _mainWindow->show();
 
     _coreLayer->mainWindow(_mainWindow);
-
-    QObject::connect(_coreThr, QThread::finished,
-                     _coreLayer, core::Manager::onThreadFinished);
-
-    qDebug("Moving core layer to core thread");
-    _coreLayer->moveToThread(_coreThr);
-
-    qDebug("Starting core thread");
-    _coreThr->start();
 
     QTimer::singleShot(2000, _coreLayer, InstrumentedManager::runScenario);
     qDebug("Starting Gui");
@@ -61,7 +51,6 @@ int main(int argc, char *argv[])
 
     delete _mainWindow;
     delete _coreLayer;
-    delete _coreThr;
     delete _crystal;
     return result;
 }

@@ -1,13 +1,15 @@
 #include <QApplication>
 
-#include "gui/gui_global.h"
 #include <QMessageBox>
 #include "Camera.h"
 #include "Driver.h"
-#include "core/mockups.h"
 #include "Thermometer.h"
 
-
+#include <QCoreApplication>
+#include "gui/MainWindow.h"
+#include "core/Crystal.h"
+#include "core/Manager.h"
+#include "core/drivers.h"
 
 //------------------------------------------------------------------------------
 
@@ -41,16 +43,21 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    init("",
-         QObject::tr("<p>Actual devices are used.</p>"),
-         thermometer, camera, driver);
+    qInfo("Initialisation");
 
-    start();
+    QCoreApplication::setOrganizationName("BIRA-IASB");
+    QCoreApplication::setApplicationName("NO2 Camera Command Interface");
+
+    auto _crystal = new core::Crystal;
+    auto _coreLayer = new core::Manager(_crystal, thermometer, camera, driver);
+    auto _mainWindow = new gui::MainWindow(_crystal, _coreLayer, "",
+                                           QObject::tr("<p>Actual devices are used.</p>"));
+    _mainWindow->show();
+
     int result = application.exec();
 
     camera->uninit();                      // comment for fake camera
     thermometer-> uninit();                      // comment for fake Probe
-    finalise();
     return result;
 }
 

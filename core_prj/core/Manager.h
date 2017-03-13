@@ -62,11 +62,13 @@ public:
 
 signals:
     void updateTemperature(double temperature);
+    void updateTemperaturePeriod(int period);
     void updateApplicationReadiness(bool isReady);
     void displaySnapshot();
     void fileCreationError(QString dirname, QString filename);
     void fileWritingError(QString dirname, QString filename);
     void displayInformation(QString msg);
+    void shutdown();
 
 public slots:
     /**
@@ -161,9 +163,15 @@ public slots:
 
 
     /**
+      * Update the temperature
+      */
+    void onTemperatureUpdated(double temperature);
+
+    /**
       * Update the temperature period
       */
-    void onTemperaturePeriodUpdated(int temperaturePeriod);
+    void onTemperaturePeriodUpdated(int period);
+
 
     /**
      * Requests the manager to shut down.
@@ -176,8 +184,7 @@ public slots:
     void onThreadFinished();
 
 private slots:
-    void onTemperatureTimer();
-    void onCooldownTimer();
+    void onCooldownTimeout();
     void onAcousticBeamReady();
     void onSnapshotAvailable(const Snapshot &buffer);
 
@@ -192,7 +199,6 @@ protected:
 
     QTimer *_cooldownT;
     QTimer *_stabilisationT;
-    QTimer *_temperatureT;
 
     const Crystal *_crystal;
     CameraCtrl *_cameraCtrl;
@@ -210,6 +216,7 @@ protected:
     QString _session;
 
     BaseMode *_mode;
+    QThread *_thread;
 };
 
 //------------------------------------------------------------------------------

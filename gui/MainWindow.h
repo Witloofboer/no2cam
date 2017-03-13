@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 #include <QString>
-
 #include "gui_global.h"
 
 //------------------------------------------------------------------------------

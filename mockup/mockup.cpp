@@ -1,7 +1,11 @@
 #include <QApplication>
 
 #include "core/mockups.h"
-#include "gui/gui_global.h"
+#include "core/Crystal.h"
+#include "core/Manager.h"
+
+#include "gui/MainWindow.h"
+
 
 //------------------------------------------------------------------------------
 
@@ -11,17 +15,24 @@ int main(int argc, char *argv[])
 
     QApplication application(argc, argv);
 
-    auto thermamter = new core::MockThermometer;
+    auto thermometer = new core::MockThermometer;
     auto camera = new core::MockCamera;
     auto driver = new core::MockAcousticDriver;
 
-    init("mockup",
-         QObject::tr("<p>Functional mockups are used for all devices.</p>"),
-         thermamter, camera, driver);
+    QCoreApplication::setOrganizationName("BIRA-IASB");
+    QCoreApplication::setApplicationName("NO2 Camera Command Interface");
 
-    start();
+    auto _crystal = new core::Crystal;
+    auto _coreLayer = new core::Manager(_crystal, thermometer, camera, driver);
+    auto _mainWindow = new gui::MainWindow(_crystal, _coreLayer, "mockup",
+                                           QObject::tr("<p>Functional mockups are used for all devices.</p>"));
+    _mainWindow->show();
+
     int result = application.exec();
-    finalise();
+
+    delete _mainWindow;
+    delete _coreLayer;
+    delete _crystal;
 
     return result;
 }

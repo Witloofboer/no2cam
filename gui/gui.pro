@@ -22,7 +22,6 @@ SOURCES +=\
     MainWindow.cpp \
     ConfigurationDlg.cpp \
     CameraBtnBox.cpp \
-    gui_global.cpp \
     HistogramWidget.cpp \
     SnapshotWidget.cpp \
     BaseParameterPane.cpp \
@@ -31,7 +30,6 @@ SOURCES +=\
     ObservationParameterPane.cpp
 
 HEADERS +=\
-    gui_global.h \
     tooling.h \
     MainWindow.h \
     ConfigurationDlg.h \
@@ -41,7 +39,8 @@ HEADERS +=\
     BaseParameterPane.h \
     SnapshotParameterPane.h \
     ObservationParameterPane.h \
-    SweepParameterPane.h
+    SweepParameterPane.h \
+    gui_global.h
 
 RESOURCES += \
     resources.qrc

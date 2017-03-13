@@ -1,6 +1,9 @@
 #include "controllers.h"
 #include "drivers.h"
+
 #include <QDir> // Q_INIT_RESOURCE
+#include <QTimer>
+#include <QThread>
 
 //------------------------------------------------------------------------------
 
@@ -41,20 +44,45 @@ bool AcousticCtrl::set(double frequency, double power)
 // ThermometerCtrl
 //------------------------------------------------------------------------------
 
-ThermometerCtrl::ThermometerCtrl(QObject *parent, ThermometerDriver *thermometer)
-    : QObject(parent)
+ThermometerCtrl::ThermometerCtrl(ThermometerDriver *thermometer)
+    : QObject()
     , _thermometer(thermometer)
+    , _thread(new QThread(this))
+    , _thermometerT(new QTimer(this))
 {
     _thermometer->setParent(this);
+    connect(_thermometerT, QTimer::timeout, this, onTemperatureTimeout);
+    this->moveToThread(_thread);
+    _thread->start();
 }
 
 //------------------------------------------------------------------------------
 
-double ThermometerCtrl::getTemperature()
+void ThermometerCtrl::onTemperaturePeriodUpdated(int period)
 {
-    double temperature = _thermometer->getTemperature();
-    qDebug("Probe: temperature is %.2f degC", temperature);
-    return temperature;
+    if (period != _thermometerT->interval())
+    {
+        qDebug("Setting thermometer period to %dms.", period);
+        _thermometerT->stop();
+        onTemperatureTimeout();
+        _thermometerT->start(period);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void ThermometerCtrl::onShutdown()
+{
+    qDebug("ThermometerCtrl shutting down");
+    _thermometerT->stop();
+    _thread->quit();
+}
+
+//------------------------------------------------------------------------------
+
+void ThermometerCtrl::onTemperatureTimeout()
+{
+    emit updateTemperature(_thermometer->getTemperature());
 }
 
 //------------------------------------------------------------------------------

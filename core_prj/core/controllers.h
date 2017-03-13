@@ -7,6 +7,9 @@
 
 #include "snapshot.h"
 
+class QTimer;
+class QThread;
+
 //------------------------------------------------------------------------------
 
 namespace core
@@ -24,6 +27,9 @@ public:
     explicit AcousticCtrl(QObject *parent, AcousticDriver *driver);
     bool set(double frequency, double power);
 
+signals:
+    updateTemperature(double temperature);
+
 private:
     AcousticDriver *_driver;
     double _frequency;
@@ -39,11 +45,22 @@ class ThermometerCtrl : public QObject
     Q_OBJECT
 
 public:
-    explicit ThermometerCtrl(QObject *parent, ThermometerDriver *thermometer);
-    double getTemperature();
+    explicit ThermometerCtrl(ThermometerDriver *thermometer);
 
-protected:
+signals:
+    void updateTemperature(double temperature);
+
+public slots:
+    void onTemperaturePeriodUpdated(int period);
+    void onShutdown();
+
+private slots:
+    void onTemperatureTimeout();
+
+private:
     ThermometerDriver *_thermometer;
+    QThread *_thread;
+    QTimer *_thermometerT;
 };
 
 //------------------------------------------------------------------------------

@@ -23,25 +23,37 @@ Manager::Manager(const Crystal *crystal,
     : QObject()
     , _cooldownT(new QTimer(this))
     , _stabilisationT(new QTimer(this))
-    , _temperatureT(new QTimer(this))
     , _crystal(crystal)
     , _cameraCtrl(new CameraCtrl(this, camera))
     , _acousticCtrl(new AcousticCtrl(this, driver))
-    , _thermometerCtrl(new ThermometerCtrl(this, thermometer))
+    , _thermometerCtrl(new ThermometerCtrl(thermometer))
     , _snapshotBuffer{0}
     , _mode(0)
+    , _thread(new QThread(this))
 {
     _cooldownT->setSingleShot(true);
     _stabilisationT->setSingleShot(true);
 
     _cameraCtrl->setParent(this);
     _acousticCtrl->setParent(this);
-    _thermometerCtrl->setParent(this);
 
-    connect(_cooldownT, QTimer::timeout, this, onCooldownTimer);
+    connect(_cooldownT, QTimer::timeout, this, onCooldownTimeout);
     connect(_stabilisationT, QTimer::timeout, this, onAcousticBeamReady);
-    connect(_temperatureT, QTimer::timeout, this, onTemperatureTimer);
-    connect(_cameraCtrl, CameraCtrl::snapshotAvailable, this, onSnapshotAvailable);
+    connect(this, updateTemperaturePeriod,
+            _thermometerCtrl, ThermometerCtrl::onTemperaturePeriodUpdated);
+    connect(this, shutdown,
+            _thermometerCtrl, ThermometerCtrl::onShutdown);
+    connect(_thermometerCtrl, ThermometerCtrl::updateTemperature,
+            this, onTemperatureUpdated);
+    connect(_cameraCtrl, CameraCtrl::snapshotAvailable,
+            this, onSnapshotAvailable);
+    connect(_thread, QThread::finished, this, onThreadFinished);
+    qDebug("Moving core layer to core thread");
+    moveToThread(_thread);
+
+    qDebug("Starting core thread");
+    _thread->start();
+
 }
 
 //------------------------------------------------------------------------------
@@ -49,6 +61,7 @@ Manager::Manager(const Crystal *crystal,
 Manager::~Manager()
 {
     Q_ASSERT(_mode == nullptr);
+    delete _thermometerCtrl;
 }
 
 //------------------------------------------------------------------------------
@@ -262,17 +275,20 @@ void Manager::onSweep(double wavelength1,
     _mode->start();
 }
 
+
 //------------------------------------------------------------------------------
 
-void Manager::onTemperaturePeriodUpdated(int temperaturePeriod)
+void Manager::onTemperatureUpdated(double temperature)
 {
-    if (temperaturePeriod != _temperatureT->interval())
-    {
-        qDebug("Setting thermometer period to %dms.", temperaturePeriod);
-        _temperatureT->stop();
-        onTemperatureTimer();
-        _temperatureT->start(temperaturePeriod);
-    }
+    _temperature=temperature;
+    emit updateTemperature(_temperature);
+}
+
+//------------------------------------------------------------------------------
+
+void Manager::onTemperaturePeriodUpdated(int period)
+{
+    emit updateTemperaturePeriod(period);
 }
 
 //------------------------------------------------------------------------------
@@ -280,8 +296,9 @@ void Manager::onTemperaturePeriodUpdated(int temperaturePeriod)
 void Manager::onShutdown()
 {
     onStop();
-    _temperatureT->stop();
-    thread()->exit();
+    emit shutdown();
+    _thermometerCtrl->thread()->wait();
+    thread()->quit();
 }
 
 //------------------------------------------------------------------------------
@@ -295,15 +312,7 @@ void Manager::onThreadFinished()
 
 //------------------------------------------------------------------------------
 
-void Manager::onTemperatureTimer()
-{
-    _temperature = _thermometerCtrl->getTemperature();
-    emit updateTemperature(_temperature);
-}
-
-//------------------------------------------------------------------------------
-
-void Manager::onCooldownTimer()
+void Manager::onCooldownTimeout()
 {
     if (_mode) _mode->setAcousticWave();
 }
