@@ -1,54 +1,87 @@
-#include "Driver.h"
+#include "Drivers.h"
 #include <QSerialPort>
 #include <QSerialPortInfo>
 #include <QCoreApplication>
 #include <QMessageBox>
 #include <QThread>
+#include <QDebug>
 #include <string>
 #include <math.h>
 #include "windows.h"
-#include "Driver.h"
 
+//------------------------------------------------------------------------------
+// BaseDriver
+//------------------------------------------------------------------------------
+
+BaseDriver::BaseDriver()
+    :_serial(new QSerialPort(this))
+{}
 
 //------------------------------------------------------------------------------
 
-Driver::Driver()
-    : core::AcousticDriver()
-{}
-
-bool Driver::init()
+bool BaseDriver::init()
 {
-    try
-    {
-        _serial = new QSerialPort(this);
-        // TODO: find the com port to which the probe is connect.
+    // TODO: find the com port to which the probe is connect.
 
-        _serial->setPortName("COM12"); // select the correct port to send the data to...
-        _serial->setBaudRate(QSerialPort::Baud9600);
-        _serial->setDataBits(QSerialPort::Data8);
-        _serial->setStopBits(QSerialPort::OneStop);
-        _serial->setParity(QSerialPort::NoParity);
-        _serial->setFlowControl(QSerialPort::NoFlowControl);
-        _serial->open(QSerialPort::ReadWrite);
-        return true;
-    }
-    catch(int e)
+    _serial->setPortName("COM12"); // select the correct port to send the data to...
+    _serial->setBaudRate(QSerialPort::Baud9600);
+    _serial->setDataBits(QSerialPort::Data8);
+    _serial->setStopBits(QSerialPort::OneStop);
+    _serial->setParity(QSerialPort::NoParity);
+    _serial->setFlowControl(QSerialPort::NoFlowControl);
+
+    bool ok = _serial->open(QSerialPort::ReadWrite);
+
+    if (!ok)
     {
-        //QMessageBox::critical(0, "Aborting", "Failed to connect to Driver COM port.");
-        return false;
+        qCritical("Failed to open the serial port 12 to connect to the acoustic driver.");
     }
 
-    if (!_serial->isOpen())
-    {
-        //QMessageBox::critical(0, "Aborting", "Failed to open the Driver COM port.");
-        return false;
-    }
+    return ok;
 }
 
 //------------------------------------------------------------------------------
 
-void Driver::writeDDS(double frequency, quint8 level)
+BaseDriver *BaseDriver::getDriver()
 {
+    for(auto &portInfo: QSerialPortInfo::availablePorts())
+    {
+        qDebug() << "Port " << portInfo.portName()
+                 << ": " << portInfo.description()
+                 << ", " << portInfo.manufacturer();
+    }
+
+    return new DdsDriver;
+}
+
+//------------------------------------------------------------------------------
+// DDS driver
+//------------------------------------------------------------------------------
+
+DdsDriver::DdsDriver()
+    : BaseDriver()
+{}
+
+//------------------------------------------------------------------------------
+
+void DdsDriver::set(double frequency, double power)
+{
+    qDebug("<acoustic wave: %.3f MHz, %.1f mW>", frequency, power);
+
+    // chose one of the following options to send data to the correct device
+
+    quint8 step;
+
+    if (power == 0)
+    {
+        frequency = 232.61; // This frequency is cut-off by a filter
+        step = 0;
+    }
+    else
+    {
+        step = round(((8e-6*power-0.0049)*power+1.3178)*power-86.215);
+    }
+
     const double per_MHz = 4294967.296;
 
     QByteArray stream(29, 0);
@@ -63,7 +96,7 @@ void Driver::writeDDS(double frequency, quint8 level)
     stream[13] = 0x41;
     stream[14] = 0x50;
     stream[15] = 0x03;
-    stream[19] = static_cast<quint8> (round(level));
+    stream[19] = step;
     stream[20] = 0x0e;
     stream[21] = 0x3f;
     stream[22] = 0xff;
@@ -81,10 +114,25 @@ void Driver::writeDDS(double frequency, quint8 level)
 }
 
 //------------------------------------------------------------------------------
+// PLL Driver
+//------------------------------------------------------------------------------
 
-void Driver::writePLL(double frequency)
+PllDriver::PllDriver()
+    : BaseDriver()
+{}
+
+//------------------------------------------------------------------------------
+
+void PllDriver::set(double frequency, double power)
 {
+    qDebug("<acoustic wave: %.3f MHz, %.1f mW>", frequency, power);
 
+    // chose one of the following options to send data to the correct device
+
+    if (power == 0)
+    {
+        frequency = 232.61; // This frequency is cut-off by a filter
+    }
 
     const double per_MHz = 1e6;
     const double VREF = 40;
@@ -162,30 +210,6 @@ void Driver::writePLL(double frequency)
     _serial->waitForBytesWritten(1);
 
     QThread::msleep(2);
-}
-
-//------------------------------------------------------------------------------
-
-void Driver::set(double frequency, double power)
-{
-    qDebug("<acoustic wave: %.3f MHz, %.1f mW>", frequency, power);
-
-    // chose one of the following options to send data to the correct device
-
-    quint8 step;
-
-    if (power == 0)
-    {
-        frequency = 232.61; // This frequency is cut-off by a filter
-        step = 0;
-    }
-    else
-    {
-        step = round(((8e-6*power-0.0049)*power+1.3178)*power-86.215);
-    }
-
-    writeDDS(frequency, step);
-    //writePLL(frequency);
 }
 
 //------------------------------------------------------------------------------

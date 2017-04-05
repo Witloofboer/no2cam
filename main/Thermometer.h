@@ -19,7 +19,6 @@ public:
     bool init();
 
 private:
-
     ViStatus    find_instruments(ViString findPattern, ViChar **resource);
     ViStatus    _err;
     ViChar      *_rscPtr;

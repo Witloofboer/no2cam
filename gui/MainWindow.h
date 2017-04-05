@@ -40,7 +40,7 @@ class GUISHARED_EXPORT MainWindow : public QMainWindow
 
 public:
     MainWindow(core::Crystal *crystal,
-               core::Manager *coreObj,
+               core::Manager *coreManager,
                const QString &version,
                const QString &devicesNotes);
 

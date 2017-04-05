@@ -42,11 +42,11 @@ namespace gui {
 //------------------------------------------------------------------------------
 
 MainWindow::MainWindow(core::Crystal *crystal,
-                       core::Manager *coreInstance,
+                       core::Manager *coreManager,
                        const QString &subversion,
                        const QString &devicesNotes)
     : QMainWindow()
-    , _coreManager(coreInstance)
+    , _coreManager(coreManager)
     , _configDlg(new ConfigurationDlg(this, crystal))
     , _stackedWdgt(new QStackedWidget)
     , _selectFolderActn(new QAction("&Select data folder"))
@@ -246,35 +246,35 @@ MainWindow::MainWindow(core::Crystal *crystal,
     if (!_configDlg->isValid())
         QTimer::singleShot(0, this, onDisplayConfigurationDlg); //TODO emit instead of timer?
 
-    connect(coreInstance, core::Manager::updateApplicationReadiness, this, onUpdateApplicationReadiness);
-    connect(coreInstance, core::Manager::displaySnapshot, this, onDisplaySnapshot);
+    connect(coreManager, core::Manager::updateApplicationReadiness, this, onUpdateApplicationReadiness);
+    connect(coreManager, core::Manager::displaySnapshot, this, onDisplaySnapshot);
 
     connect(_snapshotPane, BaseParameterPane::parametersChanged, this, refreshBtns);
     connect(_observationPane, BaseParameterPane::parametersChanged, this, refreshBtns);
     connect(_sweepPane, BaseParameterPane::parametersChanged, this, refreshBtns);
 
     connect(_snapshotPane, SnapshotParameterPane::opticalSnapshot,
-            coreInstance, core::Manager::onOpticalSnapshot);
+            coreManager, core::Manager::onOpticalSnapshot);
     connect(_snapshotPane, SnapshotParameterPane::acousticSnapshot,
-            coreInstance, core::Manager::onAcousticSnapshot);
+            coreManager, core::Manager::onAcousticSnapshot);
     connect(_observationPane, ObservationParameterPane::observationRequested,
-            coreInstance, core::Manager::onObservation);
+            coreManager, core::Manager::onObservation);
     connect(_sweepPane, SweepParameterPane::sweepRequested,
-            coreInstance, core::Manager::onSweep);
+            coreManager, core::Manager::onSweep);
 
-    connect(this, onStop, coreInstance, core::Manager::onStop);
-    connect(this, shutdownRequested, coreInstance, core::Manager::onShutdown);
-    connect(this, temperaturePeriodUpdated, coreInstance, core::Manager::onTemperaturePeriodUpdated);
+    connect(this, onStop, coreManager, core::Manager::onStop);
+    connect(this, shutdownRequested, coreManager, core::Manager::onShutdown);
+    connect(this, temperaturePeriodUpdated, coreManager, core::Manager::onTemperaturePeriodUpdated);
     connect(_cameraBtnBox, CameraBtnBox::started, this, onStart);
     connect(_cameraBtnBox, CameraBtnBox::stopped, this, onStop);
 
-    connect(coreInstance, core::Manager::fileCreationError, this, onFileCreationError);
-    connect(coreInstance, core::Manager::fileWritingError, this, onFileWritingError);
+    connect(coreManager, core::Manager::fileCreationError, this, onFileCreationError);
+    connect(coreManager, core::Manager::fileWritingError, this, onFileWritingError);
 
-    connect(coreInstance, core::Manager::updateTemperature,
+    connect(coreManager, core::Manager::updateTemperature,
             this, onUpdateTemperature);
 
-    connect(coreInstance, core::Manager::displayInformation,
+    connect(coreManager, core::Manager::displayInformation,
             this, onDisplayInformation);
     refreshBtns();
     restore();
