@@ -21,42 +21,16 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("NO2 Camera Command Interface");
     QApplication application(argc, argv);
 
-    // TEMPO
-    BaseDriver::getDriver();
-    return 0;
-    // TEMPO
-
-
-    // Camera ------------------------------------------------------------------
-
-    auto camera = new HamamatsuCamera();
-    bool ok = camera->init();
-    if (!ok) return -1;
-
-    // Thermometer -------------------------------------------------------------
-
-    auto thermometer = new Thermometer;
-    ok = thermometer->init();
-    if (!ok)
-    {
-        delete camera;
-
-        QMessageBox::critical(0, "Aborting",
-                              "Failed to connect to temperature sensor.");
-        return -1;
-    }
-
-    // Acoustic driver----------------------------------------------------------
-
+    auto camera = HamamatsuCamera::getCamera();
+    auto thermometer = Thermometer::getThermometer();
     auto driver = BaseDriver::getDriver();
-    ok = driver->init();
-    if (!ok)
+
+    if (camera == nullptr || thermometer == nullptr || driver == nullptr)
     {
         delete camera;
         delete thermometer;
+        delete driver;
 
-        QMessageBox::critical(0, "Aborting",
-                              "Failed to connect to RF module.");
         return -1;
     }
 

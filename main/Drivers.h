@@ -5,19 +5,22 @@
 #include <QtGlobal>
 
 class QSerialPort;
+class QSerialPortInfo;
 
 class BaseDriver : public core::AcousticDriver
 {
     Q_OBJECT
 
 public:
-    BaseDriver();
-    bool init();
+    BaseDriver(const QSerialPortInfo& portInfo);
 
     static BaseDriver *getDriver();
 
 protected:
     QSerialPort *_serial;
+
+private:
+    bool _ok;
 
 };
 
@@ -28,7 +31,7 @@ class DdsDriver : public BaseDriver
     Q_OBJECT
 
 public:
-    DdsDriver();
+    DdsDriver(const QSerialPortInfo& portInfo);
 
     void set(double frequency, double power) override;
 };
@@ -40,7 +43,7 @@ class PllDriver : public BaseDriver
     Q_OBJECT
 
 public:
-    PllDriver();
+    PllDriver(const QSerialPortInfo& portInfo);
 
     void set(double frequency, double power) override;
 };

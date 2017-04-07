@@ -17,10 +17,10 @@ class HamamatsuCamera: public core::CameraDriver
     Q_OBJECT
 
 public:
-    HamamatsuCamera();
+    HamamatsuCamera(HDCAM hdcam);
     ~HamamatsuCamera();
 
-    bool init();
+    static HamamatsuCamera *getCamera();
 
     void setExposure(int exposure) override;
     void takeSnapshot() override;
@@ -32,20 +32,10 @@ private slots:
     void checkFrameReady();
 
 private:
-    QTime *time;
-    DCAMWAIT_OPEN	waitopen;
-    DCAM_FRAME	frame;
-    DCAMWAIT_START	paramwait;
-    DCAMERR	_dcamErr;
-    HDCAM _hdcam;
+    const HDCAM _hdcam;
+    DCAM_FRAME	_frame;
     QTimer *_timer;
-    bool state;
-    _DWORD	dw = DCAMCAP_EVENT_FRAMEREADY;
     core::Snapshot _snap;
-    //bool first_run = true;
-
-
-
 };
 
 

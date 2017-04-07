@@ -10,20 +10,17 @@ class Thermometer : public core::ThermometerDriver
     Q_OBJECT
 
 public:
-    Thermometer();
+    Thermometer(const ViSession &session);
     virtual ~Thermometer() override;
+
+    static Thermometer* getThermometer();
 
     double getTemperature() override;
     double getHumidity();
 
-    bool init();
-
 private:
-    ViStatus    find_instruments(ViString findPattern, ViChar **resource);
-    ViStatus    _err;
-    ViChar      *_rscPtr;
-    ViSession   _instrHdl = VI_NULL;
-
+    ViStatus  find_instruments(ViString findPattern, ViChar **resource);
+    ViSession _session;
 };
 
 
