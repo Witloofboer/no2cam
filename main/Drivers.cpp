@@ -42,13 +42,13 @@ BaseDriver *BaseDriver::getDriver()
         qDebug() << "Port " << portInfo.portName()
                  << ": " << description;
 
-        if (description == "DDS driver")
+        if (description == "DDS Solution_-_-_-_-_-_-_")
         {
             qDebug("DDS driver detected");
             driver = new DdsDriver(portInfo);
             break;
         }
-        else if (description == "PLL driver")
+        else if (description == "PLL Solution_-_-_-_-_-_-_")
         {
             qDebug("PLL driver detected");
             driver = new PllDriver(portInfo);
