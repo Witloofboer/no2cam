@@ -6,7 +6,7 @@
 #include <QObject>
 
 #include "core_global.h"
-#include "drivers.h"
+#include "BaseDrivers.h"
 
 class QTimer;
 
@@ -17,7 +17,7 @@ namespace core
 
 //------------------------------------------------------------------------------
 
-class CORESHARED_EXPORT MockAcousticDriver : public AcousticDriver
+class CORESHARED_EXPORT MockAcousticDriver : public BaseAcousticDriver
 {
     Q_OBJECT
 
@@ -28,7 +28,7 @@ public:
 
 //------------------------------------------------------------------------------
 
-class CORESHARED_EXPORT MockThermometer : public ThermometerDriver
+class CORESHARED_EXPORT MockThermometer : public BaseThermometerDriver
 {
     Q_OBJECT
 
@@ -43,7 +43,7 @@ private:
 
 //------------------------------------------------------------------------------
 
-class CORESHARED_EXPORT MockCamera: public CameraDriver
+class CORESHARED_EXPORT MockCamera: public BaseCameraDriver
 {
     Q_OBJECT
 

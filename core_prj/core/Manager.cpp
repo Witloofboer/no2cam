@@ -5,10 +5,10 @@
 #include <QThread>
 #include <QTimer>
 
-#include "controllers.h"
+#include "Controllers.h"
 #include "Crystal.h"
 #include "ImageBuffer.h"
-#include "modes.h"
+#include "Modes.h"
 
 //------------------------------------------------------------------------------
 
@@ -17,9 +17,9 @@ namespace core {
 //------------------------------------------------------------------------------
 
 Manager::Manager(const Crystal *crystal,
-                 ThermometerDriver *thermometer,
-                 CameraDriver *camera,
-                 AcousticDriver *driver)
+                 BaseThermometerDriver *thermometer,
+                 BaseCameraDriver *camera,
+                 BaseAcousticDriver *driver)
     : QObject()
     , _cooldownT(new QTimer(this))
     , _stabilisationT(new QTimer(this))

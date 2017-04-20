@@ -13,26 +13,26 @@ namespace core
 
 //------------------------------------------------------------------------------
 
-class CORESHARED_EXPORT AcousticDriver : public QObject
+class CORESHARED_EXPORT BaseAcousticDriver : public QObject
 {
     Q_OBJECT
 
 public:
-    AcousticDriver();
-    virtual ~AcousticDriver() {}
+    BaseAcousticDriver();
+    virtual ~BaseAcousticDriver() {}
 
     virtual void set(double frequency, double power)=0;
 };
 
 //------------------------------------------------------------------------------
 
-class CORESHARED_EXPORT CameraDriver : public QObject
+class CORESHARED_EXPORT BaseCameraDriver : public QObject
 {
     Q_OBJECT
 
 public:
-    CameraDriver();
-    virtual ~CameraDriver() {}
+    BaseCameraDriver();
+    virtual ~BaseCameraDriver() {}
 
     virtual void setExposure(int exposure)=0;
     virtual void takeSnapshot()=0;
@@ -44,13 +44,13 @@ signals:
 
 //------------------------------------------------------------------------------
 
-class CORESHARED_EXPORT ThermometerDriver : public QObject
+class CORESHARED_EXPORT BaseThermometerDriver : public QObject
 {
     Q_OBJECT
 
 public:
-    ThermometerDriver();
-    virtual ~ThermometerDriver() {}
+    BaseThermometerDriver();
+    virtual ~BaseThermometerDriver() {}
 
     virtual double getTemperature()=0;
 };

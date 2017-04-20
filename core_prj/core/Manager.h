@@ -6,7 +6,7 @@
 
 #include "core_global.h"
 #include "Snapshot.h"
-#include "modes.h"
+#include "Modes.h"
 
 class QTimer;
 
@@ -16,9 +16,9 @@ namespace core {
 
 class BaseMode;
 class Crystal;
-class CameraDriver;
-class AcousticDriver;
-class ThermometerDriver;
+class BaseCameraDriver;
+class BaseAcousticDriver;
+class BaseThermometerDriver;
 class CameraCtrl;
 class FrequencyCtrl;
 class AcousticCtrl;
@@ -39,9 +39,9 @@ class CORESHARED_EXPORT Manager
 
 public:
     Manager(const Crystal *crystal,
-            ThermometerDriver *thermometer,
-            CameraDriver *camera,
-            AcousticDriver *driver);
+            BaseThermometerDriver *thermometer,
+            BaseCameraDriver *camera,
+            BaseAcousticDriver *driver);
 
     virtual ~Manager();
 

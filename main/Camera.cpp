@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 
 HamamatsuCamera::HamamatsuCamera(HDCAM hdcam)
-    : core::CameraDriver()
+    : core::BaseCameraDriver()
     , _hdcam(hdcam)
     , _timer(new QTimer(this))
 {

@@ -21,21 +21,21 @@ RESOURCES += \
 SOURCES += \
     Crystal.cpp \
     ImageBuffer.cpp \
-    controllers.cpp \
-    mockups.cpp \
-    drivers.cpp \
     Manager.cpp \
-    modes.cpp
+    BaseDrivers.cpp \
+    Mockups.cpp \
+    Modes.cpp \
+    Controllers.cpp
 
 HEADERS += \
     core_global.h \
     Crystal.h \
     ImageBuffer.h \
-    controllers.h \
-    mockups.h \
-    drivers.h \
     Snapshot.h \
     Manager.h \
-    modes.h
+    BaseDrivers.h \
+    Controllers.h \
+    Mockups.h \
+    Modes.h
 
 CONFIG(release, debug|release): DEFINES += QT_NO_DEBUG_OUTPUT

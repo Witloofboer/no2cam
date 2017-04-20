@@ -17,35 +17,35 @@ namespace core
 
 //------------------------------------------------------------------------------
 
-class AcousticDriver;
+class BaseAcousticDriver;
 
 class AcousticCtrl : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit AcousticCtrl(QObject *parent, AcousticDriver *driver);
+    explicit AcousticCtrl(QObject *parent, BaseAcousticDriver *driver);
     bool set(double frequency, double power);
 
 signals:
     updateTemperature(double temperature);
 
 private:
-    AcousticDriver *_driver;
+    BaseAcousticDriver *_driver;
     double _frequency;
     double _power;
 };
 
 //------------------------------------------------------------------------------
 
-class ThermometerDriver;
+class BaseThermometerDriver;
 
 class ThermometerCtrl : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit ThermometerCtrl(ThermometerDriver *thermometer);
+    explicit ThermometerCtrl(BaseThermometerDriver *thermometer);
 
 signals:
     void updateTemperature(double temperature);
@@ -58,21 +58,21 @@ private slots:
     void onTemperatureTimeout();
 
 private:
-    ThermometerDriver *_thermometer;
+    BaseThermometerDriver *_thermometer;
     QThread *_thread;
     QTimer *_thermometerT;
 };
 
 //------------------------------------------------------------------------------
 
-class CameraDriver;
+class BaseCameraDriver;
 
 class CameraCtrl : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit CameraCtrl(QObject *parent, CameraDriver *camera);
+    explicit CameraCtrl(QObject *parent, BaseCameraDriver *camera);
 
     void setExposure(int exposure);
     void takeSnapshot();
@@ -85,7 +85,7 @@ private slots:
     void onSnapshotAvailable(const Snapshot &buffer);
 
 private:
-    CameraDriver *_camera;
+    BaseCameraDriver *_camera;
     int _exposure;
     bool _isBusy;
 };

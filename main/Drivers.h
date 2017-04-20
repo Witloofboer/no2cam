@@ -1,13 +1,13 @@
 #ifndef DRIVER_H
 #define DRIVER_H
-#include "core/drivers.h"
+#include "core/BaseDrivers.h"
 
 #include <QtGlobal>
 
 class QSerialPort;
 class QSerialPortInfo;
 
-class BaseDriver : public core::AcousticDriver
+class BaseDriver : public core::BaseAcousticDriver
 {
     Q_OBJECT
 

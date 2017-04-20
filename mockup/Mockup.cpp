@@ -1,6 +1,6 @@
 #include <QApplication>
 
-#include "core/mockups.h"
+#include "core/Mockups.h"
 #include "core/Crystal.h"
 #include "core/Manager.h"
 

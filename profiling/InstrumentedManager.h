@@ -15,9 +15,9 @@ class InstrumentedManager : public core::Manager
 {
 public:
     InstrumentedManager(const core::Crystal *crystal,
-                        core::ThermometerDriver *thermometer,
-                        core::CameraDriver *camera,
-                        core::AcousticDriver *driver);
+                        core::BaseThermometerDriver *thermometer,
+                        core::BaseCameraDriver *camera,
+                        core::BaseAcousticDriver *driver);
 
     void mainWindow(gui::MainWindow* mainWindow);
 

@@ -1,4 +1,4 @@
-#include "mockups.h"
+#include "Mockups.h"
 
 #include <QColor>
 #include <QImage>
@@ -23,7 +23,7 @@ static bool isBlackImage = false;
 //------------------------------------------------------------------------------
 
 MockAcousticDriver::MockAcousticDriver()
-    : AcousticDriver()
+    : BaseAcousticDriver()
 {}
 
 //------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ void MockAcousticDriver::set(double frequency, double power)
 //------------------------------------------------------------------------------
 
 MockThermometer::MockThermometer()
-    : ThermometerDriver()
+    : BaseThermometerDriver()
     , _temperature(20.0)
     , _delta(0.12)
 {}
@@ -56,7 +56,7 @@ double MockThermometer::getTemperature()
 //------------------------------------------------------------------------------
 
 MockCamera::MockCamera()
-    : CameraDriver()
+    : BaseCameraDriver()
     , _buffer{0}
     , _exposure(-1)
     , _timer(new QTimer(this))

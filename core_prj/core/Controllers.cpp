@@ -1,5 +1,5 @@
-#include "controllers.h"
-#include "drivers.h"
+#include "Controllers.h"
+#include "BaseDrivers.h"
 
 #include <QDir> // Q_INIT_RESOURCE
 #include <QTimer>
@@ -14,7 +14,7 @@ namespace core
 // AcousticCtrl
 //------------------------------------------------------------------------------
 
-AcousticCtrl::AcousticCtrl(QObject *parent, AcousticDriver *driver)
+AcousticCtrl::AcousticCtrl(QObject *parent, BaseAcousticDriver *driver)
     : QObject(parent)
     , _driver(driver)
     , _frequency(0)
@@ -44,7 +44,7 @@ bool AcousticCtrl::set(double frequency, double power)
 // ThermometerCtrl
 //------------------------------------------------------------------------------
 
-ThermometerCtrl::ThermometerCtrl(ThermometerDriver *thermometer)
+ThermometerCtrl::ThermometerCtrl(BaseThermometerDriver *thermometer)
     : QObject()
     , _thermometer(thermometer)
     , _thread(new QThread(this))
@@ -89,14 +89,14 @@ void ThermometerCtrl::onTemperatureTimeout()
 // CameraCtrl
 //------------------------------------------------------------------------------
 
-CameraCtrl::CameraCtrl(QObject *parent, CameraDriver *camera)
+CameraCtrl::CameraCtrl(QObject *parent, BaseCameraDriver *camera)
     : QObject(parent)
     , _camera(camera)
     , _exposure(-1)
     , _isBusy(false)
 {
     _camera->setParent(this);
-    connect(_camera, CameraDriver::snapshotAvailable, this, onSnapshotAvailable);
+    connect(_camera, BaseCameraDriver::snapshotAvailable, this, onSnapshotAvailable);
 }
 
 //------------------------------------------------------------------------------

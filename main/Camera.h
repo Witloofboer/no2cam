@@ -10,9 +10,9 @@
 
 class QTimer;
 
-#include "core/drivers.h"
+#include "core/BaseDrivers.h"
 
-class HamamatsuCamera: public core::CameraDriver
+class HamamatsuCamera: public core::BaseCameraDriver
 {
     Q_OBJECT
 

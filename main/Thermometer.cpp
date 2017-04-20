@@ -5,7 +5,7 @@
 //------------------------------------------------------------------------------
 
 Thermometer::Thermometer(const ViSession &session)
-    : core::ThermometerDriver()
+    : core::BaseThermometerDriver()
     , _session(session)
 {}
 

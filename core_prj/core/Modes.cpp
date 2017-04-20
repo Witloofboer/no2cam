@@ -1,4 +1,4 @@
-#include "modes.h"
+#include "Modes.h"
 
 #include "Crystal.h"
 

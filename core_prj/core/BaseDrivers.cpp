@@ -1,22 +1,22 @@
-#include "drivers.h"
+#include "BaseDrivers.h"
 
 namespace core {
 
 //------------------------------------------------------------------------------
 
-AcousticDriver::AcousticDriver()
+BaseAcousticDriver::BaseAcousticDriver()
     :QObject()
 {}
 
 //------------------------------------------------------------------------------
 
-CameraDriver::CameraDriver()
+BaseCameraDriver::BaseCameraDriver()
     :QObject()
 {}
 
 //------------------------------------------------------------------------------
 
-ThermometerDriver::ThermometerDriver()
+BaseThermometerDriver::BaseThermometerDriver()
     :QObject()
 {}
 

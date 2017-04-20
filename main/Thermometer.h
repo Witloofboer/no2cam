@@ -3,9 +3,9 @@
 
 #include "visa.h"
 #include "TLTSP.h"
-#include "core/drivers.h"
+#include "core/BaseDrivers.h"
 
-class Thermometer : public core::ThermometerDriver
+class Thermometer : public core::BaseThermometerDriver
 {
     Q_OBJECT
 

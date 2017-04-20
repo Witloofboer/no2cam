@@ -8,9 +8,9 @@
 using namespace core;
 
 InstrumentedManager::InstrumentedManager(const Crystal *crystal,
-        ThermometerDriver *thermometer,
-        CameraDriver *camera,
-        AcousticDriver *driver)
+        BaseThermometerDriver *thermometer,
+        BaseCameraDriver *camera,
+        BaseAcousticDriver *driver)
 
     : Manager(crystal, thermometer, camera, driver)
     , _chrono()
