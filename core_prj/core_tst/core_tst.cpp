@@ -3,6 +3,7 @@
 #include <QSettings>
 
 #include "CrystalTest.h"
+#include "InterpolateTest.h"
 
 int main(int argc, char *argv[])
 {
@@ -12,6 +13,7 @@ int main(int argc, char *argv[])
     int result = 0;
 
     result |= QTest::qExec(new AotfCrystalTest, argc, argv);
+    result |= QTest::qExec(new BiInterpolationTest, argc, argv);
 
     QSettings settings;
     settings.remove("");

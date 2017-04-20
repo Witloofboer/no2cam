@@ -10,10 +10,6 @@ class AotfCrystalTest : public QObject
     Q_OBJECT
 
 private slots:
-
-    void initTestCase();
-    void cleanupTestCase();
-
     void frequency_power();
     void frequency_power_data();
     void wavelength();

@@ -25,7 +25,8 @@ SOURCES += \
     BaseDrivers.cpp \
     Mockups.cpp \
     Modes.cpp \
-    Controllers.cpp
+    Controllers.cpp \
+    Interpolate.cpp
 
 HEADERS += \
     core_global.h \
@@ -36,6 +37,7 @@ HEADERS += \
     BaseDrivers.h \
     Controllers.h \
     Mockups.h \
-    Modes.h
+    Modes.h \
+    Interpolate.h
 
 CONFIG(release, debug|release): DEFINES += QT_NO_DEBUG_OUTPUT

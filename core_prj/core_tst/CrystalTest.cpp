@@ -7,16 +7,8 @@
 
 using namespace core;
 
-double f(double x) {return 1e-3*round(x*1e3);}
-
-//------------------------------------------------------------------------------
-
-void AotfCrystalTest::initTestCase()
-{
-}
-
-void AotfCrystalTest::cleanupTestCase()
-{
+double f(double x) {
+    return 1e-3*round(x*1e3);
 }
 
 //------------------------------------------------------------------------------
