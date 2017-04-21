@@ -1,7 +1,9 @@
-#include "InterpolateTest.h"
-#include "Interpolate.cpp"
+#include "InterpolationTest.h"
+#include "Interpolation.cpp"
 
 #include <QtTest>
+
+#include <exception>
 
 using namespace core;
 
@@ -109,6 +111,78 @@ void BiInterpolationTest::asymetric2Test()
     QCOMPARE(interp(1.0, 0.0),  100.0);
 
     QCOMPARE(interp(0.5, 0.5),   82.5);
+}
+
+//------------------------------------------------------------------------------
+
+void BiInterpolationTest::constructorExceptionsTest()
+{
+    // No exception
+    BiInterpolation({0.0, 1.0}, {0.0, 1.0}, {{0.0, 0.0}, {0.0, 0.0}});
+
+    // Not enough x values
+    QVERIFY_EXCEPTION_THROWN(
+    BiInterpolation({0.0}, {0.0, 1.0}, {{0.0, 0.0}}),
+    std::invalid_argument);
+
+    // Not enough y values
+    QVERIFY_EXCEPTION_THROWN(
+    BiInterpolation({0.0, 1.0}, {0.0}, {{0.0}, {0.0}}),
+    std::invalid_argument);
+
+    // Mismatch between xs and values sizes
+    QVERIFY_EXCEPTION_THROWN(
+    BiInterpolation({0.0, 1.0}, {0.0, 1.0}, {{0.0, 0.0}}),
+    std::invalid_argument);
+
+    // Mismatch between ys and values[0] sizes
+    QVERIFY_EXCEPTION_THROWN(
+    BiInterpolation({0.0, 1.0}, {0.0, 1.0}, {{0.0}, {0.0, 0.0}}),
+    std::invalid_argument);
+
+    // Mismatch between ys and values[1] sizes
+    QVERIFY_EXCEPTION_THROWN(
+    BiInterpolation({0.0, 1.0}, {0.0, 1.0}, {{0.0, 0.0}, {0.0}}),
+    std::invalid_argument);
+
+    // Decreasing xs
+    QVERIFY_EXCEPTION_THROWN(
+    BiInterpolation({1.0, 0.0}, {0.0, 1.0}, {{0.0, 0.0}, {0.0, 0.0}}),
+    std::invalid_argument);
+
+    // Steady xs
+    QVERIFY_EXCEPTION_THROWN(
+    BiInterpolation({0.0, 0.0}, {0.0, 1.0}, {{0.0, 0.0}, {0.0, 0.0}}),
+    std::invalid_argument);
+
+    // Decreasing ys
+    QVERIFY_EXCEPTION_THROWN(
+    BiInterpolation({0.0, 1.0}, {1.0, 0.0}, {{0.0, 0.0}, {0.0, 0.0}}),
+    std::invalid_argument);
+
+    // Steady ys
+    QVERIFY_EXCEPTION_THROWN(
+    BiInterpolation({0.0, 1.0}, {0.0, 0.0}, {{0.0, 0.0}, {0.0, 0.0}}),
+    std::invalid_argument);
+}
+
+//------------------------------------------------------------------------------
+
+void BiInterpolationTest::interpolationExceptionsTest()
+{
+    BiInterpolation interp({-1.0, 1.0}, {-1.0, 1.0}, {{0.0, 0.0}, {0.0, 0.0}});
+
+    // Too small x
+    QVERIFY_EXCEPTION_THROWN(interp(-2.0,  0.0), std::domain_error);
+
+    // Too large x
+    QVERIFY_EXCEPTION_THROWN(interp( 2.0,  0.0), std::domain_error);
+
+    // Too small y
+    QVERIFY_EXCEPTION_THROWN(interp( 0.0, -2.0), std::domain_error);
+
+    // Too large y
+    QVERIFY_EXCEPTION_THROWN(interp( 0.0,  2.0), std::domain_error);
 }
 
 //------------------------------------------------------------------------------

@@ -17,11 +17,11 @@ DESTDIR=../../bin
 SOURCES += \
     core_tst.cpp \
     CrystalTest.cpp \
-    InterpolateTest.cpp
+    InterpolationTest.cpp
 
 HEADERS += \
     CrystalTest.h \
-    InterpolateTest.h
+    InterpolationTest.h
 
 INCLUDEPATH += $$PWD/../core
 DEPENDPATH += $$PWD/../core

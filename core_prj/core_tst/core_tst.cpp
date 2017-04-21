@@ -3,7 +3,7 @@
 #include <QSettings>
 
 #include "CrystalTest.h"
-#include "InterpolateTest.h"
+#include "InterpolationTest.h"
 
 int main(int argc, char *argv[])
 {

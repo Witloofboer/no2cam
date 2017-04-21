@@ -12,6 +12,8 @@ private slots:
     void middleValuesTest();
     void asymetric1Test();
     void asymetric2Test();
+    void constructorExceptionsTest();
+    void interpolationExceptionsTest();
 };
 
 #endif // INTERPOLATIONTEST_H

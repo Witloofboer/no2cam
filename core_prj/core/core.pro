@@ -26,7 +26,7 @@ SOURCES += \
     Mockups.cpp \
     Modes.cpp \
     Controllers.cpp \
-    Interpolate.cpp
+    Interpolation.cpp
 
 HEADERS += \
     core_global.h \
@@ -38,6 +38,6 @@ HEADERS += \
     Controllers.h \
     Mockups.h \
     Modes.h \
-    Interpolate.h
+    Interpolation.h
 
 CONFIG(release, debug|release): DEFINES += QT_NO_DEBUG_OUTPUT
