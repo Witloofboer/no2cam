@@ -42,18 +42,24 @@ HamamatsuCamera *HamamatsuCamera::getCamera()
 
     if (failed(err))
     {
+        qCritical("No camera detected (dcamapi_init error code: %d)", err);
+
         QMessageBox::critical(
             0, "Aborting",
-            tr("<p>Camera init has failed.</p>"
-               "<p>dcamapi_init error code: %1").arg(err));
+            tr("<p><b>Failure</b>: no camera detected</p>"
+               "<p>(dcamapi_init error code: %1)</p>").arg(err));
         return nullptr;
     }
 
     if (paraminit.iDeviceCount != 1)
     {
+        qCritical("Multiple (%ld) cameras detected", paraminit.iDeviceCount);
+
         QMessageBox::critical(
-            0, "Aborting",
-            tr("<p>%1 camera(s) found. Expecting 1.</p>").arg(err));
+            0,
+            "Aborting",
+            tr("<p><b>Failure</b>: more than 1 camera detected</p>"
+               "<p>(%1 camera found, instead of only 1)</p>").arg(err));
         return nullptr;
     }
 
@@ -65,10 +71,13 @@ HamamatsuCamera *HamamatsuCamera::getCamera()
 
     if (failed(err))
     {
+        qCritical("Error on camera opening (dcamdev_open error code: %d)", err);
+
         QMessageBox::critical(
-            0, "Aborting",
-            tr("<p>Camera open has failed.</p>"
-               "<p>dcamdev_open error code: %1").arg(err));
+            0,
+            "Aborting",
+            tr("<p><b>Failure</b>: camera not opened</p>"
+               "<p>(dcamdev_open error code: %1)</p>").arg(err));
         dcamapi_uninit();
         return nullptr;
     }
@@ -80,10 +89,14 @@ HamamatsuCamera *HamamatsuCamera::getCamera()
     err = dcamprop_setvalue(hdcam, DCAM_IDPROP_BINNING, DCAMPROP_BINNING__4);
     if (failed(err))
     {
+        qCritical("Error on camera binning setting"
+                  "(dcamprop_setvalue error code: %d)", err);
+
         QMessageBox::critical(
-            0, "Aborting",
-            tr("<p>Camera binning setting has failed.</p>"
-               "<p>dcamprop_setvalue error code: %1").arg(err));
+            0,
+            "Aborting",
+            tr("<p><b>Failure</b>: camera binning settings</p>"
+               "<p>(dcamprop_setvalue error code: %1)</p>").arg(err));
         dcamdev_close(hdcam);
         dcamapi_uninit();
         return 0;
@@ -92,37 +105,47 @@ HamamatsuCamera *HamamatsuCamera::getCamera()
     err = dcambuf_alloc(hdcam,1);
     if (failed(err))
     {
+        qCritical("Error on camera buffer allocation"
+                  "(dcambuf_alloc error code: %d)", err);
+
         QMessageBox::critical(
             0, "Aborting",
-            tr("<p>Camera buffer allocation has failed.</p>"
-               "<p>dcambuf_alloc error code: %1").arg(err));
+            tr("<p><b>Failure</b>: camera buffer allocation</p>"
+               "<p>(dcambuf_alloc error code: %1)").arg(err));
         dcamdev_close(hdcam);
         dcamapi_uninit();
         return 0;
     }
 
     // allow the software to send the trigger pulse to the camera
-    err = dcamprop_setvalue(hdcam, DCAM_IDPROP_TRIGGERSOURCE, DCAMPROP_TRIGGERSOURCE__SOFTWARE);
+    err = dcamprop_setvalue(hdcam,
+                            DCAM_IDPROP_TRIGGERSOURCE,
+                            DCAMPROP_TRIGGERSOURCE__SOFTWARE);
     if (failed(err))
     {
+        qCritical("Error on camera trigger setting"
+                  "(dcamprop_setvalue error code: %d)", err);
+
         QMessageBox::critical(
-            0, "Aborting",
-            tr("<p>Camera trigger setting has failed.</p>"
-               "<p>dcamprop_setvalue error code: %1").arg(err));
+            0,
+            "Aborting",
+            tr("<p><b>Failure</b>: camera trigger settings.</p>"
+               "<p>(dcamprop_setvalue error code: %1)</p>").arg(err));
         dcambuf_release(hdcam);
         dcamdev_close(hdcam);
         dcamapi_uninit();
         return 0;
     }
 
-    //start the capture mode of the camera (exposure will begin once camera receives trigger from software)
+    // Start the capture mode of the camera
+    // (exposure begins once camera receives trigger from software)
     err = dcamcap_start(hdcam, DCAMCAP_START_SEQUENCE);
     if (failed(err))
     {
         QMessageBox::critical(
             0, "Aborting",
-            tr("<p>Camera start has failed.</p>"
-               "<p>dcamcap_start error code: %1").arg(err));
+            tr("<p><b>Failure</b>: camera starting</p>"
+               "<p>(dcamcap_start error code: %1)</p>").arg(err));
         dcambuf_release(hdcam);
         dcamdev_close(hdcam);
         dcamapi_uninit();
@@ -136,7 +159,9 @@ HamamatsuCamera *HamamatsuCamera::getCamera()
 
 void HamamatsuCamera::setExposure(int exposure)
 {
-    DCAMERR err = dcamprop_setvalue(_hdcam, DCAM_IDPROP_EXPOSURETIME, ((double)exposure)/1000);
+    DCAMERR err = dcamprop_setvalue(_hdcam,
+                                    DCAM_IDPROP_EXPOSURETIME,
+                                    ((double)exposure)/1000);
     qDebug("<exposure time: %d ms (error code: %d)>", exposure, err);
 
     _timer->setInterval(exposure);

@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-class BiInterpolationTest : public QObject
+class BiInterpolatorTest : public QObject
 {
     Q_OBJECT
 

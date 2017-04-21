@@ -30,8 +30,10 @@ Thermometer* Thermometer::getThermometer()
 
     if (status != VI_SUCCESS)
     {
-        QMessageBox::critical(0, "Aborting",
-                              "Failed to detect temperature sensor.");
+        qCritical("No temperature sensor detected");
+        QMessageBox::critical(0,
+                              "Aborting",
+                              "<b>Failure</b>: no temperature sensor detected");
 
         return nullptr;
     }
@@ -41,8 +43,10 @@ Thermometer* Thermometer::getThermometer()
     status = TLTSP_init(rscStr, VI_ON, VI_ON, &session);
     if (status != VI_SUCCESS)
     {
-        QMessageBox::critical(0, "Aborting",
-                              "Failed to init temperature sensor.");
+        qCritical("Failure to initialise the temperature sensor");
+        QMessageBox::critical(0,
+                              "Aborting",
+                              "Failed to init temperature sensor");
         return nullptr;
     }
 

@@ -3,9 +3,14 @@
 #include "core/BaseDrivers.h"
 
 #include <QtGlobal>
+#include "core/Interpolation.h"
+
+//------------------------------------------------------------------------------
 
 class QSerialPort;
 class QSerialPortInfo;
+
+//------------------------------------------------------------------------------
 
 class BaseDriver : public core::BaseAcousticDriver
 {
@@ -34,6 +39,10 @@ public:
     DdsDriver(const QSerialPortInfo& portInfo);
 
     void set(double frequency, double power) override;
+
+private:
+    QByteArray _stream;
+    const core::BiInterpolator _interpolator;
 };
 
 //------------------------------------------------------------------------------

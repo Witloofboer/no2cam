@@ -7,9 +7,9 @@ namespace core {
 
 //------------------------------------------------------------------------------
 
-BiInterpolation::BiInterpolation(const QVector<double> &xs,
-                                 const QVector<double> &ys,
-                                 const QVector<QVector<double>> &values)
+BiInterpolator::BiInterpolator(const QVector<double> &xs,
+                               const QVector<double> &ys,
+                               const QVector<QVector<double>> &values)
     : _xs(xs)
     , _ys(ys)
     , _vs(values)
@@ -85,7 +85,7 @@ BiInterpolation::BiInterpolation(const QVector<double> &xs,
 
 //------------------------------------------------------------------------------
 
-double BiInterpolation::operator()(double x, double y)
+double BiInterpolator::operator()(double x, double y) const
 {
     if (x < _xs.first() || _xs.last() < x)
         throw std::domain_error(

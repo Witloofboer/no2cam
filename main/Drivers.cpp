@@ -62,17 +62,23 @@ BaseDriver *BaseDriver::getDriver()
         {
             return driver;
         } else {
-            QMessageBox::critical(0, "Aborting",
-                                  "Failure opening serial port of acousting driver.");
+            qCritical("Failure to open the acoustic driver port");
+            QMessageBox::critical(
+                0,
+                "Aborting",
+                "<p><b>Success</b>: acoustic driver detected</p>"
+                "<p><b>Failure</b>: acoustic driver port opening</p>");
             delete driver;
             return 0;
         }
     }
     else
     {
-        qCritical("Failure to detect the acoustic driver.");
-        QMessageBox::critical(0, "Aborting",
-                              "Failure detecting serial port of acousting driver.");
+        qCritical("No acoustic driver detected");
+        QMessageBox::critical(
+            0,
+            "Aborting",
+            "<p><b>Failure</b>: no acoustic driver detected</p>");
         return 0;
     }
 
@@ -82,9 +88,82 @@ BaseDriver *BaseDriver::getDriver()
 // DDS driver
 //------------------------------------------------------------------------------
 
+QVector<double> fromTo(double from, double to)
+{
+    QVector<double> result;
+
+    for(double i=from; i<=to; ++i)
+        result.push_back(i);
+
+    return result;
+}
+
+QVector<double> _calibratedFreq(fromTo(125, 165));
+QVector<double> _calibratedPower{63.1, 79.43, 100, 125.9, 141.25};
+QVector<QVector<double>> _calibratedSteps{
+    {16,  29,  44,  62,  71},
+    {16,  29,  44,  61,  70},
+    {15,  28,  42,  60,  70},
+    {14,  27,  41,  59,  68},
+    {14,  27,  40,  58,  67},
+    {13,  26,  40,  57,  66},
+    {12,  26,  39,  56,  65},
+    {11,  24,  38,  55,  64},
+    {11,  23,  37,  54,  63},
+    {11,  23,  37,  54,  63},
+    {11,  24,  37,  54,  63},
+    {12,  24,  39,  56,  64},
+    {14,  27,  41,  58,  67},
+    {16,  29,  44,  61,  70},
+    {19,  33,  48,  66,  76},
+    {22,  37,  52,  71,  81},
+    {26,  41,  57,  76,  86},
+    {32,  47,  63,  84,  94},
+    {34,  50,  66,  87,  97},
+    {37,  53,  71,  91, 102},
+    {40,  57,  74,  95, 107},
+    {44,  60,  79, 100, 112},
+    {45,  62,  80, 102, 114},
+    {47,  64,  83, 105, 117},
+    {49,  66,  85, 107, 119},
+    {50,  68,  87, 110, 122},
+    {51,  69,  88, 111, 123},
+    {51,  69,  88, 111, 123},
+    {50,  68,  87, 110, 122},
+    {49,  66,  85, 107, 119},
+    {46,  63,  81, 104, 115},
+    {42,  59,  77,  98, 110},
+    {38,  54,  72,  92, 103},
+    {34,  49,  66,  85,  96},
+    {33,  49,  66,  85,  96},
+    {35,  51,  68,  88,  99},
+    {42,  58,  76,  97, 109},
+    {54,  71,  91, 114, 126},
+    {67,  87, 108, 132, 146},
+    {80, 101, 124, 151, 165},
+    {94, 117, 141, 170, 185}};
+
 DdsDriver::DdsDriver(const QSerialPortInfo &portInfo)
     : BaseDriver(portInfo)
-{}
+    , _stream(29, 0)
+    , _interpolator(_calibratedFreq, _calibratedPower, _calibratedSteps)
+{
+    _stream[4] = 0x02;
+    _stream[5] = 0x01;
+    _stream[7] = 0x40;
+    _stream[8] = 0x08;
+    _stream[9] = 0x20;
+    _stream[10] = 0x02;
+    _stream[11] = 0x1d;
+    _stream[12] = 0x3f;
+    _stream[13] = 0x41;
+    _stream[14] = 0x50;
+    _stream[15] = 0x03;
+
+    _stream[20] = 0x0e;
+    _stream[21] = 0x3f;
+    _stream[22] = 0xff;
+}
 
 //------------------------------------------------------------------------------
 
@@ -98,42 +177,28 @@ void DdsDriver::set(double frequency, double power)
 
     if (power == 0)
     {
-        frequency = 232.61; // This frequency is cut-off by a filter
+        frequency = 232.61; //Filter cut-off
         step = 0;
     }
     else
     {
-        step = round(((8e-6*power-0.0049)*power+1.3178)*power-86.215);
+        //step = round(((8e-6*power-0.0049)*power+1.3178)*power-86.215);
+        step = std::round(_interpolator(frequency, power));
     }
 
     const double per_MHz = 4294967.296;
 
-    QByteArray stream(29, 0);
-    stream[4] = 0x02;
-    stream[5] = 0x01;
-    stream[7] = 0x40;
-    stream[8] = 0x08;
-    stream[9] = 0x20;
-    stream[10] = 0x02;
-    stream[11] = 0x1d;
-    stream[12] = 0x3f;
-    stream[13] = 0x41;
-    stream[14] = 0x50;
-    stream[15] = 0x03;
-    stream[19] = step;
-    stream[20] = 0x0e;
-    stream[21] = 0x3f;
-    stream[22] = 0xff;
+    _stream[19] = step;
 
     // lineair correction formula is needed to correct the frequency offset!
     int freq = round(frequency*(per_MHz+ 224.71) + 263.83);
 
-    stream[28] = freq & 0x000000ff;
-    stream[27] = (freq & 0x0000ff00)>>8;
-    stream[26] = (freq & 0x00ff0000)>>16;
-    stream[25] = (freq & 0xff000000)>>24;
+    _stream[28] = freq & 0x000000ff;
+    _stream[27] = (freq & 0x0000ff00)>>8;
+    _stream[26] = (freq & 0x00ff0000)>>16;
+    _stream[25] = (freq & 0xff000000)>>24;
 
-    _serial->write(stream);
+    _serial->write(_stream);
     _serial->flush();
 }
 

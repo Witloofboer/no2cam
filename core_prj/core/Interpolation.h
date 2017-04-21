@@ -2,6 +2,7 @@
 #define TOOLS_H
 
 //------------------------------------------------------------------------------
+#include "core_global.h"
 
 #include<QPair>
 #include<QVector>
@@ -12,14 +13,14 @@ namespace core {
 
 //------------------------------------------------------------------------------
 
-class BiInterpolation
+class CORESHARED_EXPORT BiInterpolator
 {
 public:
-    BiInterpolation(const QVector<double> &xs,
-                    const QVector<double> &ys,
-                    const QVector<QVector<double>> &values);
+    BiInterpolator(const QVector<double> &xs,
+                   const QVector<double> &ys,
+                   const QVector<QVector<double>> &values);
 
-    double operator()(double x, double y);
+    double operator()(double x, double y) const;
 
 private:
     const QVector<double> _xs;
@@ -30,7 +31,5 @@ private:
 //------------------------------------------------------------------------------
 
 }
-
-//------------------------------------------------------------------------------
 
 #endif // TOOLS_H
