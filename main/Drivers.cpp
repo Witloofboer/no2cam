@@ -100,7 +100,7 @@ QVector<double> fromTo(double from, double to)
 }
 
 QVector<double> _calibratedFreq(fromTo(125, 165));
-QVector<double> _calibratedPower{63.1, 79.43, 100, 125.9, 141.25};
+QVector<double> _calibratedPower{18.0, 19.0, 20.0, 21.0, 21.5};
 QVector<QVector<double>> _calibratedSteps{
     {16,  29,  44,  62,  71},
     {16,  29,  44,  61,  70},
@@ -195,8 +195,10 @@ void DdsDriver::set(double frequency, double power)
     else
     {
         //step = round(((8e-6*power-0.0049)*power+1.3178)*power-86.215);
-        step = std::round(_interpolator(frequency, power));
+        step = std::round(_interpolator(frequency, 10*std::log10(power)));
     }
+
+    qDebug("<acoustic wave: step = %d>", step);
 
     const double per_MHz = 4294967.296;
 
