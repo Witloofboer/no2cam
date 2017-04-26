@@ -1,5 +1,7 @@
 #include "Mockups.h"
 
+#include <exception>
+
 #include <QColor>
 #include <QImage>
 #include <QTimer>
@@ -31,6 +33,17 @@ MockAcousticDriver::MockAcousticDriver()
 void MockAcousticDriver::set(double frequency, double power)
 {
     qDebug("<acoustic wave: %.3f MHz, %.1f mW>", frequency, power);
+    if (frequency > 165)
+    {
+        qWarning("Too high frequency required: %.1f MHz (must be <= 165 MHz)",
+                 frequency);
+        throw std::domain_error(
+            QString(
+                "<p>Too high acoustic frequency. </p>"
+                "<p>Requested: %1 MHz. Maximum allowed: 165 MHz.</p>")
+            .arg(frequency, 0, 'f', 1).toStdString());
+    }
+
     isBlackImage = power == 0;
 }
 

@@ -58,7 +58,7 @@ public:
                       int snapPerObs,
                       double temperature,
                       const Snapshot &snapshotBuffer) override;
-    void onStop() override;
+    void stop() override;
 
 signals:
     void updateTemperature(double temperature);
@@ -67,6 +67,7 @@ signals:
     void displaySnapshot();
     void fileCreationError(QString dirname, QString filename);
     void fileWritingError(QString dirname, QString filename);
+    void displayWarning(QString msg);
     void displayInformation(QString msg);
     void shutdown();
 

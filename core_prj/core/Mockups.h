@@ -3,6 +3,8 @@
 
 //------------------------------------------------------------------------------
 
+#include <exception>
+
 #include <QObject>
 
 #include "core_global.h"

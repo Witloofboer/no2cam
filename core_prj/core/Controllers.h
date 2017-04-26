@@ -3,9 +3,11 @@
 
 //------------------------------------------------------------------------------
 
-#include <QObject>
+#include <QOBject>
+#include <QString>
 
 #include "snapshot.h"
+#include "core_global.h"
 
 class QTimer;
 class QThread;
@@ -18,6 +20,8 @@ namespace core
 //------------------------------------------------------------------------------
 
 class BaseAcousticDriver;
+
+//------------------------------------------------------------------------------
 
 class AcousticCtrl : public QObject
 {

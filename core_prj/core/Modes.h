@@ -37,7 +37,7 @@ public:
     /**
       * Requests the stop of all the devices.
     */
-    virtual void onStop()=0;
+    virtual void stop()=0;
 };
 
 //------------------------------------------------------------------------------

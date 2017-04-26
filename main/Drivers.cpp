@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <string>
 #include <math.h>
+#include <exception>
 #include "windows.h"
 
 //------------------------------------------------------------------------------
@@ -170,6 +171,17 @@ DdsDriver::DdsDriver(const QSerialPortInfo &portInfo)
 void DdsDriver::set(double frequency, double power)
 {
     qDebug("<acoustic wave: %.3f MHz, %.1f mW>", frequency, power);
+
+    if (frequency > 165)
+    {
+        qWarning("Too high frequency required: %.1f MHz (must be <= 165 MHz)",
+                 frequency);
+        throw std::domain_error(
+            QString(
+                "<p>Too high acoustic frequency. </p>"
+                "<p>Requested: %1 MHz. Maximum allowed: 165 MHz.</p>")
+            .arg(frequency, 0, 'f', 1).toStdString());
+    }
 
     // chose one of the following options to send data to the correct device
 

@@ -67,6 +67,7 @@ private slots:
     void onDisplaySnapshot();
     void onFileCreationError(QString datafolder, QString filename);
     void onFileWritingError(QString datafolder, QString filename);
+    void onDisplayWarning(QString msg);
     void onDisplayInformation(QString msg);
 
     void onDisplayConfigurationDlg();

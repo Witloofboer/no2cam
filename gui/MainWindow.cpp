@@ -262,7 +262,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
     connect(_sweepPane, SweepParameterPane::sweepRequested,
             coreManager, core::Manager::onSweep);
 
-    connect(this, onStop, coreManager, core::Manager::onStop);
+    connect(this, onStop, coreManager, core::Manager::stop);
     connect(this, shutdownRequested, coreManager, core::Manager::onShutdown);
     connect(this, temperaturePeriodUpdated, coreManager, core::Manager::onTemperaturePeriodUpdated);
     connect(_cameraBtnBox, CameraBtnBox::started, this, onStart);
@@ -276,6 +276,8 @@ MainWindow::MainWindow(core::Crystal *crystal,
 
     connect(coreManager, core::Manager::displayInformation,
             this, onDisplayInformation);
+    connect(coreManager, core::Manager::displayWarning,
+            this, onDisplayWarning);
     refreshBtns();
     restore();
 
@@ -336,6 +338,17 @@ void MainWindow::onDisplaySnapshot()
 {
     _snapshot->update();
     _histogram->update(_snapshot->histogramData());
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::onDisplayWarning(QString msg)
+{
+    QMessageBox::warning
+    ( this
+      , tr("NO2 Camera Command Interface")
+      , msg
+      , QMessageBox::Ok);
 }
 
 //------------------------------------------------------------------------------

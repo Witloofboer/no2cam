@@ -1,5 +1,7 @@
 #include "Manager.h"
 
+#include <exception>
+
 #include <QCoreApplication>
 #include <QFile>
 #include <QThread>
@@ -75,7 +77,17 @@ double Manager::temperature() const
 
 void Manager::setAcousticBeam(double frequency, double power)
 {
-    bool waveChanged = _acousticCtrl->set(frequency, power);
+    bool waveChanged;
+
+    try
+    {
+        waveChanged = _acousticCtrl->set(frequency, power);
+    }
+    catch(const std::domain_error& error)
+    {
+        stop();
+        emit displayWarning(QString::fromStdString(error.what()));
+    }
 
     if (waveChanged)
     {
@@ -137,7 +149,7 @@ void Manager::saveSnapshot(const QDateTime& dateTime,
 
     if (! ok)
     {
-        onStop();
+        stop();
         emit fileCreationError(_dataFolder, _filename);
         return;
     }
@@ -151,7 +163,7 @@ void Manager::saveSnapshot(const QDateTime& dateTime,
 
     if (bufSize != onDisk)
     {
-        onStop();
+        stop();
         emit fileWritingError(_dataFolder, _filename);
         return;
     }
@@ -161,7 +173,7 @@ void Manager::saveSnapshot(const QDateTime& dateTime,
 
 //------------------------------------------------------------------------------
 
-void Manager::onStop()
+void Manager::stop()
 {
     _acousticCtrl->set(0.0, 0.0);
     _cooldownT->stop();
@@ -295,7 +307,7 @@ void Manager::onTemperaturePeriodUpdated(int period)
 
 void Manager::onShutdown()
 {
-    onStop();
+    stop();
     emit shutdown();
     _thermometerCtrl->thread()->wait();
     thread()->quit();
@@ -343,7 +355,7 @@ void Manager::onSnapshotAvailable(const Snapshot& buffer)
                 _mode->setAcousticWave();
             }
         } else {
-            onStop();
+            stop();
         }
     }
 }
