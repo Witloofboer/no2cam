@@ -9,11 +9,11 @@ class BiInterpolatorTest : public QObject
 
 private slots:
     void simpleTest();
-    void middleValuesTest();
+    void interpolationTest();
+    void extrapolationTest();
     void asymetric1Test();
     void asymetric2Test();
     void constructorExceptionsTest();
-    void interpolationExceptionsTest();
 };
 
 #endif // INTERPOLATIONTEST_H

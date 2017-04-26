@@ -27,7 +27,7 @@ void BiInterpolatorTest::simpleTest()
 
 //------------------------------------------------------------------------------
 
-void BiInterpolatorTest::middleValuesTest()
+void BiInterpolatorTest::interpolationTest()
 {
     BiInterpolator interp(
     {0.0, 1.0, 3.0},
@@ -58,6 +58,39 @@ void BiInterpolatorTest::middleValuesTest()
     QCOMPARE(interp(0.5, 1.5),  157.5);
     QCOMPARE(interp(2.0, 0.5),  825.0);
     QCOMPARE(interp(2.0, 1.5),  650.0);
+}
+
+//------------------------------------------------------------------------------
+
+void BiInterpolatorTest::extrapolationTest()
+{
+    {
+        BiInterpolator interp(
+        {0.0, 1.0},
+        {0.0, 10.0},
+        {   {  0.0,  3.0},  // 2x+3y
+            {  2.0,  5.0},
+        });
+
+        QCOMPARE(interp( 0.0, -10.0),  -3.0);
+        QCOMPARE(interp( 0.0,  20.0),   6.0);
+        QCOMPARE(interp(-1.0,   0.0),  -2.0);
+        QCOMPARE(interp( 2.0,   0.0),   4.0);
+        QCOMPARE(interp( 2.0,  20.0),  10.0);
+    }
+
+    {
+        BiInterpolator interp(
+        {0.0, 1.0, 2.0},
+        {0.0, 10.0, 20.0},
+        {   {  0.0,  3.0, 0.0},
+            {  2.0,  5.0, 0.0},
+            {  0.0,  3.0, 0.0},
+        });
+
+        QCOMPARE(interp( 0.0,  30.0),  -3.0);
+        QCOMPARE(interp( 3.0,  0.0),  -2.0);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -164,25 +197,6 @@ void BiInterpolatorTest::constructorExceptionsTest()
     QVERIFY_EXCEPTION_THROWN(
     BiInterpolator({0.0, 1.0}, {0.0, 0.0}, {{0.0, 0.0}, {0.0, 0.0}}),
     std::invalid_argument);
-}
-
-//------------------------------------------------------------------------------
-
-void BiInterpolatorTest::interpolationExceptionsTest()
-{
-    BiInterpolator interp({-1.0, 1.0}, {-1.0, 1.0}, {{0.0, 0.0}, {0.0, 0.0}});
-
-    // Too small x
-    QVERIFY_EXCEPTION_THROWN(interp(-2.0,  0.0), std::domain_error);
-
-    // Too large x
-    QVERIFY_EXCEPTION_THROWN(interp( 2.0,  0.0), std::domain_error);
-
-    // Too small y
-    QVERIFY_EXCEPTION_THROWN(interp( 0.0, -2.0), std::domain_error);
-
-    // Too large y
-    QVERIFY_EXCEPTION_THROWN(interp( 0.0,  2.0), std::domain_error);
 }
 
 //------------------------------------------------------------------------------

@@ -87,28 +87,11 @@ BiInterpolator::BiInterpolator(const QVector<double> &xs,
 
 double BiInterpolator::operator()(double x, double y) const
 {
-    if (x < _xs.first() || _xs.last() < x)
-        throw std::domain_error(
-            QString("BiInterpolation::operator(): "
-                    "parameter x (%1) out of range ([%2 %3])")
-            .arg(x)
-            .arg(_xs.first())
-            .arg(_xs.last())
-            .toStdString());
-
-    if (y < _ys.first() || _ys.last() < y)
-        throw std::domain_error(
-            QString("BiInterpolation: parameter y (%1) out of range ([%2 %3])")
-            .arg(y)
-            .arg(_ys.first())
-            .arg(_ys.last())
-            .toStdString());
-
     int i=0;
-    while (_xs[i+1] < x) ++i;
+    while (_xs[i+1] < x && i<_xs.length()-2) ++i;
 
     int j=0;
-    while (_ys[j+1] < y) ++j;
+    while (_ys[j+1] < y && j<_ys.length()-2) ++j;
 
     const double x0 = (_xs[i+1]-x)/(_xs[i+1]-_xs[i]);
     const double x1 = 1-x0;
