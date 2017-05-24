@@ -101,7 +101,7 @@ QVector<double> fromTo(double from, double to)
 
 QVector<double> _calibratedFreq(fromTo(125, 165));
 QVector<double> _calibratedPower{18.0, 19.0, 20.0, 21.0, 21.5};
-QVector<QVector<double>> _calibratedSteps{
+QVector<QVector<double>> _calibratedStepsCrystal1{
     {16,  29,  44,  62,  71},
     {16,  29,  44,  61,  70},
     {15,  28,  42,  60,  70},
@@ -144,10 +144,55 @@ QVector<QVector<double>> _calibratedSteps{
     {80, 101, 124, 151, 165},
     {94, 117, 141, 170, 185}};
 
+QVector<QVector<double>> _calibratedStepsCrystal2{
+    { 14,  27,  45,  62,  69},
+    { 13,  26,  44,  61,  68},
+    { 13,  25,  43,  60,  66},
+    { 11,  22,  41,  58,  64},
+    { 10,  22,  39,  56,  62},
+    {  9,  21,  38,  54,  60},
+    {  7,  19,  36,  52,  59},
+    {  6,  18,  35,  50,  57},
+    {  5,  17,  33,  49,  55},
+    {  5,  16,  33,  48,  54},
+    {  5,  16,  33,  48,  55},
+    {  5,  17,  34,  50,  56},
+    {  7,  19,  36,  51,  58},
+    {  9,  21,  39,  56,  61},
+    { 12,  25,  43,  60,  65},
+    { 16,  28,  47,  64,  70},
+    { 19,  31,  50,  67,  74},
+    { 21,  34,  53,  71,  78},
+    { 23,  36,  56,  74,  81},
+    { 25,  38,  57,  75,  83},
+    { 25,  38,  57,  76,  84},
+    { 24,  37,  57,  75,  83},
+    { 23,  35,  54,  72,  80},
+    { 19,  32,  50,  68,  75},
+    { 14,  26,  44,  61,  68},
+    {  9,  20,  37,  53,  60},
+    {  2,  13,  28,  44,  50},
+    {  0,   7,  22,  37,  43},
+    {  0,   6,  21,  35,  42},
+    {  0,  11,  26,  42,  48},
+    { 10,  22,  38,  55,  63},
+    { 22,  35,  54,  73,  81},
+    { 36,  50,  71,  92, 101},
+    { 48,  64,  87, 109, 119},
+    { 60,  77, 102, 126, 138},
+    { 71,  89, 116, 142, 155},
+    { 81,  98, 128, 156, 170},
+    { 91, 110, 141, 171, 186},
+    {101, 120, 154, 185, 200},
+    {110, 131, 166, 199, 214},
+    {121, 143, 179, 214, 230}};
+
 DdsDriver::DdsDriver(const QSerialPortInfo &portInfo)
     : BaseDriver(portInfo)
     , _stream(29, 0)
-    , _interpolator(_calibratedFreq, _calibratedPower, _calibratedSteps)
+    , _interpolator(_calibratedFreq,
+                    _calibratedPower,
+                    _calibratedStepsCrystal1)
 {
     _stream[4] = 0x02;
     _stream[5] = 0x01;
