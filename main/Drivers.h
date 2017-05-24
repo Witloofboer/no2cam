@@ -17,7 +17,7 @@ class BaseDriver : public core::BaseAcousticDriver
     Q_OBJECT
 
 public:
-    BaseDriver(const QSerialPortInfo& portInfo);
+    BaseDriver(QSerialPort *serial);
 
     static BaseDriver *getDriver();
 
@@ -36,7 +36,7 @@ class DdsDriver : public BaseDriver
     Q_OBJECT
 
 public:
-    DdsDriver(const QSerialPortInfo& portInfo);
+    DdsDriver(QSerialPort *serial);
 
     void set(double frequency, double power) override;
 
@@ -52,7 +52,7 @@ class PllDriver : public BaseDriver
     Q_OBJECT
 
 public:
-    PllDriver(const QSerialPortInfo& portInfo);
+    PllDriver(QSerialPort *serial);
 
     void set(double frequency, double power) override;
 };

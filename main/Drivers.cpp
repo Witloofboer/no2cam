@@ -14,75 +14,81 @@
 // BaseDriver
 //------------------------------------------------------------------------------
 
-BaseDriver::BaseDriver(const QSerialPortInfo &portInfo)
-    :_serial(new QSerialPort(portInfo, this))
+BaseDriver::BaseDriver(QSerialPort *serial)
+    :_serial(serial)
 {
-    //_serial->setPortName("COM12"); // select the correct port to send the data to...
-    _serial->setBaudRate(QSerialPort::Baud9600);
-    _serial->setDataBits(QSerialPort::Data8);
-    _serial->setStopBits(QSerialPort::OneStop);
-    _serial->setParity(QSerialPort::NoParity);
-    _serial->setFlowControl(QSerialPort::NoFlowControl);
-    _ok = _serial->open(QSerialPort::ReadWrite);
-    if (_ok)
-        qDebug("Success opening serial port of acousting driver");
-    else
-        qCritical("Failure opening serial port of acousting driver");
+    _serial->setParent(this);
 }
 
 //------------------------------------------------------------------------------
 
 BaseDriver *BaseDriver::getDriver()
 {
-    BaseDriver *driver = nullptr;
-
     for(auto &portInfo: QSerialPortInfo::availablePorts())
     {
-        const auto description = portInfo.description();
+        qDebug() << "Port: " << portInfo.portName();
+        qDebug() << "    Description: " << portInfo.description();
+        qDebug() << "    Manufacturer: " << portInfo.manufacturer();
+        qDebug() << "    Product identifier: " << portInfo.productIdentifier();
+        qDebug() << "    Vendor identifier: " << portInfo.vendorIdentifier();
 
-        qDebug() << "Port " << portInfo.portName()
-                 << ": " << description;
+        if (    portInfo.description() == "USB Communication Port" &&
+                portInfo.manufacturer() == "Microchip Technology. Inc." &&
+                portInfo.productIdentifier() == 10 &&
+                portInfo.productIdentifier() == 1240)
+        {
+            qDebug("Candidate driver board detected");
 
-        if (description == "DDS Solution_-_-_-_-_-_-_")
-        {
-            qDebug("DDS driver detected");
-            driver = new DdsDriver(portInfo);
-            break;
-        }
-        else if (description == "PLL Solution_-_-_-_-_-_-_")
-        {
-            qDebug("PLL driver detected");
-            driver = new PllDriver(portInfo);
-            break;
+            QSerialPort *serial = new QSerialPort(portInfo);
+            serial->setBaudRate(QSerialPort::Baud9600);
+            serial->setDataBits(QSerialPort::Data8);
+            serial->setStopBits(QSerialPort::OneStop);
+            serial->setParity(QSerialPort::NoParity);
+            serial->setFlowControl(QSerialPort::NoFlowControl);
+            bool ok = serial->open(QSerialPort::ReadWrite);
+
+            if (ok)
+            {
+                qDebug("Serial port succesfully opened");
+            }
+            else
+            {
+                qCritical("Failure to open serial port -> Ignoring it");
+                delete serial;
+                continue;
+            }
+
+            serial->write("\n");
+            QString answer = QString::fromStdString(
+                                 serial->readAll().toStdString()
+                             );
+            qDebug() << "Driver board identification: " << answer;
+
+            if (answer == "DDS")
+            {
+                qDebug("DDS board succesfully detected");
+                return new DdsDriver(serial);
+            }
+            else if (answer == "PLL")
+            {
+                qDebug("PLL board succesfully detected");
+                return new PllDriver(serial);
+            }
+            else
+            {
+                qWarning("Unexpected board identification -> board ignored");
+                delete serial;
+                continue;
+            }
         }
     }
 
-    if (driver)
-    {
-        if (driver->_ok)
-        {
-            return driver;
-        } else {
-            qCritical("Failure to open the acoustic driver port");
-            QMessageBox::critical(
-                0,
-                "Aborting",
-                "<p><b>Success</b>: acoustic driver detected</p>"
-                "<p><b>Failure</b>: acoustic driver port opening</p>");
-            delete driver;
-            return 0;
-        }
-    }
-    else
-    {
-        qCritical("No acoustic driver detected");
-        QMessageBox::critical(
-            0,
-            "Aborting",
-            "<p><b>Failure</b>: no acoustic driver detected</p>");
-        return 0;
-    }
-
+    qCritical("No acoustic driver board detected");
+    QMessageBox::critical(
+        0,
+        "Aborting",
+        "<p><b>Failure</b>: no acoustic driver detected</p>");
+    return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -187,8 +193,8 @@ QVector<QVector<double>> _calibratedStepsCrystal2{
     {110, 131, 166, 199, 214},
     {121, 143, 179, 214, 230}};
 
-DdsDriver::DdsDriver(const QSerialPortInfo &portInfo)
-    : BaseDriver(portInfo)
+DdsDriver::DdsDriver(QSerialPort *serial)
+    : BaseDriver(serial)
     , _stream(29, 0)
     , _interpolator(_calibratedFreq,
                     _calibratedPower,
@@ -265,8 +271,8 @@ void DdsDriver::set(double frequency, double power)
 // PLL Driver
 //------------------------------------------------------------------------------
 
-PllDriver::PllDriver(const QSerialPortInfo &portInfo)
-    : BaseDriver(portInfo)
+PllDriver::PllDriver(QSerialPort *serial)
+    : BaseDriver(serial)
 {}
 
 //------------------------------------------------------------------------------
