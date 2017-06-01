@@ -1,5 +1,7 @@
 #include "Thermometer.h"
 
+#include "core/Mockups.h"
+
 #include <QMessageBox>
 
 //------------------------------------------------------------------------------
@@ -18,7 +20,7 @@ Thermometer::~Thermometer()
 
 //------------------------------------------------------------------------------
 
-Thermometer* Thermometer::getThermometer()
+core::BaseThermometerDriver* Thermometer::getThermometer()
 {
     ViStatus status;
     ViUInt32 findCnt;
@@ -33,9 +35,10 @@ Thermometer* Thermometer::getThermometer()
         qCritical("No temperature sensor detected");
         QMessageBox::critical(0,
                               "Aborting",
-                              "<b>Failure</b>: no temperature sensor detected");
+                              "<p><b>Failure</b>: no temperature sensor detected</p>"
+                              "<p><b>Using the mockup sensor</b></p>");
 
-        return nullptr;
+        return new core::MockThermometer;
     }
 
     ViSession session;
@@ -46,8 +49,10 @@ Thermometer* Thermometer::getThermometer()
         qCritical("Failure to initialise the temperature sensor");
         QMessageBox::critical(0,
                               "Aborting",
-                              "Failed to init temperature sensor");
-        return nullptr;
+                              "<p>Failed to init temperature sensor</p>"
+                              "<p><b>Using the mockup sensor</b></p>");
+
+        return new core::MockThermometer;
     }
 
     viSetAttribute(session, VI_ATTR_TMO_VALUE, 5000);

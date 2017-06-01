@@ -20,7 +20,7 @@ public:
     HamamatsuCamera(HDCAM hdcam);
     ~HamamatsuCamera();
 
-    static HamamatsuCamera *getCamera();
+    static BaseCameraDriver *getCamera();
 
     void setExposure(int exposure) override;
     void takeSnapshot() override;

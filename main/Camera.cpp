@@ -3,6 +3,7 @@
 #include <QString>
 #include "dcamprop.h"
 #include <stdlib.h>
+#include "core/Mockups.h"
 
 //------------------------------------------------------------------------------
 
@@ -31,7 +32,7 @@ HamamatsuCamera::~HamamatsuCamera()
 
 //------------------------------------------------------------------------------
 
-HamamatsuCamera *HamamatsuCamera::getCamera()
+core::BaseCameraDriver *HamamatsuCamera::getCamera()
 {
     // first initialize the DCAM API software
     DCAMAPI_INIT paraminit;
@@ -47,8 +48,9 @@ HamamatsuCamera *HamamatsuCamera::getCamera()
         QMessageBox::critical(
             0, "Aborting",
             tr("<p><b>Failure</b>: no camera detected</p>"
-               "<p>(dcamapi_init error code: %1)</p>").arg(err));
-        return nullptr;
+               "<p>(dcamapi_init error code: %1)</p>"
+               "<p><b>Using the mockup camera</b></p>").arg(err));
+        return new core::MockCamera;
     }
 
     if (paraminit.iDeviceCount != 1)
@@ -59,8 +61,9 @@ HamamatsuCamera *HamamatsuCamera::getCamera()
             0,
             "Aborting",
             tr("<p><b>Failure</b>: more than 1 camera detected</p>"
-               "<p>(%1 camera found, instead of only 1)</p>").arg(err));
-        return nullptr;
+               "<p>(%1 camera found, instead of only 1)</p>"
+               "<p><b>Using the mockup camera</b></p>").arg(err));
+        return new core::MockCamera;
     }
 
     DCAMDEV_OPEN paramopen;
@@ -77,9 +80,10 @@ HamamatsuCamera *HamamatsuCamera::getCamera()
             0,
             "Aborting",
             tr("<p><b>Failure</b>: camera not opened</p>"
-               "<p>(dcamdev_open error code: %1)</p>").arg(err));
+               "<p>(dcamdev_open error code: %1)</p>"
+               "<p><b>Using the mockup camera</b></p>").arg(err));
         dcamapi_uninit();
-        return nullptr;
+        return new core::MockCamera;
     }
 
     // once the camera could be opened succesfully, couple the device ID to the device handler
@@ -96,10 +100,11 @@ HamamatsuCamera *HamamatsuCamera::getCamera()
             0,
             "Aborting",
             tr("<p><b>Failure</b>: camera binning settings</p>"
-               "<p>(dcamprop_setvalue error code: %1)</p>").arg(err));
+               "<p>(dcamprop_setvalue error code: %1)</p>"
+               "<p><b>Using the mockup camera</b></p>").arg(err));
         dcamdev_close(hdcam);
         dcamapi_uninit();
-        return 0;
+        return new core::MockCamera;
     }
 
     err = dcambuf_alloc(hdcam,1);
@@ -111,10 +116,11 @@ HamamatsuCamera *HamamatsuCamera::getCamera()
         QMessageBox::critical(
             0, "Aborting",
             tr("<p><b>Failure</b>: camera buffer allocation</p>"
-               "<p>(dcambuf_alloc error code: %1)").arg(err));
+               "<p>(dcambuf_alloc error code: %1)"
+               "<p><b>Using the mockup camera</b></p>").arg(err));
         dcamdev_close(hdcam);
         dcamapi_uninit();
-        return 0;
+        return new core::MockCamera;
     }
 
     // allow the software to send the trigger pulse to the camera
@@ -130,11 +136,12 @@ HamamatsuCamera *HamamatsuCamera::getCamera()
             0,
             "Aborting",
             tr("<p><b>Failure</b>: camera trigger settings.</p>"
-               "<p>(dcamprop_setvalue error code: %1)</p>").arg(err));
+               "<p>(dcamprop_setvalue error code: %1)</p>"
+               "<p><b>Using the mockup camera</b></p>").arg(err));
         dcambuf_release(hdcam);
         dcamdev_close(hdcam);
         dcamapi_uninit();
-        return 0;
+        return new core::MockCamera;
     }
 
     // Start the capture mode of the camera
@@ -145,11 +152,12 @@ HamamatsuCamera *HamamatsuCamera::getCamera()
         QMessageBox::critical(
             0, "Aborting",
             tr("<p><b>Failure</b>: camera starting</p>"
-               "<p>(dcamcap_start error code: %1)</p>").arg(err));
+               "<p>(dcamcap_start error code: %1)</p>"
+               "<p><b>Using the mockup camera</b></p>").arg(err));
         dcambuf_release(hdcam);
         dcamdev_close(hdcam);
         dcamapi_uninit();
-        return 0;
+        return new core::MockCamera;
     }
 
     return new HamamatsuCamera(hdcam);

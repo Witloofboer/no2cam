@@ -13,7 +13,7 @@ public:
     Thermometer(const ViSession &session);
     virtual ~Thermometer() override;
 
-    static Thermometer* getThermometer();
+    static BaseThermometerDriver *getThermometer();
 
     double getTemperature() override;
     double getHumidity();

@@ -32,10 +32,10 @@ BaseDriver *BaseDriver::getDriver()
         qDebug() << "    Product identifier: " << portInfo.productIdentifier();
         qDebug() << "    Vendor identifier: " << portInfo.vendorIdentifier();
 
-        if (    portInfo.description() == "USB Communication Port" &&
-                portInfo.manufacturer() == "Microchip Technology. Inc." &&
+        if (    portInfo.description() == "USB Communications Port" &&
+                portInfo.manufacturer() == "Microchip Technology, Inc." &&
                 portInfo.productIdentifier() == 10 &&
-                portInfo.productIdentifier() == 1240)
+                portInfo.vendorIdentifier() == 1240)
         {
             qDebug("Candidate driver board detected");
 
@@ -59,17 +59,17 @@ BaseDriver *BaseDriver::getDriver()
             }
 
             serial->write("\n");
-            QString answer = QString::fromStdString(
-                                 serial->readAll().toStdString()
-                             );
-            qDebug() << "Driver board identification: " << answer;
+            serial->waitForReadyRead(-1);
+            QByteArray ans = serial->read(3);
 
-            if (answer == "DDS")
+            qDebug() << "Driver board identification: " << ans;
+
+            if (ans == "DDS")
             {
                 qDebug("DDS board succesfully detected");
                 return new DdsDriver(serial);
             }
-            else if (answer == "PLL")
+            else if (ans == "PLL")
             {
                 qDebug("PLL board succesfully detected");
                 return new PllDriver(serial);
