@@ -5,6 +5,8 @@
 #include "Drivers.h"
 #include "Thermometer.h"
 
+#include <cstring>
+
 #include <QCoreApplication>
 #include "gui/MainWindow.h"
 #include "core/Crystal.h"
@@ -21,9 +23,39 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("NO2 Camera Command Interface");
     QApplication application(argc, argv);
 
+    bool isDds = false;
+    bool isPll = false;
+
+    if (argc == 2)
+    {
+        isDds = 0 == strcmp("-dds", argv[1]);
+        isPll = 0 == strcmp("-pll", argv[1]);
+    }
+
+    BaseDriver *driver = 0;
+
+    if (isDds)
+    {
+        driver = DdsDriver::getDriver();
+    }
+    else if (isPll)
+    {
+        driver = PllDriver::getDriver();
+    }
+    else
+    {
+        qCritical("Missing '-dll' or '-pll' parameter at launch");
+        QMessageBox::critical(
+            0,
+            "Aborting",
+            "<p><b>Failure</b>: "
+            "The application requires either '-dll' or '-pll' as a parameter."
+            "</p>");
+        return -1;
+    }
+
     auto camera = HamamatsuCamera::getCamera();
     auto thermometer = Thermometer::getThermometer();
-    auto driver = BaseDriver::getDriver();
 
     if (camera == nullptr || thermometer == nullptr || driver == nullptr)
     {

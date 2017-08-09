@@ -11,18 +11,12 @@
 #include "windows.h"
 
 //------------------------------------------------------------------------------
-// BaseDriver
+// Helpers
 //------------------------------------------------------------------------------
 
-BaseDriver::BaseDriver(QSerialPort *serial)
-    :_serial(serial)
-{
-    _serial->setParent(this);
-}
+enum AcoustoDriverType {DDS, PLL};
 
-//------------------------------------------------------------------------------
-
-BaseDriver *BaseDriver::getDriver()
+static QSerialPort* getSerialPort(AcoustoDriverType driverType)
 {
     for(auto &portInfo: QSerialPortInfo::availablePorts())
     {
@@ -60,26 +54,23 @@ BaseDriver *BaseDriver::getDriver()
 
             serial->write("\n");
             serial->waitForReadyRead(-1);
-            QByteArray ans = serial->read(3);
+            QByteArray feedback = serial->read(3);
 
-            qDebug() << "Driver board identification: " << ans;
+            qDebug() << "Driver board identification: " << feedback;
 
-            if (ans == "DDS")
+            if (feedback == "DDS" and driverType == DDS)
             {
-                qDebug("DDS board succesfully detected");
-                return new DdsDriver(serial);
+                qDebug("DDS board selected");
+                return serial;
             }
-            else if (ans == "PLL")
+
+            if (feedback == "PLL" && driverType == PLL)
             {
-                qDebug("PLL board succesfully detected");
-                return new PllDriver(serial);
+                qDebug("PLL board selected");
+                return serial;
             }
-            else
-            {
-                qWarning("Unexpected board identification -> board ignored");
-                delete serial;
-                continue;
-            }
+
+            delete serial;
         }
     }
 
@@ -89,6 +80,17 @@ BaseDriver *BaseDriver::getDriver()
         "Aborting",
         "<p><b>Failure</b>: no acoustic driver detected</p>");
     return 0;
+}
+
+
+//------------------------------------------------------------------------------
+// BaseDriver
+//------------------------------------------------------------------------------
+
+BaseDriver::BaseDriver(QSerialPort *serial)
+    :_serial(serial)
+{
+    _serial->setParent(this);
 }
 
 //------------------------------------------------------------------------------
@@ -193,6 +195,16 @@ QVector<QVector<double>> _calibratedStepsCrystal2{
     {110, 131, 166, 199, 214},
     {121, 143, 179, 214, 230}};
 
+//------------------------------------------------------------------------------
+
+DdsDriver* DdsDriver::getDriver()
+{
+    QSerialPort *port = getSerialPort(DDS);
+    return port ? new DdsDriver(port) : 0;
+}
+
+//------------------------------------------------------------------------------
+
 DdsDriver::DdsDriver(QSerialPort *serial)
     : BaseDriver(serial)
     , _stream(29, 0)
@@ -269,6 +281,14 @@ void DdsDriver::set(double frequency, double power)
 
 //------------------------------------------------------------------------------
 // PLL Driver
+//------------------------------------------------------------------------------
+
+PllDriver* PllDriver::getDriver()
+{
+    QSerialPort * port = getSerialPort(PLL);
+    return port ? new PllDriver(port) : 0;
+}
+
 //------------------------------------------------------------------------------
 
 PllDriver::PllDriver(QSerialPort *serial)

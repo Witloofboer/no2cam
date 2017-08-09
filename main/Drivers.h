@@ -16,12 +16,8 @@ class BaseDriver : public core::BaseAcousticDriver
 {
     Q_OBJECT
 
-public:
-    BaseDriver(QSerialPort *serial);
-
-    static BaseDriver *getDriver();
-
 protected:
+    BaseDriver(QSerialPort *serial);
     QSerialPort *_serial;
 
 private:
@@ -36,11 +32,13 @@ class DdsDriver : public BaseDriver
     Q_OBJECT
 
 public:
-    DdsDriver(QSerialPort *serial);
+    static DdsDriver *getDriver();
 
     void set(double frequency, double power) override;
 
 private:
+    DdsDriver(QSerialPort *serial);
+
     QByteArray _stream;
     const core::BiInterpolator _interpolator;
 };
@@ -52,9 +50,12 @@ class PllDriver : public BaseDriver
     Q_OBJECT
 
 public:
-    PllDriver(QSerialPort *serial);
+    static PllDriver *getDriver();
 
     void set(double frequency, double power) override;
+
+private:
+    PllDriver(QSerialPort *serial);
 };
 
 //------------------------------------------------------------------------------
