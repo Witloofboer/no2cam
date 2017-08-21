@@ -44,12 +44,12 @@ int main(int argc, char *argv[])
     }
     else
     {
-        qCritical("Missing '-dll' or '-pll' parameter at launch");
+        qCritical("Missing '-dds' or '-pll' parameter at launch");
         QMessageBox::critical(
             0,
             "Aborting",
             "<p><b>Failure</b>: "
-            "The application requires either '-dll' or '-pll' as a parameter."
+            "The application requires either '-dds' or '-pll' as a parameter."
             "</p>");
         return -1;
     }
