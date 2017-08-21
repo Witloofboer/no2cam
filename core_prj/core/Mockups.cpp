@@ -49,10 +49,10 @@ void MockAcousticDriver::set(double frequency, double power)
 
 //------------------------------------------------------------------------------
 
-MockThermometer::MockThermometer()
+MockThermometer::MockThermometer(double delta)
     : BaseThermometerDriver()
     , _temperature(20.0)
-    , _delta(0.12)
+    , _delta(delta)
 {}
 
 //------------------------------------------------------------------------------

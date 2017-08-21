@@ -36,9 +36,9 @@ core::BaseThermometerDriver* Thermometer::getThermometer()
         QMessageBox::critical(0,
                               "Aborting",
                               "<p><b>Failure</b>: no temperature sensor detected</p>"
-                              "<p><b>Using the mockup sensor</b></p>");
+                              "<p><b>Using the mockup sensor at 20°C</b></p>");
 
-        return new core::MockThermometer;
+        return new core::MockThermometer(0.0);
     }
 
     ViSession session;
@@ -50,9 +50,9 @@ core::BaseThermometerDriver* Thermometer::getThermometer()
         QMessageBox::critical(0,
                               "Aborting",
                               "<p>Failed to init temperature sensor</p>"
-                              "<p><b>Using the mockup sensor</b></p>");
+                              "<p><b>Using the mockup sensor at 20°C</b></p>");
 
-        return new core::MockThermometer;
+        return new core::MockThermometer(0.0);
     }
 
     viSetAttribute(session, VI_ATTR_TMO_VALUE, 5000);

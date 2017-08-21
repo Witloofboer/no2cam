@@ -35,7 +35,7 @@ class CORESHARED_EXPORT MockThermometer : public BaseThermometerDriver
     Q_OBJECT
 
 public:
-    MockThermometer();
+    MockThermometer(double delta);
     double getTemperature() override;
 
 private:

@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     //chrono.start();
     //qint64 elapsed1 = chrono.nsecsElapsed();
 
-    auto thermometer = new core::MockThermometer;
+    auto thermometer = new core::MockThermometer(0.0);
     auto camera = new core::MockCamera;
     auto driver = new core::MockAcousticDriver;
 

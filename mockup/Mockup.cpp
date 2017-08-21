@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 
     QApplication application(argc, argv);
 
-    auto thermometer = new core::MockThermometer;
+    auto thermometer = new core::MockThermometer(0.12);
     auto camera = new core::MockCamera;
     auto driver = new core::MockAcousticDriver;
 
