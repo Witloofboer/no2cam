@@ -12,9 +12,19 @@ SnapshotWidget::SnapshotWidget(QWidget *parent)
              core::ImageBuffer::size,
              QImage::Format_Indexed8)
 {
-    for(int i=0; i<256; ++i)
+    for(int i=0; i<230; ++i)
     {
         _image.setColor(i, qRgb(i, i, i));
+    }
+
+    for(int i=230; i<245; ++i)
+    {
+        _image.setColor(i, qRgb(i, i, i/2));
+    }
+
+    for(int i=245; i<256; ++i)
+    {
+        _image.setColor(i, qRgb(i, i/2, i/2));
     }
 
     _image.fill(0);

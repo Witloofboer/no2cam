@@ -30,13 +30,8 @@ signals:
 public slots:
 
 private:
-    const unsigned squeezeLvl = 1;
-    const unsigned squeezeWidth = 1 << squeezeLvl;
-    const unsigned nbrSqueezedValues = 256 >> squeezeLvl;
-
     QPixmap *_pixmap;
     QPainter _painter;
-    QBrush   _brush, _redBrush;
 };
 
 //------------------------------------------------------------------------------
