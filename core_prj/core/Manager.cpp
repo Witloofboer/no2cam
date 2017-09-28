@@ -132,7 +132,7 @@ void Manager::saveSnapshot(const QDateTime& dateTime,
                    ? QString("%1x%2").arg(snapPerObs).arg(_exposure)
                    : QString("%1").arg(_exposure);
 
-    auto _filename = QString("%1-%2-%3-%4nm-%5Ghz-%6mW-%7ms-%8degC.dat")
+    auto _filename = QString("%1-%2-%3-%4nm-%5Mhz-%6mW-%7ms-%8degC.dat")
                      . arg(dateTime.toString("yyMMdd-HHmmss.zzz"))
                      . arg(_session.isEmpty() ? "_" : _session)
                      . arg(mode)
