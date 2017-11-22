@@ -265,6 +265,18 @@ void PllDriver::set(double frequency, double power)
         frequency = 232.61; // This frequency is cut-off by a filter
     }
 
+    if (frequency < 125 && frequency != 0)
+    {
+        qWarning("Too low frequency required: %.1f MHz (must be >= 125 MHz)",
+                 frequency);
+        throw std::domain_error(
+            QString(
+                "<p>Too low acoustic frequency. </p>"
+                "<p>Requested: %1 MHz. Minimum allowed: 125 MHz.</p>")
+            .arg(frequency, 0, 'f', 1).toStdString());
+    }
+
+
     const double per_MHz = 1e6;
     const double VREF = 40;
     double VCO_freq = 1040;    //choose: NIR=1472, UV=1040, VIS=1152
