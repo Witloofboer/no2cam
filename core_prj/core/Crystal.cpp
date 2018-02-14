@@ -52,9 +52,10 @@ void Crystal::computeFreqPow(double wavelength, double T,
     const double c11 = (5.620-0.00148*T)*1e10;
     const double c12 = (5.120-0.00178*T)*1e10;
     const double c44 = (2.675-0.00020*T)*1e10;
+    const double ceff = (-3.41e3*T+1.0496e6)*T+2.2522e9;
     // Temperature-dependent crystal stiffness coefficients [N m-2]
 
-    const double V2 = (c11-c12)/2/rho*_cos2a + c44/rho*_sin2a;
+    const double V2 = ceff/rho*_cos2a + c44/rho*_sin2a;
     // Square of the temperature-dependent acoustic wave phase velocity [m2 s-2]
 
     const double l  = wavelength * 1e-3;
