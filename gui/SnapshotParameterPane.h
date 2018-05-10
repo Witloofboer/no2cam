@@ -16,6 +16,7 @@ namespace gui {
 
 class DoubleLineEdit;
 class IntLineEdit;
+class MainWindow;
 
 //------------------------------------------------------------------------------
 
@@ -23,7 +24,8 @@ class SnapshotParameterPane : public BaseParameterPane
 {
     Q_OBJECT
 public:
-    explicit SnapshotParameterPane(const core::Crystal *crystal);
+    explicit SnapshotParameterPane(MainWindow *mainWindow,
+                                   const core::Crystal *crystal);
     void updateState(bool isAppReady);
     void persiste() const;
 

@@ -19,6 +19,7 @@
 #include "CameraBtnBox.h"
 #include "SnapshotParameterPane.h"
 #include "ObservationParameterPane.h"
+#include "DoasParameterPane.h"
 #include "SweepParameterPane.h"
 #include "ConfigurationDlg.h"
 #include "HistogramWidget.h"
@@ -52,17 +53,19 @@ MainWindow::MainWindow(core::Crystal *crystal,
     , _selectFolderActn(new QAction("&Select data folder"))
     , _snapshotModeActn(new QAction("Take &snapshots", this))
     , _observationModeActn(new QAction("Make &observations", this))
+    , _doasModeActn(new QAction("DOAS", this))
     , _sweepModeActn(new QAction("Sweep over &wavelength", this))
     , _configParamActn(new QAction("&Configure", this))
     , _dataFolder()
-    , _version(tr("0.3.0")
+    , _version(tr("0.4.0")
                + (subversion.isEmpty()
                   ? QString("")
                   : QString(" (%1)").arg(subversion)))
     , _devicesNotes(devicesNotes)
-    , _snapshotPane(new SnapshotParameterPane(crystal))
-    , _observationPane(new ObservationParameterPane)
-    , _sweepPane(new SweepParameterPane)
+    , _snapshotPane(new SnapshotParameterPane(this, crystal))
+    , _observationPane(new ObservationParameterPane(this))
+    , _doasPane(new DoasParameterPane(this))
+    , _sweepPane(new SweepParameterPane(this))
     , _cameraBtnBox(new CameraBtnBox)
     , _sessionEdit(new LineEdit)
     , _snapshot(new SnapshotWidget)
@@ -81,6 +84,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
     auto leftLayout = new QVBoxLayout;
     _stackedWdgt->addWidget(_snapshotPane);
     _stackedWdgt->addWidget(_observationPane);
+    _stackedWdgt->addWidget(_doasPane);
     _stackedWdgt->addWidget(_sweepPane);
 
     auto lineEditLayout = new QHBoxLayout;
@@ -174,6 +178,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
     auto modeGroup = new QActionGroup(this);
     modeGroup->addAction(_snapshotModeActn);
     modeGroup->addAction(_observationModeActn);
+    modeGroup->addAction(_doasModeActn);
     modeGroup->addAction(_sweepModeActn);
 
     _snapshotModeActn->setIcon(QIcon(":/icons/S-blue-24.png"));
@@ -189,6 +194,13 @@ MainWindow::MainWindow(core::Crystal *crystal,
     _observationModeActn->setShortcut(QKeySequence("Alt+O"));
     _observationModeActn->setStatusTip(tr("Switch to observation mode"));
     connect(_observationModeActn, QAction::triggered, this, onSwitchMode);
+
+    _doasModeActn->setIcon(QIcon(":/icons/D-blue-24.png"));
+    _doasModeActn->setIconVisibleInMenu(false);
+    _doasModeActn->setCheckable(true);
+    _doasModeActn->setShortcut(QKeySequence("Alt+D"));
+    _doasModeActn->setStatusTip(tr("Switch to DOAS mode"));
+    connect(_doasModeActn, QAction::triggered, this, onSwitchMode);
 
     _sweepModeActn->setIcon(QIcon(":/icons/W-blue-24.png"));
     _sweepModeActn->setIconVisibleInMenu(false);
@@ -216,6 +228,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
     auto modeMenu = menuBar()->addMenu(tr("&Mode"));
     modeMenu->addAction(_snapshotModeActn);
     modeMenu->addAction(_observationModeActn);
+    modeMenu->addAction(_doasModeActn);
     modeMenu->addAction(_sweepModeActn);
 
     auto helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -229,6 +242,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
     auto toolBar = addToolBar(tr("&Mode"));
     toolBar->addAction(_snapshotModeActn);
     toolBar->addAction(_observationModeActn);
+    toolBar->addAction(_doasModeActn);
     toolBar->addAction(_sweepModeActn);
     toolBar->addSeparator();
     toolBar->addAction(_configParamActn);
@@ -251,6 +265,7 @@ MainWindow::MainWindow(core::Crystal *crystal,
 
     connect(_snapshotPane, BaseParameterPane::parametersChanged, this, refreshBtns);
     connect(_observationPane, BaseParameterPane::parametersChanged, this, refreshBtns);
+    connect(_doasPane, BaseParameterPane::parametersChanged, this, refreshBtns);
     connect(_sweepPane, BaseParameterPane::parametersChanged, this, refreshBtns);
 
     connect(_snapshotPane, SnapshotParameterPane::opticalSnapshot,
@@ -259,6 +274,8 @@ MainWindow::MainWindow(core::Crystal *crystal,
             coreManager, core::Manager::onAcousticSnapshot);
     connect(_observationPane, ObservationParameterPane::observationRequested,
             coreManager, core::Manager::onObservation);
+    connect(_doasPane, DoasParameterPane::doasRequested,
+            coreManager, core::Manager::onDoas);
     connect(_sweepPane, SweepParameterPane::sweepRequested,
             coreManager, core::Manager::onSweep);
 
@@ -323,10 +340,12 @@ void MainWindow::onUpdateApplicationReadiness(bool isAppReady)
 {
     _snapshotModeActn->setEnabled(isAppReady);
     _observationModeActn->setEnabled(isAppReady);
+    _doasModeActn->setEnabled(isAppReady);
     _sweepModeActn->setEnabled(isAppReady);
     _configParamActn->setEnabled(isAppReady);
     _snapshotPane->updateState(isAppReady);
     _observationPane->updateState(isAppReady);
+    _doasPane->updateState(isAppReady);
     _sweepPane->updateState(isAppReady);
     _cameraBtnBox->updateState(isAppReady);
     _sessionEdit->setEnabled(isAppReady);
@@ -441,6 +460,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     _configDlg->persiste();
     _snapshotPane->persiste();
     _observationPane->persiste();
+    _doasPane->persiste();
     _sweepPane->persiste();
     coreThread->wait();
 
@@ -461,9 +481,14 @@ void MainWindow::onSwitchMode()
         _stackedWdgt->setCurrentIndex(1);
         refreshBtns();
     }
-    else if (_sweepModeActn->isChecked())
+    else if (_doasModeActn->isChecked())
     {
         _stackedWdgt->setCurrentIndex(2);
+        refreshBtns();
+    }
+    else if (_sweepModeActn->isChecked())
+    {
+        _stackedWdgt->setCurrentIndex(3);
         refreshBtns();
     }
     else

@@ -30,6 +30,7 @@ class LineEdit;
 class ObservationParameterPane;
 class SnapshotWidget;
 class SnapshotParameterPane;
+class DoasParameterPane;
 class SweepParameterPane;
 
 //------------------------------------------------------------------------------
@@ -43,6 +44,10 @@ public:
                core::Manager *coreManager,
                const QString &version,
                const QString &devicesNotes);
+
+public slots:
+    void onDisplayWarning(QString msg);
+    void onUpdateApplicationReadiness(bool isAppReady);
 
 signals:
     void onStop();
@@ -63,11 +68,10 @@ private slots:
     void onAbout();
 
     void onUpdateTemperature(double temperature);
-    void onUpdateApplicationReadiness(bool isAppReady);
+
     void onDisplaySnapshot();
     void onFileCreationError(QString datafolder, QString filename);
     void onFileWritingError(QString datafolder, QString filename);
-    void onDisplayWarning(QString msg);
     void onDisplayInformation(QString msg);
 
     void onDisplayConfigurationDlg();
@@ -87,6 +91,7 @@ private:
     QAction *_selectFolderActn;
     QAction *_snapshotModeActn;
     QAction *_observationModeActn;
+    QAction *_doasModeActn;
     QAction *_sweepModeActn;
     QAction *_configParamActn;
 
@@ -96,6 +101,7 @@ private:
 
     SnapshotParameterPane    *_snapshotPane;
     ObservationParameterPane *_observationPane;
+    DoasParameterPane        *_doasPane;
     SweepParameterPane       *_sweepPane;
     CameraBtnBox *_cameraBtnBox;
 

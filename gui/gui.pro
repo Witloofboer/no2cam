@@ -27,7 +27,8 @@ SOURCES +=\
     BaseParameterPane.cpp \
     SweepParameterPane.cpp \
     SnapshotParameterPane.cpp \
-    ObservationParameterPane.cpp
+    ObservationParameterPane.cpp \
+    DoasParameterPane.cpp
 
 HEADERS +=\
     tooling.h \
@@ -40,6 +41,7 @@ HEADERS +=\
     SnapshotParameterPane.h \
     ObservationParameterPane.h \
     SweepParameterPane.h \
+    DoasParameterPane.h \
     gui_global.h
 
 RESOURCES += \

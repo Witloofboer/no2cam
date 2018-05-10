@@ -11,8 +11,9 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-BaseParameterPane::BaseParameterPane()
+BaseParameterPane::BaseParameterPane(MainWindow* mainWindow)
     : QWidget()
+    , _mainWindow(mainWindow)
     , _parameterBox(new QGroupBox())
     , _paramBoxLayout(new QGridLayout)
     , _exposureEdit(new IntLineEdit)
@@ -24,6 +25,7 @@ BaseParameterPane::BaseParameterPane()
 
     auto layout = new QVBoxLayout;
     layout->addWidget(_parameterBox);
+    layout->addStretch();
     setLayout(layout);
     layout->setContentsMargins(0,0,0,0);
 

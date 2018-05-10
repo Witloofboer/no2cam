@@ -14,8 +14,9 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-SnapshotParameterPane::SnapshotParameterPane(const core::Crystal *crystal)
-    : BaseParameterPane()
+SnapshotParameterPane::SnapshotParameterPane(MainWindow *mainWindow,
+                                             const core::Crystal *crystal)
+    : BaseParameterPane(mainWindow)
     , _crystal(crystal)
     , _temperature(20.0) // Initial value, will be updated
     , _spectralBtn(new QRadioButton(tr("Optic")))

@@ -13,6 +13,7 @@ class QSettings;
 
 namespace gui {
 
+class MainWindow;
 class IntLineEdit;
 
 //------------------------------------------------------------------------------
@@ -21,7 +22,7 @@ class BaseParameterPane : public QWidget
 {
     Q_OBJECT
 public:
-    explicit BaseParameterPane();
+    explicit BaseParameterPane(MainWindow *mainWindow);
 
     virtual void start(bool burst,
                        bool record,
@@ -42,6 +43,7 @@ protected:
     void persiste(QSettings &settings) const;
     void restore(QSettings &settings);
 
+    MainWindow   *_mainWindow;
     QGroupBox    *_parameterBox;
     QGridLayout  *_paramBoxLayout;
 

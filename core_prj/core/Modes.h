@@ -141,6 +141,39 @@ private:
 };
 
 //------------------------------------------------------------------------------
+// DOAS Mode
+//------------------------------------------------------------------------------
+
+class DoasMode: public BaseMode
+{
+public:
+    DoasMode(IModeToManager &manager,
+             const Crystal &crystal,
+             double minWavelength,
+             double maxWavelength,
+             double wavelengthStep,
+             int blackSnapshotRate);
+
+    void setAcousticWave() override;
+    void processSnapshot(const Snapshot &snapshotBuffer) override;
+
+protected:
+    bool mustContinueAquisition() const override;
+
+private:
+    const double _minWavelength;
+    const double _maxWavelength;
+    const double _wavelengthStep;
+    const int _blackSnapshotRate;
+
+    double _wavelength;
+    double _frequency;
+    double _power;
+    int _counter;
+};
+
+
+//------------------------------------------------------------------------------
 // SweepMode
 //------------------------------------------------------------------------------
 

@@ -138,6 +138,28 @@ public slots:
 
 
     /**
+     * Initiate a DOAS session.
+     * @param wavelengthFile file containing the wavelength
+     * @param snapshotPerObs number of snapshots composing a single observation
+     * @param exposure exposure time [s]
+     * @param cooldown cooldown time [s]
+     * @param burst single snapshot or burst mode flag
+     * @param stabilisationTime duration needed by electronic boards to relax to a new
+     *        set-point.
+     * @param session name used to prepend record files. No recording if empty.
+     * @param crystal crystal used
+     */
+    void onDoas(QString wavelengthFile,
+                int snapshotPerObs,
+                int exposure,
+                int cooldownTime,
+                int stabilisationTime,
+                bool burst,
+                bool record,
+                QString dataFolder,
+                QString session);
+
+    /**
      * Initiate a sweep session.
      * @param wavelength1 initial wavelength [nm]
      * @param wavelength2 final wavelength [nm]

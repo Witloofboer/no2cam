@@ -9,6 +9,7 @@ namespace gui {
 
 class DoubleLineEdit;
 class PosIntLineEdit;
+class MainWindow;
 
 //------------------------------------------------------------------------------
 
@@ -16,7 +17,7 @@ class SweepParameterPane : public BaseParameterPane
 {
     Q_OBJECT
 public:
-    explicit SweepParameterPane();
+    explicit SweepParameterPane(MainWindow *mainWindow);
     void updateState(bool isAppReady);
     void persiste() const;
 

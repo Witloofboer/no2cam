@@ -36,6 +36,9 @@ signals:
 public slots:
     void onDisplay(bool abortEnabled=false);
 
+    double doasRefWavelength() const;
+    double doasExposureFactor() const;
+
     int stabilisingTime() const;
     int temperaturePeriod() const;
 
@@ -52,6 +55,13 @@ private:
     DoubleLineEdit *_incidentEdit; // Incident angle
     DoubleLineEdit *_heightEdit;   // Transducer height
     DoubleLineEdit *_lengthEdit;   // Transducer lenght
+
+
+    DoubleLineEdit *_doasRefWlEdit;          // DOAS reference wavelength
+    double _doasRefWl;
+
+    DoubleLineEdit *_doasExposureFactorEdit; // DOAS exposure time correction factor
+    double _doasExposureFactor;
 
     IntLineEdit *_stabilisationTimeEdit;
     int _stabilisingTime;

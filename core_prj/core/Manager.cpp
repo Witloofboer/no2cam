@@ -3,7 +3,9 @@
 #include <exception>
 
 #include <QCoreApplication>
+#include <QDebug>
 #include <QFile>
+#include <QFileInfo>
 #include <QThread>
 #include <QTimer>
 
@@ -77,24 +79,21 @@ double Manager::temperature() const
 
 void Manager::setAcousticBeam(double frequency, double power)
 {
-    bool waveChanged;
-
     try
     {
-        waveChanged = _acousticCtrl->set(frequency, power);
+        bool waveChanged = _acousticCtrl->set(frequency, power);
+        if (waveChanged)
+        {
+            qDebug("Acoustic wave stabilisation: %d ms", _stabilisationT->interval());
+            _stabilisationT->start();
+        } else {
+            onAcousticBeamReady();
+        }
     }
     catch(const std::domain_error& error)
     {
         stop();
         emit displayWarning(QString::fromStdString(error.what()));
-    }
-
-    if (waveChanged)
-    {
-        qDebug("Acoustic wave stabilisation: %d ms", _stabilisationT->interval());
-        _stabilisationT->start();
-    } else {
-        onAcousticBeamReady();
     }
 }
 
@@ -129,18 +128,18 @@ void Manager::saveSnapshot(const QDateTime& dateTime,
     const QChar zero('0');
 
     QString expo = (mode=='O')
-                   ? QString("%1x%2").arg(snapPerObs).arg(_exposure)
-                   : QString("%1").arg(_exposure);
+            ? QString("%1x%2").arg(snapPerObs).arg(_exposure)
+            : QString("%1").arg(_exposure);
 
     auto _filename = QString("%1-%2-%3-%4nm-%5Mhz-%6mW-%7ms-%8degC.dat")
-                     . arg(dateTime.toString("yyMMdd-HHmmss.zzz"))
-                     . arg(_session.isEmpty() ? "_" : _session)
-                     . arg(mode)
-                     . arg(wavelength, 1, 'f', 1, zero)
-                     . arg(frequency, 1, 'f', 3, zero)
-                     . arg(power, 1, 'f', 0, zero)
-                     . arg(expo)
-                     . arg(temperature, 1, 'f', 1, zero);
+            . arg(dateTime.toString("yyMMdd-HHmmss.zzz"))
+            . arg(_session.isEmpty() ? "_" : _session)
+            . arg(mode)
+            . arg(wavelength, 1, 'f', 1, zero)
+            . arg(frequency, 1, 'f', 3, zero)
+            . arg(power, 1, 'f', 0, zero)
+            . arg(expo)
+            . arg(temperature, 1, 'f', 1, zero);
 
     QFile file(_dataFolder+"/"+_filename);
     qDebug("Dumping snapshot to %s", _filename.toLatin1().constData());
@@ -254,6 +253,38 @@ void Manager::onObservation(double wavelength1,
     _mode = new ObservationMode(*this, *_crystal,
                                 wavelength1, wavelength2, snapshotPerObs);
     _mode->start();
+}
+
+//------------------------------------------------------------------------------
+
+void Manager::onDoas(QString wavelengthFile,
+                     int snapshotPerObs,
+                     int exposure,
+                     int cooldownTime,
+                     int stabilisationTime,
+                     bool burst,
+                     bool record,
+                     QString dataFolder,
+                     QString session)
+
+{
+    Q_ASSERT(_mode == nullptr);
+
+    qDebug("DOAS: file=%s, snapshot/obs=%d", wavelengthFile.toLocal8Bit().constData(), snapshotPerObs);
+
+    setParams(exposure, cooldownTime, stabilisationTime,
+              burst, record, dataFolder, session);
+
+
+    /*
+    _mode = new DoasMode(*this,
+                         *_crystal,
+                         wavelength1,
+                         wavelength2,
+                         wavelengthStep,
+                         blackSnapshotRate);
+    _mode->start();
+    */
 }
 
 //------------------------------------------------------------------------------

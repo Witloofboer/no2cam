@@ -9,6 +9,7 @@ namespace gui {
 
 class IntLineEdit;
 class DoubleLineEdit;
+class MainWindow;
 
 //------------------------------------------------------------------------------
 
@@ -16,7 +17,7 @@ class ObservationParameterPane : public BaseParameterPane
 {
     Q_OBJECT
 public:
-    explicit ObservationParameterPane();
+    explicit ObservationParameterPane(MainWindow *mainWindow);
     void updateState(bool isAppReady);
     void persiste() const;
 

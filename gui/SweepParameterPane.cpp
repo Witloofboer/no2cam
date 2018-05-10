@@ -10,8 +10,8 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-SweepParameterPane::SweepParameterPane()
-    : BaseParameterPane()
+SweepParameterPane::SweepParameterPane(MainWindow *mainWindow)
+    : BaseParameterPane(mainWindow)
     , _wavelength1Edit(new DoubleLineEdit)
     , _wavelength2Edit(new DoubleLineEdit)
     , _wavelengthStepEdit(new DoubleLineEdit)

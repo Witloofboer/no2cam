@@ -247,6 +247,93 @@ bool ObservationMode::canCooldown() const
 }
 
 //------------------------------------------------------------------------------
+// DOAS Mode
+//------------------------------------------------------------------------------
+
+DoasMode::DoasMode(IModeToManager &manager,
+                   const Crystal &crystal,
+                   double minWavelength,
+                   double maxWavelength,
+                   double wavelengthStep,
+                   int    blackSnapshotRate)
+    : BaseMode(manager, crystal)
+    , _minWavelength(minWavelength)
+    , _maxWavelength(maxWavelength+1e-5) // 1e-5 to account for rounding error
+    , _wavelengthStep(wavelengthStep)
+    , _blackSnapshotRate(blackSnapshotRate)
+    , _wavelength(minWavelength)
+    , _counter(0)
+{
+}
+
+//------------------------------------------------------------------------------
+
+void DoasMode::setAcousticWave()
+{
+    _refTemperature = _manager.temperature();
+
+    if (0 == _counter)
+    {
+        qDebug("Snapshot: black");
+        _manager.setAcousticBeam(0.0, 0.0); // Black snapshot
+    } else {
+
+        if (_maxWavelength < _wavelength)
+        {
+            _wavelength = _minWavelength;
+        }
+
+        qDebug("Snapshot: %.3f nm", _wavelength);
+        _crystal.computeFreqPow(_wavelength,
+                                _refTemperature,
+                                _frequency,
+                                _power);
+        _manager.setAcousticBeam(_frequency, _power);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void DoasMode::processSnapshot(const Snapshot &snapshotBuffer)
+{
+    _manager.setSnapshotForGui(snapshotBuffer);
+
+    if (0 == _counter)
+    {
+        _manager.saveSnapshot(_snapTime,
+                              'W',
+                              0.0,
+                              0.0,
+                              0.0,
+                              1,
+                              _refTemperature,
+                              snapshotBuffer);
+    } else {
+        _manager.saveSnapshot(_snapTime,
+                              'W',
+                              _wavelength,
+                              _frequency,
+                              _power,
+                              1,
+                              _refTemperature,
+                              snapshotBuffer);
+
+        _wavelength += _wavelengthStep;
+    }
+
+    ++_counter;
+    if (_counter == _blackSnapshotRate+1)
+        _counter = 0;
+}
+
+//------------------------------------------------------------------------------
+
+bool DoasMode::mustContinueAquisition() const
+{
+    return _wavelength <= _maxWavelength;
+}
+
+//------------------------------------------------------------------------------
 // SweepMode
 //------------------------------------------------------------------------------
 

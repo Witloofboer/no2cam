@@ -9,8 +9,8 @@ namespace gui {
 
 //------------------------------------------------------------------------------
 
-ObservationParameterPane::ObservationParameterPane()
-    : BaseParameterPane()
+ObservationParameterPane::ObservationParameterPane(MainWindow *mainWindow)
+    : BaseParameterPane(mainWindow)
     , _wavelength1Edit(new DoubleLineEdit)
     , _wavelength2Edit(new DoubleLineEdit)
     , _snapPerObsEdit(new IntLineEdit)
