@@ -537,7 +537,7 @@ void MainWindow::onAbout()
       , tr("<h3>NO<sub>2</sub> Camera Command Interface</h3>"
            "<p>Version: %1</p>"
            "<p>Author: Didier Pieroux (didier.pieroux@aeronomie.be)</p>"
-           "<p>Copyright 2016-2017 BIRA-IASB</p>"
+           "<p>Copyright (c) 2016-2018 BIRA-IASB</p>"
            "<p>THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY "
            "KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE "
            "WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE "
@@ -564,7 +564,8 @@ void MainWindow::onDisplayReleaseNotes()
            "%3"
           )
       .arg(_version)
-      .arg("<p>All initially foreseen functionalities are implemented.</p>")
+      .arg("<p>Version 0.3: all initial functionalities.</p>"
+           "<p>Version 0.4: DOAS mode and wavelength-dependent exposure time.</p>")
       .arg(_devicesNotes)
       , QMessageBox::Ok);
 }
