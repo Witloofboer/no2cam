@@ -3,6 +3,8 @@
 
 #include "BaseParameterPane.h"
 
+#include <QVector>
+
 //------------------------------------------------------------------------------
 
 class QPushButton;
@@ -32,7 +34,7 @@ public:
                const QString &dataFolder) override;
 
 signals:
-    void doasRequested(QString wavelengthFile,
+    void doasRequested(QVector<double> wavelengths,
                        int snapshotPerObs,
                        double exposure,
                        double cooldownTime,

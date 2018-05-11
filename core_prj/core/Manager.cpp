@@ -35,6 +35,8 @@ Manager::Manager(const Crystal *crystal,
     , _mode(0)
     , _thread(new QThread(this))
 {
+    qRegisterMetaType<QVector<int>>("QVector<double>");
+
     _cooldownT->setSingleShot(true);
     _stabilisationT->setSingleShot(true);
 
@@ -99,8 +101,10 @@ void Manager::setAcousticBeam(double frequency, double power)
 
 //------------------------------------------------------------------------------
 
-void Manager::takeSnapshot()
+void Manager::takeSnapshot(int exposure)
 {
+    _exposure = exposure;
+    _cameraCtrl->setExposure(exposure);
     _cameraCtrl->takeSnapshot();
 }
 
@@ -199,10 +203,10 @@ void Manager::onOpticalSnapshot(double wavelength,
 
     qDebug("Spectral snap: wl=%.1f nm", wavelength);
 
-    setParams(exposure, cooldownTime, stabilisationTime,
+    setParams(cooldownTime, stabilisationTime,
               burst, record, dataFolder, session);
 
-    _mode = new OpticalSnapMode(*this, *_crystal, wavelength);
+    _mode = new OpticalSnapMode(*this, *_crystal, exposure, wavelength);
     _mode->start();
 }
 
@@ -222,10 +226,10 @@ void Manager::onAcousticSnapshot(double frequency,
 
     qDebug("Acoustic: freq=%.1f MHz, power=%.1f mW", frequency, power);
 
-    setParams(exposure, cooldownTime, stabilisationTime,
+    setParams(cooldownTime, stabilisationTime,
               burst, record, dataFolder, session);
 
-    _mode = new AcousticSnapMode(*this, *_crystal, frequency, power);
+    _mode = new AcousticSnapMode(*this, *_crystal, exposure, frequency, power);
     _mode->start();
 }
 
@@ -233,7 +237,7 @@ void Manager::onAcousticSnapshot(double frequency,
 
 void Manager::onObservation(double wavelength1,
                             double wavelength2,
-                            int snapshotPerObs,
+                            int nbrSeqPerObs,
                             int exposure,
                             int cooldownTime,
                             int stabilisationTime,
@@ -247,18 +251,18 @@ void Manager::onObservation(double wavelength1,
     qDebug("Observation: wl1=%.1f nm, wl2=%.1f nm",
            wavelength1, wavelength2);
 
-    setParams(exposure, cooldownTime, stabilisationTime,
+    setParams(cooldownTime, stabilisationTime,
               burst, record, dataFolder, session);
 
-    _mode = new ObservationMode(*this, *_crystal,
-                                wavelength1, wavelength2, snapshotPerObs);
+    _mode = new ObservationMode(*this, *_crystal, exposure,
+                                wavelength1, wavelength2, nbrSeqPerObs);
     _mode->start();
 }
 
 //------------------------------------------------------------------------------
 
-void Manager::onDoas(QString wavelengthFile,
-                     int snapshotPerObs,
+void Manager::onDoas(QVector<double> wavelengths,
+                     int nbrSeqPerObs,
                      int exposure,
                      int cooldownTime,
                      int stabilisationTime,
@@ -270,21 +274,17 @@ void Manager::onDoas(QString wavelengthFile,
 {
     Q_ASSERT(_mode == nullptr);
 
-    qDebug("DOAS: file=%s, snapshot/obs=%d", wavelengthFile.toLocal8Bit().constData(), snapshotPerObs);
+    qDebug("DOAS: %d wavelengths, snapshot/obs=%d", wavelengths.size(), nbrSeqPerObs);
 
-    setParams(exposure, cooldownTime, stabilisationTime,
+    setParams(cooldownTime, stabilisationTime,
               burst, record, dataFolder, session);
 
-
-    /*
     _mode = new DoasMode(*this,
                          *_crystal,
-                         wavelength1,
-                         wavelength2,
-                         wavelengthStep,
-                         blackSnapshotRate);
+                         exposure,
+                         wavelengths,
+                         nbrSeqPerObs);
     _mode->start();
-    */
 }
 
 //------------------------------------------------------------------------------
@@ -306,11 +306,12 @@ void Manager::onSweep(double wavelength1,
     qDebug("Sweep: wl1=%.1f nm, wl2=%.1f nm, step=%.1f nm",
            wavelength1, wavelength2, wavelengthStep);
 
-    setParams(exposure, cooldownTime, stabilisationTime,
+    setParams(cooldownTime, stabilisationTime,
               burst, record, dataFolder, session);
 
     _mode = new SweepMode(*this,
                           *_crystal,
+                          exposure,
                           wavelength1,
                           wavelength2,
                           wavelengthStep,
@@ -357,7 +358,7 @@ void Manager::onThreadFinished()
 
 void Manager::onCooldownTimeout()
 {
-    if (_mode) _mode->setAcousticWave();
+    if (_mode) _mode->setAcousticBeam();
 }
 
 //------------------------------------------------------------------------------
@@ -383,7 +384,7 @@ void Manager::onSnapshotAvailable(const Snapshot& buffer)
                 qDebug("Cooling down: %d ms", _cooldownT->interval());
                 _cooldownT->start();
             } else {
-                _mode->setAcousticWave();
+                _mode->setAcousticBeam();
             }
         } else {
             stop();
@@ -393,8 +394,7 @@ void Manager::onSnapshotAvailable(const Snapshot& buffer)
 
 //------------------------------------------------------------------------------
 
-void Manager::setParams(int exposure,
-                        int cooldownTime,
+void Manager::setParams(int cooldownTime,
                         int stabilisationTime,
                         bool bursting,
                         bool record,
@@ -402,15 +402,12 @@ void Manager::setParams(int exposure,
                         const QString& session)
 {
     QByteArray s = session.toLatin1();
-    qDebug("Exposure %d ms, cooldown %d ms, "
-           "stabilisation %d ms, %s, %s, session '%s'",
-           exposure, cooldownTime, stabilisationTime,
+    qDebug("Cooldown %d ms, stabilisation %d ms, %s, %s, session '%s'",
+           cooldownTime, stabilisationTime,
            bursting ? "bursting" : "singleshot",
            record ? "recording" : "not recording",
            s.data());
 
-    _exposure = exposure;
-    _cameraCtrl->setExposure(exposure);
     _cooldownT->setInterval(cooldownTime);
     _stabilisationT->setInterval(stabilisationTime);
     _bursting = bursting;

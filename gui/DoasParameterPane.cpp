@@ -7,9 +7,10 @@
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
+#include <QPushButton>
 #include <QSettings>
 #include <QStandardPaths>
-#include <QPushButton>
+#include <QVector>
 
 #include "tooling.h"
 
@@ -102,7 +103,7 @@ void DoasParameterPane::start(bool burst,
         return;
     }
 
-    QList<double> wavelengths;
+    QVector<double> wavelengths;
 
     QTextStream in(&file);
     bool ok;
@@ -134,7 +135,7 @@ void DoasParameterPane::start(bool burst,
         return;
     }
 
-    emit doasRequested(_wlFileEdit->text(),
+    emit doasRequested(wavelengths,
                        _snapPerObsEdit->value(),
                        _exposureEdit->value(),
                        _cooldownTimeEdit->value(),

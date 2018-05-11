@@ -14,7 +14,7 @@ const qint64 snapshotSize = 512;
 typedef quint16 Pixel;
 typedef Pixel Snapshot[snapshotSize][snapshotSize];
 
-
+extern void clear(Snapshot& snapshot);
 
 //------------------------------------------------------------------------------
 

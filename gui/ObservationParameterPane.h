@@ -30,8 +30,8 @@ public:
 signals:
     void observationRequested(double wavelength1,
                               double wavelength2,
-                              double exposure,
                               int snapshotPerObs,
+                              double exposure,
                               double cooldownTime,
                               double stabilisationTime,
                               bool burst,

@@ -3,6 +3,7 @@
 
 #include <QDateTime>
 #include <QObject>
+#include <QVector>
 
 #include "core_global.h"
 #include "Snapshot.h"
@@ -48,7 +49,7 @@ public:
     // IModeToManager
     double temperature() const override;
     void setAcousticBeam(double frequency, double power) override;
-    void takeSnapshot() override;
+    void takeSnapshot(int exposure) override;
     void setSnapshotForGui(const Snapshot &snapshotBuffer) override;
     void saveSnapshot(const QDateTime &dateTime,
                       char mode,
@@ -117,8 +118,8 @@ public slots:
      * Initiate an observation
      * @param wavelength1 first of the two wavelengths [nm]
      * @param wavelength2 second of the two wavelengths [nm]
+     * @param number of snapshot sequences composing a single observation
      * @param exposure exposure time [s]
-     * @param snapshotPerObs number of snapshots composing a single observation
      * @param cooldown cooldown time [s]
      * @param stabilisationTime duration needed by electronic boards to relax to a new
      *        set-point.
@@ -127,7 +128,7 @@ public slots:
      */
     void onObservation(double wavelength1,
                        double wavelength2,
-                       int snapshotPerObs,
+                       int nbrSeqPerObs,
                        int exposure,
                        int cooldownTime,
                        int stabilisationTime,
@@ -139,8 +140,8 @@ public slots:
 
     /**
      * Initiate a DOAS session.
-     * @param wavelengthFile file containing the wavelength
-     * @param snapshotPerObs number of snapshots composing a single observation
+     * @param the selected wavelengths
+     * @param number of snapshot sequences composing a single observation
      * @param exposure exposure time [s]
      * @param cooldown cooldown time [s]
      * @param burst single snapshot or burst mode flag
@@ -149,8 +150,8 @@ public slots:
      * @param session name used to prepend record files. No recording if empty.
      * @param crystal crystal used
      */
-    void onDoas(QString wavelengthFile,
-                int snapshotPerObs,
+    void onDoas(QVector<double> wavelengths,
+                int nbrSeqPerObs,
                 int exposure,
                 int cooldownTime,
                 int stabilisationTime,
@@ -212,8 +213,7 @@ private slots:
     void onSnapshotAvailable(const Snapshot &buffer);
 
 protected:
-    void setParams(int exposure,
-                   int cooldownTime,
+    void setParams(int cooldownTime,
                    int stabilisationTime,
                    bool bursting,
                    bool record,
@@ -229,7 +229,6 @@ protected:
     ThermometerCtrl *_thermometerCtrl;
 
     double _temperature;
-
     int _exposure;
     bool _bursting;
     Snapshot _snapshotBuffer;

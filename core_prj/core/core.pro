@@ -26,7 +26,8 @@ SOURCES += \
     Mockups.cpp \
     Modes.cpp \
     Controllers.cpp \
-    Interpolation.cpp
+    Interpolation.cpp \
+    Snapshot.cpp
 
 HEADERS += \
     core_global.h \
