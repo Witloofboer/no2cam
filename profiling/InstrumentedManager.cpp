@@ -34,6 +34,7 @@ void InstrumentedManager::runScenario()
 
 void InstrumentedManager::saveSnapshot(const QDateTime& dateTime,
                                        char mode,
+                                       int exposure,
                                        double wavelength,
                                        double frequency,
                                        double power,
@@ -41,7 +42,7 @@ void InstrumentedManager::saveSnapshot(const QDateTime& dateTime,
                                        double temperature,
                                        const Snapshot &snapshotBuffer)
 {
-    Manager::saveSnapshot(dateTime, mode,
+    Manager::saveSnapshot(dateTime, mode, exposure,
                           wavelength, frequency, power, snapPerObs,
                           temperature, snapshotBuffer);
     ++_counter;

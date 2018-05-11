@@ -9,11 +9,16 @@ namespace core {
 //------------------------------------------------------------------------------
 
 BaseMode::BaseMode(IModeToManager &manager,
-                   const Crystal &crystal)
+                   const Crystal &crystal,
+                   int baseExposure,
+                   double refWavelength,
+                   double exposureFactor)
     : _manager(manager)
     , _crystal(crystal)
+    , _baseExposure(baseExposure)
+    , _refWavelength(refWavelength)
+    , _exposureFactor(exposureFactor)
 {
-
 }
 
 //------------------------------------------------------------------------------
@@ -47,8 +52,11 @@ void BaseMode::start()
 
 OpticalSnapMode::OpticalSnapMode(IModeToManager &manager,
                                  const Crystal &crystal,
-                                 double wavelength)
-    : BaseMode(manager, crystal)
+                                 double wavelength,
+                                 int exposure,
+                                 double refWavelength,
+                                 double exposureFactor)
+    : BaseMode(manager, crystal, exposure, refWavelength, exposureFactor)
     , _wavelength(wavelength)
 {
 
@@ -71,7 +79,7 @@ void OpticalSnapMode::setAcousticBeam()
 void OpticalSnapMode::acousticBeamReady()
 {
     _snapTime = QDateTime::currentDateTime();
-    _manager.takeSnapshot(_wavelength);
+    _manager.takeSnapshot(_baseExposure);
 }
 
 //------------------------------------------------------------------------------
@@ -81,6 +89,7 @@ void OpticalSnapMode::processSnapshot(const Snapshot &snapshotBuffer)
     _manager.setSnapshotForGui(snapshotBuffer);
     _manager.saveSnapshot(_snapTime,
                           'S',
+                          _baseExposure,
                           _wavelength,
                           _frequency,
                           _power,
@@ -96,8 +105,9 @@ void OpticalSnapMode::processSnapshot(const Snapshot &snapshotBuffer)
 AcousticSnapMode::AcousticSnapMode(IModeToManager &manager,
                                    const Crystal &crystal,
                                    double frequency,
-                                   double power)
-    : BaseMode(manager, crystal)
+                                   double power,
+                                   int exposure)
+    : BaseMode(manager, crystal, exposure, 0, 0)
     , _frequency(frequency)
     , _power(power)
 {
@@ -118,7 +128,7 @@ void AcousticSnapMode::setAcousticBeam()
 void AcousticSnapMode::acousticBeamReady()
 {
     _snapTime = QDateTime::currentDateTime();
-    _manager.takeSnapshot(0.0);
+    _manager.takeSnapshot(_baseExposure);
 }
 
 //------------------------------------------------------------------------------
@@ -128,6 +138,7 @@ void AcousticSnapMode::processSnapshot(const Snapshot &snapshotBuffer)
     _manager.setSnapshotForGui(snapshotBuffer);
     _manager.saveSnapshot(_snapTime,
                           'A',
+                          _baseExposure,
                           _wavelength,
                           _frequency,
                           _power,
@@ -144,8 +155,11 @@ ObservationMode::ObservationMode(IModeToManager &manager,
                                  const Crystal &crystal,
                                  double wavelength1,
                                  double wavelength2,
-                                 int snapshotPerObs)
-    : BaseMode(manager, crystal)
+                                 int snapshotPerObs,
+                                 int exposure,
+                                 double refWavelength,
+                                 double exposureFactor)
+    : BaseMode(manager, crystal, exposure, refWavelength, exposureFactor)
     , _wavelengths{0, wavelength1, wavelength2}
     , _snapshotPerObs(snapshotPerObs)
     , _idx(0)
@@ -191,7 +205,7 @@ void ObservationMode::setAcousticBeam()
 
 void ObservationMode::acousticBeamReady()
 {
-    _manager.takeSnapshot(_wavelengths[_idx]);
+    _manager.takeSnapshot(_baseExposure);
 }
 
 //------------------------------------------------------------------------------
@@ -225,6 +239,7 @@ void ObservationMode::processSnapshot(const Snapshot &snapshotBuffer)
         for(int i=0; i<3; ++i)
             _manager.saveSnapshot(_snapTime,
                                   'O',
+                                  _baseExposure,
                                   _wavelengths[i],
                                   _frequency[i],
                                   _power[i],
@@ -259,11 +274,15 @@ bool ObservationMode::canCooldown() const
 DoasMode::DoasMode(IModeToManager &manager,
                    const Crystal &crystal,
                    const QVector<double> &wavelengths,
-                   int nbrSeqPerObs)
-    : BaseMode(manager, crystal)
+                   int nbrSeqPerObs,
+                   int exposure,
+                   double refWavelength,
+                   double exposureFactor)
+    : BaseMode(manager, crystal, exposure, refWavelength, exposureFactor)
     , _wavelengths()
     , _frequencies(1+wavelengths.size()) // +1 for black snapshot
     , _powers(1+wavelengths.size())
+    , _exposures(1+wavelengths.size())
     , _snapshotBuffers(new Snapshot[1+wavelengths.size()])
     , _nbrSeqPerObs(nbrSeqPerObs)
     , _refTemperature(0) // will be set at sequence beginning
@@ -286,25 +305,27 @@ DoasMode::~DoasMode()
 
 void DoasMode::setAcousticBeam()
 {
-    if (_wlIx == 0)
+    if (_wlIx == 0 && _seqIx == 0)
     {
-        if (_seqIx == 0)
-        {   // Start of a new observation
-            _snapTime = QDateTime::currentDateTime();
-            for (int i=0; i<_wavelengths.size(); ++i)
-                clear(_snapshotBuffers[i]);
-        }
+        _snapTime = QDateTime::currentDateTime();
+        for (int i=0; i<_wavelengths.size(); ++i) clear(_snapshotBuffers[i]);
 
-        // Initialise the freqs and powers
         _refTemperature = _manager.temperature();
 
         _frequencies[0] = 0;
         _powers[0] = 0;
+        _exposures[0] = _baseExposure;
         for (int i=1; i<_wavelengths.size(); ++i)
+        {
             _crystal.computeFreqPow(_wavelengths[i],
                                     _refTemperature,
                                     _frequencies[i],
                                     _powers[i]);
+
+            _exposures[i] = 0.5
+                    + _baseExposure
+                    * (1.0-(_wavelengths[i]-_refWavelength)*_exposureFactor*0.01);
+        }
     }
 
     _manager.setAcousticBeam(_frequencies[_wlIx], _powers[_wlIx]);
@@ -314,7 +335,7 @@ void DoasMode::setAcousticBeam()
 
 void DoasMode::acousticBeamReady()
 {
-    _manager.takeSnapshot(_wavelengths[_wlIx]);
+    _manager.takeSnapshot(_exposures[_wlIx]);
 }
 
 //------------------------------------------------------------------------------
@@ -342,6 +363,7 @@ void DoasMode::processSnapshot(const Snapshot &snapshotBuffer)
         for(int i=0; i<_wavelengths.size(); ++i)
             _manager.saveSnapshot(_snapTime,
                                   'D',
+                                  _exposures[i],
                                   _wavelengths[i],
                                   _frequencies[i],
                                   _powers[i],
@@ -393,8 +415,11 @@ SweepMode::SweepMode(IModeToManager &manager,
                      double minWavelength,
                      double maxWavelength,
                      double wavelengthStep,
-                     int    blackSnapshotRate)
-    : BaseMode(manager, crystal)
+                     int    blackSnapshotRate,
+                     int exposure,
+                     double refWavelength,
+                     double exposureFactor)
+    : BaseMode(manager, crystal, exposure, refWavelength, exposureFactor)
     , _minWavelength(minWavelength)
     , _maxWavelength(maxWavelength+1e-5) // 1e-5 to account for rounding error
     , _wavelengthStep(wavelengthStep)
@@ -435,7 +460,7 @@ void SweepMode::setAcousticBeam()
 void SweepMode::acousticBeamReady()
 {
     _snapTime = QDateTime::currentDateTime();
-    _manager.takeSnapshot(_wavelength);
+    _manager.takeSnapshot(_baseExposure);
 }
 
 //------------------------------------------------------------------------------
@@ -448,6 +473,7 @@ void SweepMode::processSnapshot(const Snapshot &snapshotBuffer)
     {
         _manager.saveSnapshot(_snapTime,
                               'W',
+                              _baseExposure,
                               0.0,
                               0.0,
                               0.0,
@@ -457,6 +483,7 @@ void SweepMode::processSnapshot(const Snapshot &snapshotBuffer)
     } else {
         _manager.saveSnapshot(_snapTime,
                               'W',
+                              _baseExposure,
                               _wavelength,
                               _frequency,
                               _power,

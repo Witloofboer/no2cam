@@ -23,6 +23,7 @@ public:
 
     void saveSnapshot(const QDateTime &dateTime,
                       char mode,
+                      int exposure,
                       double wavelength,
                       double frequency,
                       double power,

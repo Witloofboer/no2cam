@@ -23,11 +23,12 @@ class IModeToManager
 public:
     virtual double temperature() const=0;
     virtual void setAcousticBeam(double frequency, double power)=0;
-    virtual void takeSnapshot(double wavelength)=0;
+    virtual void takeSnapshot(int exposure)=0;
     virtual void setSnapshotForGui(const Snapshot &snapshotBuffer)=0;
 
     virtual void saveSnapshot(const QDateTime &dateTime,
                               char mode,
+                              int exposure,
                               double wavelength,
                               double frequency,
                               double power,
@@ -49,7 +50,10 @@ class BaseMode
 {
 public:
     BaseMode(IModeToManager &manager,
-             const Crystal &crystal);
+             const Crystal &crystal,
+             int baseExposure,
+             double refWavelength,
+             double exposureFactor);
 
     virtual ~BaseMode();
 
@@ -63,6 +67,9 @@ public:
 
     IModeToManager &_manager;
     const Crystal &_crystal;
+    int _baseExposure;
+    double _refWavelength;
+    double _exposureFactor;
     double _refTemperature;
     QDateTime _snapTime;
 };
@@ -76,7 +83,10 @@ class OpticalSnapMode: public BaseMode
 public:
     OpticalSnapMode(IModeToManager &manager,
                     const Crystal &crystal,
-                    double wavelength);
+                    double wavelength,
+                    int exposure,
+                    double refWavelength,
+                    double exposureFactor);
 
     void setAcousticBeam() override;
     void acousticBeamReady() override;
@@ -98,7 +108,8 @@ public:
     AcousticSnapMode(IModeToManager &manager,
                      const Crystal &crystal,
                      double frequency,
-                     double power);
+                     double power,
+                     int exposure);
 
     void setAcousticBeam() override;
     void acousticBeamReady() override;
@@ -121,7 +132,10 @@ public:
                     const Crystal &crystal,
                     double wavelength1,
                     double wavelength2,
-                    int snapshotPerObs);
+                    int snapshotPerObs,
+                    int exposure,
+                    double refWavelength,
+                    double exposureFactor);
 
     void setAcousticBeam() override;
     void acousticBeamReady() override;
@@ -153,7 +167,10 @@ public:
     DoasMode(IModeToManager &manager,
              const Crystal &crystal,
              const QVector<double> &wavelengths,
-             int nbrSeqPerObs);
+             int nbrSeqPerObs,
+             int exposure,
+             double refWavelength,
+             double exposureFactor);
     virtual ~DoasMode();
 
     void setAcousticBeam() override;
@@ -165,7 +182,7 @@ protected:
     bool canCooldown() const override;
 
 private:
-    QVector<double> _wavelengths, _frequencies, _powers;
+    QVector<double> _wavelengths, _frequencies, _powers, _exposures;
     Snapshot  *_snapshotBuffers;
     const int _nbrSeqPerObs;
 
@@ -188,7 +205,10 @@ public:
               double minWavelength,
               double maxWavelength,
               double wavelengthStep,
-              int blackSnapshotRate);
+              int blackSnapshotRate,
+              int exposure,
+              double refWavelength,
+              double exposureFactor);
 
     void setAcousticBeam() override;
     void acousticBeamReady() override;

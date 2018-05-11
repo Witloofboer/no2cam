@@ -49,10 +49,11 @@ public:
     // IModeToManager
     double temperature() const override;
     void setAcousticBeam(double frequency, double power) override;
-    void takeSnapshot(double wavelength) override;
+    void takeSnapshot(int exposure) override;
     void setSnapshotForGui(const Snapshot &snapshotBuffer) override;
     void saveSnapshot(const QDateTime &dateTime,
                       char mode,
+                      int exposure,
                       double wavelength,
                       double frequency,
                       double power,
@@ -103,8 +104,6 @@ public slots:
      * @param wavelength optical wavelength [nm]
      * @param exposure exposure time [ms]
      * @param cooldown cooldown time [ms]
-     * @param reference wavelength for exposure correction [nm]
-     * @param exposure correction factor [% nm-1]
      * @param stabilisationTime duration needed by electronic boards to relax to a new
      *        set-point.
      * @param burst single snapshot or burst mode flag
@@ -114,8 +113,6 @@ public slots:
                             double power,
                             int exposure,
                             int cooldownTime,
-                            double refWavelength,
-                            double exposureFactor,
                             int stabilisationTime,
                             bool burst,
                             bool record,
@@ -234,10 +231,7 @@ private slots:
     void onSnapshotAvailable(const Snapshot &buffer);
 
 protected:
-    void setParams(int exposure,
-                   int cooldownTime,
-                   double refWavelength,
-                   double exposureFactor,
+    void setParams(int cooldownTime,
                    int stabilisationTime,
                    bool bursting,
                    bool record,
@@ -253,10 +247,6 @@ protected:
     ThermometerCtrl *_thermometerCtrl;
 
     double _temperature;
-    int _exposure;
-    int _baseExposure;
-    double _refWavelength;
-    double _expoFactor;
     bool _bursting;
     Snapshot _snapshotBuffer;
 
