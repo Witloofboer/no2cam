@@ -49,7 +49,7 @@ public:
     // IModeToManager
     double temperature() const override;
     void setAcousticBeam(double frequency, double power) override;
-    void takeSnapshot(int exposure) override;
+    void takeSnapshot(double wavelength) override;
     void setSnapshotForGui(const Snapshot &snapshotBuffer) override;
     void saveSnapshot(const QDateTime &dateTime,
                       char mode,
@@ -79,6 +79,8 @@ public slots:
      * @param wavelength optical wavelength [nm]
      * @param exposure exposure time [ms]
      * @param cooldown cooldown time [ms]
+     * @param reference wavelength for exposure correction [nm]
+     * @param exposure correction factor [% nm-1]
      * @param stabilisationTime duration needed by electronic boards to relax to a new
      *        set-point.
      * @param burst single snapshot or burst mode flag
@@ -87,6 +89,8 @@ public slots:
     void onOpticalSnapshot(double wavelength,
                            int exposure,
                            int cooldownTime,
+                           double refWavelength,
+                           double exposureFactor,
                            int stabilisationTime,
                            bool burst,
                            bool record,
@@ -99,6 +103,8 @@ public slots:
      * @param wavelength optical wavelength [nm]
      * @param exposure exposure time [ms]
      * @param cooldown cooldown time [ms]
+     * @param reference wavelength for exposure correction [nm]
+     * @param exposure correction factor [% nm-1]
      * @param stabilisationTime duration needed by electronic boards to relax to a new
      *        set-point.
      * @param burst single snapshot or burst mode flag
@@ -108,6 +114,8 @@ public slots:
                             double power,
                             int exposure,
                             int cooldownTime,
+                            double refWavelength,
+                            double exposureFactor,
                             int stabilisationTime,
                             bool burst,
                             bool record,
@@ -121,6 +129,8 @@ public slots:
      * @param number of snapshot sequences composing a single observation
      * @param exposure exposure time [s]
      * @param cooldown cooldown time [s]
+     * @param reference wavelength for exposure correction [nm]
+     * @param exposure correction factor [% nm-1]
      * @param stabilisationTime duration needed by electronic boards to relax to a new
      *        set-point.
      * @param burst single snapshot or burst mode flag
@@ -131,6 +141,8 @@ public slots:
                        int nbrSeqPerObs,
                        int exposure,
                        int cooldownTime,
+                       double refWavelength,
+                       double exposureFactor,
                        int stabilisationTime,
                        bool burst,
                        bool record,
@@ -144,6 +156,8 @@ public slots:
      * @param number of snapshot sequences composing a single observation
      * @param exposure exposure time [s]
      * @param cooldown cooldown time [s]
+     * @param reference wavelength for exposure correction [nm]
+     * @param exposure correction factor [% nm-1]
      * @param burst single snapshot or burst mode flag
      * @param stabilisationTime duration needed by electronic boards to relax to a new
      *        set-point.
@@ -154,6 +168,8 @@ public slots:
                 int nbrSeqPerObs,
                 int exposure,
                 int cooldownTime,
+                double refWavelength,
+                double exposureFactor,
                 int stabilisationTime,
                 bool burst,
                 bool record,
@@ -166,7 +182,11 @@ public slots:
      * @param wavelength2 final wavelength [nm]
      * @param wavelengthStep wavelength step [nm]
      * @param exposure exposure time [s]
+     * @param reference wavelength for exposure correction [nm]
+     * @param exposure correction factor [% nm-1]
      * @param cooldown cooldown time [s]
+     * @param reference wavelength for exposure correction [nm]
+     * @param exposure correction factor [% nm-1]
      * @param burst single snapshot or burst mode flag
      * @param stabilisationTime duration needed by electronic boards to relax to a new
      *        set-point.
@@ -179,12 +199,13 @@ public slots:
                  int    blackSnapshotRate,
                  int exposure,
                  int cooldownTime,
+                 double refWavelength,
+                 double exposureFactor,
                  int stabilisationTime,
                  bool burst,
                  bool record,
                  QString dataFolder,
                  QString session);
-
 
     /**
       * Update the temperature
@@ -213,7 +234,10 @@ private slots:
     void onSnapshotAvailable(const Snapshot &buffer);
 
 protected:
-    void setParams(int cooldownTime,
+    void setParams(int exposure,
+                   int cooldownTime,
+                   double refWavelength,
+                   double exposureFactor,
                    int stabilisationTime,
                    bool bursting,
                    bool record,
@@ -230,6 +254,9 @@ protected:
 
     double _temperature;
     int _exposure;
+    int _baseExposure;
+    double _refWavelength;
+    double _expoFactor;
     bool _bursting;
     Snapshot _snapshotBuffer;
 

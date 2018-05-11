@@ -29,6 +29,8 @@ public:
 
     void start(bool burst,
                bool record,
+               double refWavelength,
+               double exposureFactor,
                double stabilisationTime,
                const QString &session,
                const QString &dataFolder) override;
@@ -38,6 +40,8 @@ signals:
                        int snapshotPerObs,
                        double exposure,
                        double cooldownTime,
+                       double refWavelength,
+                       double exposureFactor,
                        double stabilisationTime,
                        bool burst,
                        bool record,

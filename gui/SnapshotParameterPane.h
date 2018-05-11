@@ -31,6 +31,8 @@ public:
 
     void start(bool burst,
                bool record,
+               double refWavelength,
+               double exposureFactor,
                double stabilisationTime,
                const QString& session,
                const QString& dataFolder) override;
@@ -39,18 +41,22 @@ public:
 
 signals:
     void opticalSnapshot(double wavelength,
-                          double exposure,
-                          double cooldownTime,
-                          double stabilisationTime,
-                          bool burst,
-                          bool record,
-                          QString dataFolder,
-                          QString session);
+                         double exposure,
+                         double cooldownTime,
+                         double refWavelength,
+                         double exposureFactor,
+                         double stabilisationTime,
+                         bool burst,
+                         bool record,
+                         QString dataFolder,
+                         QString session);
 
     void acousticSnapshot(double frequency,
                           double power,
                           double exposure,
                           double cooldownTime,
+                          double refWavelength,
+                          double exposureFactor,
                           double stabilisationTime,
                           bool burst,
                           bool record,

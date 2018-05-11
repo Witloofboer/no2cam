@@ -101,10 +101,13 @@ void Manager::setAcousticBeam(double frequency, double power)
 
 //------------------------------------------------------------------------------
 
-void Manager::takeSnapshot(int exposure)
+void Manager::takeSnapshot(double wavelength)
 {
-    _exposure = exposure;
-    _cameraCtrl->setExposure(exposure);
+    _exposure = _baseExposure;
+    if (wavelength > 0)
+        _exposure *= (1.0-(wavelength-_refWavelength)*_expoFactor*0.01);
+
+    _cameraCtrl->setExposure(_exposure);
     _cameraCtrl->takeSnapshot();
 }
 
@@ -193,6 +196,8 @@ void Manager::stop()
 void Manager::onOpticalSnapshot(double wavelength,
                                 int exposure,
                                 int cooldownTime,
+                                double refWavelength,
+                                double exposureFactor,
                                 int stabilisationTime,
                                 bool burst,
                                 bool record,
@@ -203,10 +208,10 @@ void Manager::onOpticalSnapshot(double wavelength,
 
     qDebug("Spectral snap: wl=%.1f nm", wavelength);
 
-    setParams(cooldownTime, stabilisationTime,
-              burst, record, dataFolder, session);
+    setParams(exposure, cooldownTime, refWavelength, exposureFactor,
+              stabilisationTime, burst, record, dataFolder, session);
 
-    _mode = new OpticalSnapMode(*this, *_crystal, exposure, wavelength);
+    _mode = new OpticalSnapMode(*this, *_crystal, wavelength);
     _mode->start();
 }
 
@@ -216,6 +221,8 @@ void Manager::onAcousticSnapshot(double frequency,
                                  double power,
                                  int exposure,
                                  int cooldownTime,
+                                 double refWavelength,
+                                 double exposureFactor,
                                  int stabilisationTime,
                                  bool burst,
                                  bool record,
@@ -226,10 +233,10 @@ void Manager::onAcousticSnapshot(double frequency,
 
     qDebug("Acoustic: freq=%.1f MHz, power=%.1f mW", frequency, power);
 
-    setParams(cooldownTime, stabilisationTime,
-              burst, record, dataFolder, session);
+    setParams(exposure, cooldownTime, refWavelength, exposureFactor,
+              stabilisationTime, burst, record, dataFolder, session);
 
-    _mode = new AcousticSnapMode(*this, *_crystal, exposure, frequency, power);
+    _mode = new AcousticSnapMode(*this, *_crystal, frequency, power);
     _mode->start();
 }
 
@@ -240,6 +247,8 @@ void Manager::onObservation(double wavelength1,
                             int nbrSeqPerObs,
                             int exposure,
                             int cooldownTime,
+                            double refWavelength,
+                            double exposureFactor,
                             int stabilisationTime,
                             bool burst,
                             bool record,
@@ -251,10 +260,10 @@ void Manager::onObservation(double wavelength1,
     qDebug("Observation: wl1=%.1f nm, wl2=%.1f nm",
            wavelength1, wavelength2);
 
-    setParams(cooldownTime, stabilisationTime,
-              burst, record, dataFolder, session);
+    setParams(exposure, cooldownTime, refWavelength, exposureFactor,
+              stabilisationTime, burst, record, dataFolder, session);
 
-    _mode = new ObservationMode(*this, *_crystal, exposure,
+    _mode = new ObservationMode(*this, *_crystal,
                                 wavelength1, wavelength2, nbrSeqPerObs);
     _mode->start();
 }
@@ -265,6 +274,8 @@ void Manager::onDoas(QVector<double> wavelengths,
                      int nbrSeqPerObs,
                      int exposure,
                      int cooldownTime,
+                     double refWavelength,
+                     double exposureFactor,
                      int stabilisationTime,
                      bool burst,
                      bool record,
@@ -276,12 +287,11 @@ void Manager::onDoas(QVector<double> wavelengths,
 
     qDebug("DOAS: %d wavelengths, snapshot/obs=%d", wavelengths.size(), nbrSeqPerObs);
 
-    setParams(cooldownTime, stabilisationTime,
-              burst, record, dataFolder, session);
+    setParams(exposure, cooldownTime, refWavelength, exposureFactor,
+              stabilisationTime, burst, record, dataFolder, session);
 
     _mode = new DoasMode(*this,
                          *_crystal,
-                         exposure,
                          wavelengths,
                          nbrSeqPerObs);
     _mode->start();
@@ -295,6 +305,8 @@ void Manager::onSweep(double wavelength1,
                       int blackSnapshotRate,
                       int exposure,
                       int cooldownTime,
+                      double refWavelength,
+                      double exposureFactor,
                       int stabilisationTime,
                       bool burst,
                       bool record,
@@ -306,12 +318,11 @@ void Manager::onSweep(double wavelength1,
     qDebug("Sweep: wl1=%.1f nm, wl2=%.1f nm, step=%.1f nm",
            wavelength1, wavelength2, wavelengthStep);
 
-    setParams(cooldownTime, stabilisationTime,
-              burst, record, dataFolder, session);
+    setParams(exposure, cooldownTime, refWavelength, exposureFactor,
+              stabilisationTime, burst, record, dataFolder, session);
 
     _mode = new SweepMode(*this,
                           *_crystal,
-                          exposure,
                           wavelength1,
                           wavelength2,
                           wavelengthStep,
@@ -394,7 +405,10 @@ void Manager::onSnapshotAvailable(const Snapshot& buffer)
 
 //------------------------------------------------------------------------------
 
-void Manager::setParams(int cooldownTime,
+void Manager::setParams(int exposure,
+                        int cooldownTime,
+                        double refWavelength,
+                        double exposureFactor,
                         int stabilisationTime,
                         bool bursting,
                         bool record,
@@ -402,13 +416,20 @@ void Manager::setParams(int cooldownTime,
                         const QString& session)
 {
     QByteArray s = session.toLatin1();
-    qDebug("Cooldown %d ms, stabilisation %d ms, %s, %s, session '%s'",
-           cooldownTime, stabilisationTime,
+    qDebug("Parameters: base exposure %d ms, cooldown %d ms",
+           exposure, cooldownTime);
+    qDebug("          : ref wavelength %.0f nm, exp. factor %.2e %%nm-1",
+           refWavelength, exposureFactor);
+    qDebug("          : stabilisation %d ms, %s, %s, session '%s'",
+           stabilisationTime,
            bursting ? "bursting" : "singleshot",
            record ? "recording" : "not recording",
            s.data());
 
+    _baseExposure = exposure;
     _cooldownT->setInterval(cooldownTime);
+    _refWavelength = refWavelength;
+    _expoFactor = exposureFactor;
     _stabilisationT->setInterval(stabilisationTime);
     _bursting = bursting;
     _record = record;

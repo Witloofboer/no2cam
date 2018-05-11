@@ -78,6 +78,8 @@ void DoasParameterPane::selectWavelengthFile()
 
 void DoasParameterPane::start(bool burst,
                               bool record,
+                              double refWavelength,
+                              double exposureFactor,
                               double stabilisationTime,
                               const QString &session,
                               const QString &dataFolder)
@@ -139,6 +141,8 @@ void DoasParameterPane::start(bool burst,
                        _snapPerObsEdit->value(),
                        _exposureEdit->value(),
                        _cooldownTimeEdit->value(),
+                       refWavelength,
+                       exposureFactor,
                        stabilisationTime,
                        burst,
                        record,

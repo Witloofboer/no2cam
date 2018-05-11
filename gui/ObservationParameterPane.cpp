@@ -48,7 +48,8 @@ void ObservationParameterPane::updateState(bool isAppReady)
 
 void ObservationParameterPane::start(bool burst,
                                      bool record,
-                                     double stabilisationTime,
+                                     double refWavelength,
+                                     double exposureFactor,                                     double stabilisationTime,
                                      const QString &session,
                                      const QString &dataFolder)
 {
@@ -57,6 +58,8 @@ void ObservationParameterPane::start(bool burst,
                               _snapPerObsEdit->value(),
                               _exposureEdit->value(),
                               _cooldownTimeEdit->value(),
+                              refWavelength,
+                              exposureFactor,
                               stabilisationTime,
                               burst,
                               record,
