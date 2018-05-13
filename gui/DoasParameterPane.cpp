@@ -106,6 +106,7 @@ void DoasParameterPane::start(bool burst,
     }
 
     QVector<double> wavelengths;
+    wavelengths.push_back(0); // Black snapshot
 
     QTextStream in(&file);
     bool ok;

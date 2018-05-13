@@ -119,7 +119,8 @@ void Manager::setSnapshotForGui(const Snapshot &snapshotBuffer)
 //------------------------------------------------------------------------------
 
 void Manager::saveSnapshot(const QDateTime& dateTime,
-                           char mode,
+                           int snapshotIx,
+                           const QString &mode,
                            int exposure,
                            double wavelength,
                            double frequency,
@@ -132,19 +133,20 @@ void Manager::saveSnapshot(const QDateTime& dateTime,
 
     const QChar zero('0');
 
-    QString expo = (mode=='O')
-            ? QString("%1x%2").arg(snapPerObs).arg(exposure)
-            : QString("%1").arg(exposure);
+    QString expo = (snapPerObs==1)
+            ? QString("%1").arg(exposure)
+            : QString("%1x%2").arg(snapPerObs).arg(exposure);
 
-    auto _filename = QString("%1-%2-%3-%4nm-%5Mhz-%6mW-%7ms-%8degC.dat")
-            . arg(dateTime.toString("yyMMdd-HHmmss.zzz"))
-            . arg(_session.isEmpty() ? "NA" : _session)
-            . arg(mode)
-            . arg(wavelength, 1, 'f', 1, zero)
-            . arg(frequency, 1, 'f', 3, zero)
-            . arg(power, 1, 'f', 0, zero)
-            . arg(expo)
-            . arg(temperature, 1, 'f', 1, zero);
+    auto _filename = QString("%1-%2-%3-%4-%5nm-%6Mhz-%7mW-%8ms-%9degC.dat")
+            .arg(dateTime.toString("yyMMdd-HHmmss.zzz"))
+            .arg(snapshotIx)
+            .arg(_session.isEmpty() ? "NA" : _session)
+            .arg(mode)
+            .arg(wavelength, 1, 'f', 1, zero)
+            .arg(frequency, 1, 'f', 3, zero)
+            .arg(power, 1, 'f', 0, zero)
+            .arg(expo)
+            .arg(temperature, 1, 'f', 1, zero);
 
     QFile file(_dataFolder+"/"+_filename);
     qDebug("Dumping snapshot to %s", _filename.toLatin1().constData());
@@ -254,11 +256,17 @@ void Manager::onObservation(double wavelength1,
     qDebug("Observation: wl1=%.1f nm, wl2=%.1f nm",
            wavelength1, wavelength2);
 
+    QVector<double> wavelengths;
+    wavelengths.push_back(0.0);
+    wavelengths.push_back(wavelength1);
+    wavelengths.push_back(wavelength2);
+
     setParams(cooldownTime, stabilisationTime, burst, record, dataFolder, session);
 
-    _mode = new ObservationMode(*this, *_crystal,
-                                wavelength1, wavelength2, nbrSeqPerObs,
-                                exposure, refWavelength, exposureFactor);
+    _mode = new GenericMode(*this, *_crystal,
+                         wavelengths, "obs", nbrSeqPerObs,
+                         exposure, refWavelength, exposureFactor);
+
     _mode->start();
 }
 
@@ -283,9 +291,10 @@ void Manager::onDoas(QVector<double> wavelengths,
 
     setParams(cooldownTime, stabilisationTime, burst, record, dataFolder, session);
 
-    _mode = new DoasMode(*this, *_crystal,
-                         wavelengths, nbrSeqPerObs,
+    _mode = new GenericMode(*this, *_crystal,
+                         wavelengths, "doas", nbrSeqPerObs,
                          exposure, refWavelength, exposureFactor);
+
     _mode->start();
 }
 
@@ -294,7 +303,7 @@ void Manager::onDoas(QVector<double> wavelengths,
 void Manager::onSweep(double wavelength1,
                       double wavelength2,
                       double wavelengthStep,
-                      int blackSnapshotRate,
+                      int nbrSeqPerObs,
                       int exposure,
                       int cooldownTime,
                       double refWavelength,
@@ -310,13 +319,24 @@ void Manager::onSweep(double wavelength1,
     qDebug("Sweep: wl1=%.1f nm, wl2=%.1f nm, step=%.1f nm",
            wavelength1, wavelength2, wavelengthStep);
 
+    QVector<double> wavelengths;
+    double cur = wavelength1;
+
+    wavelengths.push_back(0.0);
+    while (cur < wavelength2 + 0.1 * wavelengthStep)
+    {
+        wavelengths.push_back(cur);
+        cur += wavelengthStep;
+    }
+
     setParams(cooldownTime, stabilisationTime, burst, record, dataFolder, session);
 
-    _mode = new SweepMode(*this, *_crystal,
-                          wavelength1, wavelength2, wavelengthStep,
-                          blackSnapshotRate,
-                          exposure, refWavelength, exposureFactor);
+    _mode = new GenericMode(*this, *_crystal,
+                            wavelengths, "sweep", nbrSeqPerObs,
+                            exposure, refWavelength, exposureFactor);
+
     _mode->start();
+
 }
 
 

@@ -15,7 +15,7 @@ SweepParameterPane::SweepParameterPane(MainWindow *mainWindow)
     , _wavelength1Edit(new DoubleLineEdit)
     , _wavelength2Edit(new DoubleLineEdit)
     , _wavelengthStepEdit(new DoubleLineEdit)
-    , _blckSnapRateEdit(new PosIntLineEdit)
+    , _snapshotPerObs(new PosIntLineEdit)
 {
     // Parameter box -----------------------------------------------------------
     _parameterBox->setTitle(tr("Sweep mode"));
@@ -24,7 +24,7 @@ SweepParameterPane::SweepParameterPane(MainWindow *mainWindow)
     gui::putInGrid(_wavelength1Edit, _paramBoxLayout, row, tr("Wavelength 1"), "[nm]");
     gui::putInGrid(_wavelength2Edit, _paramBoxLayout, row, tr("Wavelength 2"), "[nm]");
     gui::putInGrid(_wavelengthStepEdit, _paramBoxLayout, row, tr("Increment"), "[nm]");
-    gui::putInGrid(_blckSnapRateEdit, _paramBoxLayout, row, tr("Black snapshot rate"), "");
+    gui::putInGrid(_snapshotPerObs, _paramBoxLayout, row, tr("Snapshots/obs"), "");
 
     BaseParameterPane::putInGrid(row);
 
@@ -32,7 +32,7 @@ SweepParameterPane::SweepParameterPane(MainWindow *mainWindow)
     connect(_wavelength1Edit, LineEdit::textChanged, this, parametersChanged);
     connect(_wavelength2Edit, LineEdit::textChanged, this, parametersChanged);
     connect(_wavelengthStepEdit, LineEdit::textChanged, this, parametersChanged);
-    connect(_blckSnapRateEdit, LineEdit::textChanged, this, parametersChanged);
+    connect(_snapshotPerObs, LineEdit::textChanged, this, parametersChanged);
 
     restore();
 }
@@ -46,7 +46,7 @@ void SweepParameterPane::updateState(bool isAppReady)
     _wavelength1Edit->setEnabled(isAppReady);
     _wavelength2Edit->setEnabled(isAppReady);
     _wavelengthStepEdit->setEnabled(isAppReady);
-    _blckSnapRateEdit->setEnabled(isAppReady);
+    _snapshotPerObs->setEnabled(isAppReady);
 }
 
 //------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ void SweepParameterPane::start(bool burst,
     emit sweepRequested(_wavelength1Edit->value(),
                         _wavelength2Edit->value(),
                         _wavelengthStepEdit->value(),
-                        _blckSnapRateEdit->value(),
+                        _snapshotPerObs->value(),
                         _exposureEdit->value(),
                         _cooldownTimeEdit->value(),
                         refWavelength,
@@ -81,7 +81,7 @@ bool SweepParameterPane::areParametersValid() const
     return _wavelength1Edit->isValid() &&
            _wavelength2Edit->isValid() &&
            _wavelengthStepEdit->isValid() &&
-           _blckSnapRateEdit->isValid() &&
+           _snapshotPerObs->isValid() &&
            BaseParameterPane::areParametersValid();
 }
 
@@ -108,8 +108,8 @@ void SweepParameterPane::persiste() const
         settings.setValue(wavelength2Lbl, _wavelength2Edit->text());
     if (_wavelengthStepEdit->isValid())
         settings.setValue(wavelengthStepLbl, _wavelengthStepEdit->text());
-    if (_blckSnapRateEdit->isValid())
-        settings.setValue(blkSnapRateLbl, _blckSnapRateEdit->text());
+    if (_snapshotPerObs->isValid())
+        settings.setValue(blkSnapRateLbl, _snapshotPerObs->text());
 
     settings.endGroup();
 
@@ -130,7 +130,7 @@ void SweepParameterPane::restore()
     _wavelength1Edit->setText(settings.value(wavelength1Lbl).toString());
     _wavelength2Edit->setText(settings.value(wavelength2Lbl).toString());
     _wavelengthStepEdit->setText(settings.value(wavelengthStepLbl).toString());
-    _blckSnapRateEdit->setText(settings.value(blkSnapRateLbl).toString());
+    _snapshotPerObs->setText(settings.value(blkSnapRateLbl).toString());
     settings.endGroup();
 
     emit parametersChanged();

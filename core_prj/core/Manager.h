@@ -34,7 +34,6 @@ class ThermometerCtrl;
  */
 class CORESHARED_EXPORT Manager
     : public QObject
-    , public IModeToManager
 {
     Q_OBJECT
 
@@ -46,21 +45,21 @@ public:
 
     virtual ~Manager();
 
-    // IModeToManager
-    double temperature() const override;
-    void setAcousticBeam(double frequency, double power) override;
-    void takeSnapshot(int exposure) override;
-    void setSnapshotForGui(const Snapshot &snapshotBuffer) override;
+    double temperature() const;
+    void setAcousticBeam(double frequency, double power);
+    void takeSnapshot(int exposure);
+    void setSnapshotForGui(const Snapshot &snapshotBuffer);
     void saveSnapshot(const QDateTime &dateTime,
-                      char mode,
+                      int snapshotIx,
+                      const QString &mode,
                       int exposure,
                       double wavelength,
                       double frequency,
                       double power,
                       int snapPerObs,
                       double temperature,
-                      const Snapshot &snapshotBuffer) override;
-    void stop() override;
+                      const Snapshot &snapshotBuffer);
+    void stop();
 
 signals:
     void updateTemperature(double temperature);
@@ -178,6 +177,7 @@ public slots:
      * @param wavelength1 initial wavelength [nm]
      * @param wavelength2 final wavelength [nm]
      * @param wavelengthStep wavelength step [nm]
+     * @param number of snapshot sequences composing a single observation
      * @param exposure exposure time [s]
      * @param reference wavelength for exposure correction [nm]
      * @param exposure correction factor [% nm-1]
@@ -193,7 +193,7 @@ public slots:
     void onSweep(double wavelength1,
                  double wavelength2,
                  double wavelengthStep,
-                 int    blackSnapshotRate,
+                 int nbrSeqPerObs,
                  int exposure,
                  int cooldownTime,
                  double refWavelength,

@@ -22,14 +22,14 @@ public:
     void mainWindow(gui::MainWindow* mainWindow);
 
     void saveSnapshot(const QDateTime &dateTime,
-                      char mode,
+                      const QString &mode,
                       int exposure,
                       double wavelength,
                       double frequency,
                       double power,
                       int snapPerObs,
                       double temperature,
-                      const core::Snapshot &snapshotBuffer) override;
+                      const core::Snapshot &snapshotBuffer);
 public slots:
     void runScenario();
 
