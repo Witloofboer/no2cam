@@ -1,4 +1,5 @@
 #include "SweepParameterPane.h"
+#include "MainWindow.h"
 
 #include <QGroupBox>
 #include <QLabel>
@@ -59,9 +60,26 @@ void SweepParameterPane::start(bool burst,
                                const QString &session,
                                const QString &dataFolder)
 {
-    emit sweepRequested(_wavelength1Edit->value(),
-                        _wavelength2Edit->value(),
-                        _wavelengthStepEdit->value(),
+    const double wl1 = _wavelength1Edit->value();
+    const double wl2 = _wavelength2Edit->value();
+    const double dwl = _wavelengthStepEdit->value();
+
+    if (wl1 >= wl2)
+    {
+        _mainWindow->onDisplayWarning(QString("<p><b>Error</b>: the 1st wavelength is not smaller than the 2nd one.</p>"));
+        _mainWindow->onUpdateApplicationReadiness(true);
+        return;
+    }
+
+    if (dwl <= 0)
+    {
+        _mainWindow->onDisplayWarning(QString("<p><b>Error</b>: the wavelength increment must be positive.</p>"));
+        _mainWindow->onUpdateApplicationReadiness(true);
+        return;
+    }
+
+
+    emit sweepRequested(wl1, wl2, dwl,
                         _snapshotPerObs->value(),
                         _exposureEdit->value(),
                         _cooldownTimeEdit->value(),
