@@ -161,17 +161,22 @@ GenericMode::GenericMode(Manager &manager,
                          int exposure)
     : BaseMode(manager, crystal, exposure)
     , _wavelengths(wavelengths)
-    , _frequencies(1+wavelengths.size()) // +1 for black snapshot
-    , _powers(1+wavelengths.size())
-    , _accumulators(new AccumulatingBuffer[1+wavelengths.size()])
     , _mode(mode)
     , _nbrSeqPerObs(nbrSeqPerObs)
-    , _refTemp(0) // will be set at sequence beginning
+    , _refTemp(0)
     , _wlIx(0)
     , _seqIx(0)
 {    
-    qDebug("Adding black snapshot");
-    _wavelengths.push_front(0.0); // Insert a black snapshot as first snapshot.
+    if (_wavelengths[0] != 0)
+    {
+        qDebug("Adding black snapshot");
+        _wavelengths.push_front(0.0); // Insert a black snapshot as first snapshot.
+    }
+
+    _frequencies.resize(_wavelengths.size());
+    _powers.resize(_wavelengths.size());
+    _accumulators = new AccumulatingBuffer[_wavelengths.size()];
+
 }
 
 //------------------------------------------------------------------------------
@@ -187,7 +192,6 @@ void GenericMode::setAcousticBeam()
 {
     if (_wlIx == 0 && _seqIx == 0) // Start of the observation?
     {
-        printf("%d\n", sizeof(AccumulatingBuffer)*_wavelengths.size());
         memset(_accumulators, 0,
                sizeof(AccumulatingBuffer)*_wavelengths.size());
 
