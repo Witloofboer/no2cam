@@ -103,7 +103,6 @@ void Manager::setAcousticBeam(double frequency, double power)
 
 void Manager::takeSnapshot(int exposure)
 {
-
     _cameraCtrl->setExposure(exposure);
     _cameraCtrl->takeSnapshot();
 }
@@ -196,8 +195,6 @@ void Manager::stop()
 void Manager::onOpticalSnapshot(double wavelength,
                                 int exposure,
                                 int cooldownTime,
-                                double refWavelength,
-                                double exposureFactor,
                                 int stabilisationTime,
                                 bool burst,
                                 bool record,
@@ -210,7 +207,7 @@ void Manager::onOpticalSnapshot(double wavelength,
 
     setParams(cooldownTime, stabilisationTime, burst, record, dataFolder, session);
 
-    _mode = new OpticalSnapMode(*this, *_crystal, wavelength, exposure, refWavelength, exposureFactor);
+    _mode = new OpticalSnapMode(*this, *_crystal, wavelength, exposure);
     _mode->start();
 }
 
@@ -243,8 +240,6 @@ void Manager::onObservation(double wavelength1,
                             int nbrSeqPerObs,
                             int exposure,
                             int cooldownTime,
-                            double refWavelength,
-                            double exposureFactor,
                             int stabilisationTime,
                             bool burst,
                             bool record,
@@ -257,15 +252,13 @@ void Manager::onObservation(double wavelength1,
            wavelength1, wavelength2);
 
     QVector<double> wavelengths;
-    wavelengths.push_back(0.0);
     wavelengths.push_back(wavelength1);
     wavelengths.push_back(wavelength2);
 
     setParams(cooldownTime, stabilisationTime, burst, record, dataFolder, session);
 
-    _mode = new GenericMode(*this, *_crystal,
-                         wavelengths, "obs", nbrSeqPerObs,
-                         exposure, refWavelength, exposureFactor);
+    _mode = new GenericMode(*this, *_crystal, wavelengths,
+                            "obs", nbrSeqPerObs, exposure);
 
     _mode->start();
 }
@@ -276,8 +269,6 @@ void Manager::onDoas(QVector<double> wavelengths,
                      int nbrSeqPerObs,
                      int exposure,
                      int cooldownTime,
-                     double refWavelength,
-                     double exposureFactor,
                      int stabilisationTime,
                      bool burst,
                      bool record,
@@ -291,9 +282,8 @@ void Manager::onDoas(QVector<double> wavelengths,
 
     setParams(cooldownTime, stabilisationTime, burst, record, dataFolder, session);
 
-    _mode = new GenericMode(*this, *_crystal,
-                         wavelengths, "doas", nbrSeqPerObs,
-                         exposure, refWavelength, exposureFactor);
+    _mode = new GenericMode(*this, *_crystal, wavelengths,
+                            "doas", nbrSeqPerObs, exposure);
 
     _mode->start();
 }
@@ -306,8 +296,6 @@ void Manager::onSweep(double wavelength1,
                       int nbrSeqPerObs,
                       int exposure,
                       int cooldownTime,
-                      double refWavelength,
-                      double exposureFactor,
                       int stabilisationTime,
                       bool burst,
                       bool record,
@@ -322,7 +310,6 @@ void Manager::onSweep(double wavelength1,
     QVector<double> wavelengths;
     double cur = wavelength1;
 
-    wavelengths.push_back(0.0);
     while (cur < wavelength2 + 0.1 * wavelengthStep)
     {
         wavelengths.push_back(cur);
@@ -331,9 +318,8 @@ void Manager::onSweep(double wavelength1,
 
     setParams(cooldownTime, stabilisationTime, burst, record, dataFolder, session);
 
-    _mode = new GenericMode(*this, *_crystal,
-                            wavelengths, "sweep", nbrSeqPerObs,
-                            exposure, refWavelength, exposureFactor);
+    _mode = new GenericMode(*this, *_crystal, wavelengths,
+                            "sweep", nbrSeqPerObs, exposure);
 
     _mode->start();
 

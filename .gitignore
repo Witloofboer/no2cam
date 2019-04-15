@@ -3,3 +3,4 @@ doc
 *.autosave
 ~*
 hamamatsu
+Makefile

@@ -16,10 +16,11 @@ namespace core
 AcousticCtrl::AcousticCtrl(QObject *parent, BaseAcousticDriver *driver)
     : QObject(parent)
     , _driver(driver)
-    , _frequency(0)
-    , _power(0.0)
+    , _frequency(-1)
+    , _power(-1.0)
 {
     _driver->setParent(this);
+    this->set(0, 0);
 }
 
 //------------------------------------------------------------------------------

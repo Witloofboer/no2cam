@@ -1,7 +1,11 @@
 #include "Modes.h"
 
+#include <cstring>
+#include <limits>
+
 #include "Crystal.h"
 #include "Manager.h"
+
 
 namespace core {
 
@@ -11,14 +15,10 @@ namespace core {
 
 BaseMode::BaseMode(Manager &manager,
                    const Crystal &crystal,
-                   int baseExposure,
-                   double refWavelength,
-                   double exposureFactor)
+                   int exposure)
     : _manager(manager)
     , _crystal(crystal)
-    , _baseExposure(baseExposure)
-    , _refWavelength(refWavelength)
-    , _exposureFactor(exposureFactor)
+    , _exposure(exposure)
 {
 }
 
@@ -54,10 +54,8 @@ void BaseMode::start()
 OpticalSnapMode::OpticalSnapMode(Manager &manager,
                                  const Crystal &crystal,
                                  double wavelength,
-                                 int exposure,
-                                 double refWavelength,
-                                 double exposureFactor)
-    : BaseMode(manager, crystal, exposure, refWavelength, exposureFactor)
+                                 int exposure)
+    : BaseMode(manager, crystal, exposure)
     , _wavelength(wavelength)
 {
 
@@ -67,9 +65,9 @@ OpticalSnapMode::OpticalSnapMode(Manager &manager,
 
 void OpticalSnapMode::setAcousticBeam()
 {
-    _refTemperature = _manager.temperature();
+    _refTemp = _manager.temperature();
     _crystal.computeFreqPow(_wavelength,
-                            _refTemperature,
+                            _refTemp,
                             _frequency,
                             _power);
     _manager.setAcousticBeam(_frequency, _power);
@@ -80,7 +78,7 @@ void OpticalSnapMode::setAcousticBeam()
 void OpticalSnapMode::acousticBeamReady()
 {
     _snapTime = QDateTime::currentDateTime();
-    _manager.takeSnapshot(_baseExposure);
+    _manager.takeSnapshot(_exposure);
 }
 
 //------------------------------------------------------------------------------
@@ -91,12 +89,12 @@ void OpticalSnapMode::processSnapshot(const Snapshot &snapshotBuffer)
     _manager.saveSnapshot(_snapTime,
                           0,
                           "snap",
-                          _baseExposure,
+                          _exposure,
                           _wavelength,
                           _frequency,
                           _power,
                           1,
-                          _refTemperature,
+                          _refTemp,
                           snapshotBuffer);
 }
 
@@ -109,7 +107,7 @@ AcousticSnapMode::AcousticSnapMode(Manager &manager,
                                    double frequency,
                                    double power,
                                    int exposure)
-    : BaseMode(manager, crystal, exposure, 0, 0)
+    : BaseMode(manager, crystal, exposure)
     , _frequency(frequency)
     , _power(power)
 {
@@ -120,8 +118,8 @@ AcousticSnapMode::AcousticSnapMode(Manager &manager,
 
 void AcousticSnapMode::setAcousticBeam()
 {
-    _refTemperature = _manager.temperature();
-    _wavelength = _crystal.wavelength(_frequency, _refTemperature);
+    _refTemp = _manager.temperature();
+    _wavelength = _crystal.wavelength(_frequency, _refTemp);
     _manager.setAcousticBeam(_frequency, _power);
 }
 
@@ -130,7 +128,7 @@ void AcousticSnapMode::setAcousticBeam()
 void AcousticSnapMode::acousticBeamReady()
 {
     _snapTime = QDateTime::currentDateTime();
-    _manager.takeSnapshot(_baseExposure);
+    _manager.takeSnapshot(_exposure);
 }
 
 //------------------------------------------------------------------------------
@@ -141,12 +139,12 @@ void AcousticSnapMode::processSnapshot(const Snapshot &snapshotBuffer)
     _manager.saveSnapshot(_snapTime,
                           0,
                           "acou",
-                          _baseExposure,
+                          _exposure,
                           _wavelength,
                           _frequency,
                           _power,
                           1,
-                          _refTemperature,
+                          _refTemp,
                           snapshotBuffer);
 }
 
@@ -160,62 +158,57 @@ GenericMode::GenericMode(Manager &manager,
                          const QVector<double> &wavelengths,
                          const QString &mode,
                          int nbrSeqPerObs,
-                         int exposure,
-                         double refWavelength,
-                         double exposureFactor)
-    : BaseMode(manager, crystal, exposure, refWavelength, exposureFactor)
+                         int exposure)
+    : BaseMode(manager, crystal, exposure)
     , _wavelengths(wavelengths)
-    , _frequencies(wavelengths.size())
-    , _powers(wavelengths.size())
-    , _exposures(wavelengths.size())
-    , _snapshotBuffers(new Snapshot[wavelengths.size()])
+    , _frequencies(1+wavelengths.size()) // +1 for black snapshot
+    , _powers(1+wavelengths.size())
+    , _accumulators(new AccumulatingBuffer[1+wavelengths.size()])
     , _mode(mode)
     , _nbrSeqPerObs(nbrSeqPerObs)
-    , _refTemperature(0) // will be set at sequence beginning
+    , _refTemp(0) // will be set at sequence beginning
     , _wlIx(0)
     , _seqIx(0)
-{
+{    
+    qDebug("Adding black snapshot");
+    _wavelengths.push_front(0.0); // Insert a black snapshot as first snapshot.
 }
 
 //------------------------------------------------------------------------------
 
 GenericMode::~GenericMode()
 {
-    delete [] _snapshotBuffers;
+    delete [] _accumulators;
 }
 
 //------------------------------------------------------------------------------
 
 void GenericMode::setAcousticBeam()
 {
-    if (_wlIx == 0 && _seqIx == 0)
+    if (_wlIx == 0 && _seqIx == 0) // Start of the observation?
     {
+        printf("%d\n", sizeof(AccumulatingBuffer)*_wavelengths.size());
+        memset(_accumulators, 0,
+               sizeof(AccumulatingBuffer)*_wavelengths.size());
+
+        // Set the observation reference time and temperature
         _snapTime = QDateTime::currentDateTime();
-        for (int i=0; i<_wavelengths.size(); ++i) clear(_snapshotBuffers[i]);
+        _refTemp = _manager.temperature();
 
-        _refTemperature = _manager.temperature();
-
-        _frequencies[0] = 0;
-        _powers[0] = 0;
-        _exposures[0] = _baseExposure;
-        for (int i=1; i<_wavelengths.size(); ++i)
+        for (int wx=0; wx<_wavelengths.size(); ++wx)
         {
-            if (_wavelengths[i] == 0)
+            // Compute the acoustic frequency and power for each wavelength
+            if (_wavelengths[wx] == 0)
             {
-                _frequencies[i] = 0;
-                _powers[i] = 0;
-                _exposures[i] = _baseExposure;
+                _frequencies[wx] = 0;
+                _powers[wx] = 0;
             }
             else
             {
-                _crystal.computeFreqPow(_wavelengths[i],
-                                        _refTemperature,
-                                        _frequencies[i],
-                                        _powers[i]);
-
-                _exposures[i] = 0.5
-                        + _baseExposure
-                        * (1.0-(_wavelengths[i]-_refWavelength)*_exposureFactor*0.01);
+                _crystal.computeFreqPow(_wavelengths[wx],
+                                        _refTemp,
+                                        _frequencies[wx],
+                                        _powers[wx]);
             }
         }
     }
@@ -228,57 +221,103 @@ void GenericMode::setAcousticBeam()
 
 void GenericMode::acousticBeamReady()
 {
-    _manager.takeSnapshot(_exposures[_wlIx]);
+    _manager.takeSnapshot(_exposure);
 }
 
 //------------------------------------------------------------------------------
 
 void GenericMode::processSnapshot(const Snapshot &snapshotBuffer)
-{
-    // Add the current snapshot to the consolidated one.
-    for(int i=0; i<snapshotSize; ++i)
-        for(int j=0; j<snapshotSize; ++j)
-            _snapshotBuffers[_wlIx][i][j] += snapshotBuffer[i][j];
+{           
+    {
+        // Accumulate the current snapshot
+        auto& accumSnap = _accumulators[_wlIx];
 
+        for(int i=0; i<snapshotSize; ++i)
+            for(int j=0; j<snapshotSize; ++j)
+                accumSnap[i][j] += snapshotBuffer[i][j];
+    }
+
+    // Move to the next snapshot
     ++_wlIx;
 
+
+    // If last snapshot from the current sequence then restart the sequence
     if (_wlIx == _wavelengths.size())
     {
         _wlIx = 0;
         ++_seqIx;
     }
 
+
+    // If last snapshot of the last sequence, save data on disk and display them
     if (_seqIx == _nbrSeqPerObs)
     {
         _wlIx = 0;
         _seqIx = 0;
 
-        for(int i=0; i<_wavelengths.size(); ++i)
-            _manager.saveSnapshot(_snapTime,
-                                  i,
-                                  _mode,
-                                  _exposures[i],
-                                  _wavelengths[i],
-                                  _frequencies[i],
-                                  _powers[i],
-                                  _nbrSeqPerObs,
-                                  _refTemperature,
-                                  _snapshotBuffers[i]);
+        Snapshot displaySnap = {0};
+        // snapshot to display
 
-        Snapshot displaySnap;
+        int blkIx;
+        // black snapshot index
 
-        for(int i=0; i<snapshotSize; ++i)
-            for(int j=0; j<snapshotSize; ++j)
-                displaySnap[i][j]=0;
+        const Pixel maxPixel = std::numeric_limits<Pixel>::max();
 
-        for(int k=0; k<_wavelengths.size(); ++k)
+        // Iterate on all the accumulated buffers
+        for(int wx=0; wx<_wavelengths.size(); ++wx)
         {
-            const Snapshot &snap = _snapshotBuffers[k];
+            Snapshot fileSnap; // Snapshot to save in file;
 
-            for(int i=0; i<snapshotSize; ++i)
-                for(int j=0; j<snapshotSize; ++j)
-                    if (displaySnap[i][j] < snap[i][j]) displaySnap[i][j] = snap[i][j];
+            const auto& accumSnap = _accumulators[wx];
+
+            if (_wavelengths[wx] == 0)
+            {
+                blkIx = wx;
+
+                for(int i=0; i<snapshotSize; ++i)
+                    for(int j=0; j<snapshotSize; ++j)
+                    {
+                        const SgnPixel &sp = accumSnap[i][j];
+                        Pixel p = static_cast<Pixel>(sp);
+
+                        if (p != sp)
+                            p = maxPixel;
+
+                        fileSnap[i][j] = p;
+                    }
+
+            } else {
+
+                const AccumulatingBuffer& blkSnap = _accumulators[blkIx];
+
+                for(int i=0; i<snapshotSize; ++i)
+                    for(int j=0; j<snapshotSize; ++j)
+                    {
+                        const SgnPixel sp = accumSnap[i][j] - blkSnap[i][j];
+                        Pixel p = static_cast<Pixel>(sp);
+
+                        if (p != sp)
+                            p = (sp < 0) ? 0 : maxPixel;
+
+                        fileSnap[i][j] = p;
+
+                        if (displaySnap[i][j] < p)
+                            displaySnap[i][j] = p;
+                    }
+            }
+
+            _manager.saveSnapshot(_snapTime,
+                                  wx,
+                                  _mode,
+                                  _exposure,
+                                  _wavelengths[wx],
+                                  _frequencies[wx],
+                                  _powers[wx],
+                                  _nbrSeqPerObs,
+                                  _refTemp,
+                                  fileSnap);
         }
+
         _manager.setSnapshotForGui(displaySnap);
     }
 }

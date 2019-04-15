@@ -6,7 +6,7 @@ CONFIG += ordered
 SUBDIRS += \
     core_prj \
     gui \
-    main \
+#    main \
     mockup \
     profiling
 

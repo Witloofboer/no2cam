@@ -15,6 +15,8 @@ namespace core {
 class Crystal;
 class Manager;
 
+typedef qint32 SgnPixel;
+typedef SgnPixel AccumulatingBuffer[snapshotSize][snapshotSize];
 
 //------------------------------------------------------------------------------
 // BaseMode
@@ -25,9 +27,7 @@ class BaseMode
 public:
     BaseMode(Manager &manager,
              const Crystal &crystal,
-             int baseExposure,
-             double refWavelength,
-             double exposureFactor);
+             int exposure);
 
     virtual ~BaseMode();
 
@@ -41,10 +41,8 @@ public:
 
     Manager &_manager;
     const Crystal &_crystal;
-    int _baseExposure;
-    double _refWavelength;
-    double _exposureFactor;
-    double _refTemperature;
+    int _exposure;
+    double _refTemp;
     QDateTime _snapTime;
 };
 
@@ -58,9 +56,7 @@ public:
     OpticalSnapMode(Manager &manager,
                     const Crystal &crystal,
                     double wavelength,
-                    int exposure,
-                    double refWavelength,
-                    double exposureFactor);
+                    int exposure);
 
     void setAcousticBeam() override;
     void acousticBeamReady() override;
@@ -108,9 +104,7 @@ public:
              const QVector<double> &wavelengths,
              const QString &mode,
              int nbrSeqPerObs,
-             int exposure,
-             double refWavelength,
-             double exposureFactor);
+             int exposure);
     virtual ~GenericMode();
 
     void setAcousticBeam() override;
@@ -122,11 +116,11 @@ protected:
     bool canCooldown() const override;
 
 private:
-    QVector<double> _wavelengths, _frequencies, _powers, _exposures;
-    Snapshot  *_snapshotBuffers;
+    QVector<double> _wavelengths, _frequencies, _powers;
+    AccumulatingBuffer* _accumulators;
     const QString _mode;
     const int _nbrSeqPerObs;
-    double _refTemperature;
+    double _refTemp;
     int _wlIx;   // Wavelength index
     int _seqIx;  // Sequence index
 };

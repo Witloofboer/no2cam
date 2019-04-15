@@ -79,8 +79,6 @@ public slots:
      * @param wavelength optical wavelength [nm]
      * @param exposure exposure time [ms]
      * @param cooldown cooldown time [ms]
-     * @param reference wavelength for exposure correction [nm]
-     * @param exposure correction factor [% nm-1]
      * @param stabilisationTime duration needed by electronic boards to relax to a new
      *        set-point.
      * @param burst single snapshot or burst mode flag
@@ -89,8 +87,6 @@ public slots:
     void onOpticalSnapshot(double wavelength,
                            int exposure,
                            int cooldownTime,
-                           double refWavelength,
-                           double exposureFactor,
                            int stabilisationTime,
                            bool burst,
                            bool record,
@@ -125,8 +121,6 @@ public slots:
      * @param number of snapshot sequences composing a single observation
      * @param exposure exposure time [s]
      * @param cooldown cooldown time [s]
-     * @param reference wavelength for exposure correction [nm]
-     * @param exposure correction factor [% nm-1]
      * @param stabilisationTime duration needed by electronic boards to relax to a new
      *        set-point.
      * @param burst single snapshot or burst mode flag
@@ -137,8 +131,6 @@ public slots:
                        int nbrSeqPerObs,
                        int exposure,
                        int cooldownTime,
-                       double refWavelength,
-                       double exposureFactor,
                        int stabilisationTime,
                        bool burst,
                        bool record,
@@ -164,8 +156,6 @@ public slots:
                 int nbrSeqPerObs,
                 int exposure,
                 int cooldownTime,
-                double refWavelength,
-                double exposureFactor,
                 int stabilisationTime,
                 bool burst,
                 bool record,
@@ -182,8 +172,6 @@ public slots:
      * @param reference wavelength for exposure correction [nm]
      * @param exposure correction factor [% nm-1]
      * @param cooldown cooldown time [s]
-     * @param reference wavelength for exposure correction [nm]
-     * @param exposure correction factor [% nm-1]
      * @param burst single snapshot or burst mode flag
      * @param stabilisationTime duration needed by electronic boards to relax to a new
      *        set-point.
@@ -196,8 +184,6 @@ public slots:
                  int nbrSeqPerObs,
                  int exposure,
                  int cooldownTime,
-                 double refWavelength,
-                 double exposureFactor,
                  int stabilisationTime,
                  bool burst,
                  bool record,

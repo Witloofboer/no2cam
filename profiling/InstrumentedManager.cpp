@@ -28,8 +28,7 @@ void InstrumentedManager::runScenario()
     qInfo("Running scenario");
     _counter=0;
     _chrono.start();
-    //onOpticalSnapshot(500, 0, 0, 0, 0, 0, true, false, "h:/cam_data", "test");
-    onObservation(450, 550, 4, 0, 0, 0, 0, 0, true, false, "h:/cam_data", "test");
+    onObservation(450, 550, 4, 0, 0, 0, true, false, "h:/cam_data", "test");
 }
 
 void InstrumentedManager::saveSnapshot(const QDateTime& dateTime,

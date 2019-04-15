@@ -141,8 +141,6 @@ bool SnapshotParameterPane::areParametersValid() const
 
 void SnapshotParameterPane::start(bool burst,
                                   bool record,
-                                  double refWavelength,
-                                  double exposureFactor,
                                   double stabilisationTime,
                                   const QString &session,
                                   const QString &dataFolder)
@@ -152,8 +150,6 @@ void SnapshotParameterPane::start(bool burst,
         emit opticalSnapshot(_wavelengthEdit->value(),
                               _exposureEdit->value(),
                               _cooldownTimeEdit->value(),
-                              refWavelength,
-                              exposureFactor,
                               stabilisationTime,
                               burst,
                               record,

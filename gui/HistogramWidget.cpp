@@ -103,7 +103,7 @@ void HistogramWidget::update(const Data& intensities)
         _painter.setPen(satBgColor2);
         _painter.setBrush(satBgColor2);
 
-        for (unsigned i=satLimit2; i<256; ++i)
+        for (unsigned i=satLimit2; i<nbrBars; ++i)
         {
             if (barHeights[i])
             {
@@ -114,7 +114,7 @@ void HistogramWidget::update(const Data& intensities)
         _painter.setPen(satColor2);
         _painter.setBrush(satColor2);
 
-        for (unsigned i=satLimit2; i<256; ++i)
+        for (unsigned i=satLimit2; i<nbrBars; ++i)
         {
             if (barHeights[i])
             {

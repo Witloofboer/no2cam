@@ -78,12 +78,10 @@ void DoasParameterPane::selectWavelengthFile()
 
 void DoasParameterPane::start(bool burst,
                               bool record,
-                              double refWavelength,
-                              double exposureFactor,
                               double stabilisationTime,
                               const QString &session,
                               const QString &dataFolder)
-{      
+{
     const QString filename = _wlFileEdit->text();
     const QFileInfo fileInfo(filename);
 
@@ -106,8 +104,6 @@ void DoasParameterPane::start(bool burst,
     }
 
     QVector<double> wavelengths;
-    wavelengths.push_back(0); // Black snapshot
-
     QTextStream in(&file);
     bool ok;
     int c=0;
@@ -142,8 +138,6 @@ void DoasParameterPane::start(bool burst,
                        _snapPerObsEdit->value(),
                        _exposureEdit->value(),
                        _cooldownTimeEdit->value(),
-                       refWavelength,
-                       exposureFactor,
                        stabilisationTime,
                        burst,
                        record,

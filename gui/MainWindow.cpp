@@ -329,8 +329,6 @@ void MainWindow::onStart(bool burst, bool record)
     onUpdateApplicationReadiness(false);
     currentPane()->start(burst,
                          record,
-                         _configDlg->doasRefWavelength(),
-                         _configDlg->doasExposureFactor(),
                          _configDlg->stabilisingTime(),
                          _sessionEdit->text(),
                          _dataFolder);
