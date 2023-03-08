@@ -9,5 +9,6 @@
         <file>icons/media-burst-32.png</file>
         <file>icons/media-record-32.png</file>
         <file>icons/media-stop-32.png</file>
+        <file>icons/D-blue-24.png</file>
     </qresource>
 </RCC>

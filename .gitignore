@@ -1,1 +1,6 @@
 *.pro.user*
+doc
+*.autosave
+~*
+hamamatsu
+Makefile

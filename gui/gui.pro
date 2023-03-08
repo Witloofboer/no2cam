@@ -4,40 +4,52 @@
 #
 #-------------------------------------------------
 
-QT       += widgets
+QT     += widgets
+CONFIG += c++11
 
 TARGET = gui
 TEMPLATE = lib
 
 DEFINES += GUI_LIBRARY
 
+OBJECTS_DIR=../obj
+DESTDIR=../bin
+
+INCLUDEPATH += ../core_prj/
+
 SOURCES +=\
     tooling.cpp \
     MainWindow.cpp \
-    ObservationPane.cpp \
-    SnapshotPane.cpp \
-    SweepPane.cpp \
-    CameraButtonBox.cpp \
-    DatagramBox.cpp \
-    AbstractMainPane.cpp \
-    ConfigurationDlg.cpp
+    ConfigurationDlg.cpp \
+    CameraBtnBox.cpp \
+    HistogramWidget.cpp \
+    SnapshotWidget.cpp \
+    BaseParameterPane.cpp \
+    SweepParameterPane.cpp \
+    SnapshotParameterPane.cpp \
+    ObservationParameterPane.cpp \
+    DoasParameterPane.cpp
 
 HEADERS +=\
-    gui_global.h \
     tooling.h \
     MainWindow.h \
-    ObservationPane.h \
-    SnapshotPane.h \
-    SweepingPane.h \
-    CameraButtonBox.h \
-    DatagramBox.h \
-    AbstractMainPane.h \
-    ConfigurationDlg.h
+    ConfigurationDlg.h \
+    CameraBtnBox.h \
+    HistogramWidget.h \
+    SnapshotWidget.h \
+    BaseParameterPane.h \
+    SnapshotParameterPane.h \
+    ObservationParameterPane.h \
+    SweepParameterPane.h \
+    DoasParameterPane.h \
+    gui_global.h
 
 RESOURCES += \
     resources.qrc
 
-unix {
-    target.path = /usr/lib
-    INSTALLS += target
-}
+LIBS += -L$$OUT_PWD/../bin/ -lcore
+
+INCLUDEPATH += $$PWD/../core_prj/core
+DEPENDPATH += $$PWD/../core_prj/core
+
+CONFIG(release, debug|release): DEFINES += QT_NO_DEBUG_OUTPUT

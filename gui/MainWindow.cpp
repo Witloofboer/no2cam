@@ -2,252 +2,615 @@
 
 #include <QAction>
 #include <QActionGroup>
+#include <QCloseEvent>
+#include <QDir>
+#include <QFileDialog>
+#include <QGroupBox>
 #include <QMenuBar>
 #include <QMessageBox>
-#include <QToolBar>
+#include <QSettings>
 #include <QStackedWidget>
+#include <QStatusBar>
+#include <QTimer>
+#include <QThread>
+#include <QToolBar>
+#include <QVBoxLayout>
 
-#include "SnapshotPane.h"
-#include "ObservationPane.h"
-#include "SweepingPane.h"
+#include "CameraBtnBox.h"
+#include "SnapshotParameterPane.h"
+#include "ObservationParameterPane.h"
+#include "DoasParameterPane.h"
+#include "SweepParameterPane.h"
 #include "ConfigurationDlg.h"
+#include "HistogramWidget.h"
+#include "SnapshotWidget.h"
+#include "tooling.h"
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , mStackedWidget(new QStackedWidget)
-    , mSnapshotModeAction(new QAction("Take &snapshots", this))
-    , mObservationModeAction(new QAction("Make &observations", this))
-    , mSweepModeAction(new QAction("Sweep over &wavelength", this))
-    , mConfigurationDlg(new ConfigurationDlg(this))
+#include "core/Manager.h"
+#include "core/Crystal.h"
+
+//------------------------------------------------------------------------------
+
+static void init_resource()
 {
+    Q_INIT_RESOURCE(resources);
+}
+
+//------------------------------------------------------------------------------
+
+namespace gui {
+
+//------------------------------------------------------------------------------
+
+MainWindow::MainWindow(core::Crystal *crystal,
+                       core::Manager *coreManager,
+                       const QString &subversion,
+                       const QString &devicesNotes)
+    : QMainWindow()
+    , _coreManager(coreManager)
+    , _configDlg(new ConfigurationDlg(this, crystal))
+    , _stackedWdgt(new QStackedWidget)
+    , _selectFolderActn(new QAction("&Select data folder"))
+    , _snapshotModeActn(new QAction("Take &snapshots", this))
+    , _observationModeActn(new QAction("Make &observations", this))
+    , _doasModeActn(new QAction("DOAS", this))
+    , _sweepModeActn(new QAction("Sweep over &wavelength", this))
+    , _configParamActn(new QAction("&Configure", this))
+    , _dataFolder()
+    , _version(tr("0.4.0")
+               + (subversion.isEmpty()
+                  ? QString("")
+                  : QString(" (%1)").arg(subversion)))
+    , _devicesNotes(devicesNotes)
+    , _snapshotPane(new SnapshotParameterPane(this, crystal))
+    , _observationPane(new ObservationParameterPane(this))
+    , _doasPane(new DoasParameterPane(this))
+    , _sweepPane(new SweepParameterPane(this))
+    , _cameraBtnBox(new CameraBtnBox)
+    , _sessionEdit(new LineEdit)
+    , _snapshot(new SnapshotWidget)
+    , _histogram(new HistogramWidget)
+    , _infoWdgt(new QLabel)
+    , _temperatureWdgt(new QLabel)
+    , _infoT(new QTimer)
+{
+    init_resource();
+
     // -------------------------------------------------------------------------
     // Central widget
     // -------------------------------------------------------------------------
 
-    mStackedWidget->addWidget(new SnapshotPane());
-    mStackedWidget->addWidget(new ObservationPane());
-    mStackedWidget->addWidget(new SweepingPane());
+    // Left part
+    auto leftLayout = new QVBoxLayout;
+    _stackedWdgt->addWidget(_snapshotPane);
+    _stackedWdgt->addWidget(_observationPane);
+    _stackedWdgt->addWidget(_doasPane);
+    _stackedWdgt->addWidget(_sweepPane);
 
-    setCentralWidget(mStackedWidget);
+    auto lineEditLayout = new QHBoxLayout;
+    lineEditLayout->addWidget(new QLabel("Session:"));
+    lineEditLayout->addWidget(_sessionEdit);
+
+    auto lineEditBox = new QGroupBox;
+    lineEditBox->setLayout(lineEditLayout);
+
+    leftLayout->addWidget(_stackedWdgt);
+    leftLayout->addWidget(lineEditBox);
+    leftLayout->addWidget(_cameraBtnBox);
+
+    _cameraBtnBox->setStyleSheet("margin-bottom: 0px");
+
+    // Middle part
+    auto snapshotLayout = new QVBoxLayout;
+    snapshotLayout->addWidget(_snapshot);
+
+    auto snapshotBox = new QGroupBox(tr("Snapshot"));
+    snapshotBox->setLayout(snapshotLayout);
+
+    // Right part
+    auto histogramBoxLayout = new QVBoxLayout;
+    histogramBoxLayout->addWidget(_histogram);
+
+    auto histogramBox = new QGroupBox(tr("Histogram"));
+    histogramBox->setLayout(histogramBoxLayout);
+
+    auto topLayout = new QHBoxLayout;
+
+    topLayout->addLayout(leftLayout);
+    topLayout->addWidget(snapshotBox);
+    topLayout->addWidget(histogramBox);
+
+    // -------------------------------------------------------------------------
+    // Info box
+    // -------------------------------------------------------------------------
+
+    auto bottomLayout = new QHBoxLayout;
+
+    auto infoBox = new QGroupBox;
+    auto infoBoxLayout = new QHBoxLayout;
+    infoBoxLayout->addWidget(_infoWdgt);
+    infoBoxLayout->addStretch();
+    infoBox->setLayout(infoBoxLayout);
+    infoBox->setTitle("Info");
+
+    auto temperatureBox = new QGroupBox;
+    auto temperatureBoxLayout = new QHBoxLayout;
+    temperatureBoxLayout->addWidget(_temperatureWdgt);
+    temperatureBox->setLayout(temperatureBoxLayout);
+    temperatureBox->setTitle("T [°C]");
+
+    bottomLayout->addWidget(infoBox);
+    bottomLayout->addWidget(temperatureBox);
+
+
+    _infoT->setSingleShot(true);
+    _infoT->setInterval(4000);
+    connect(_infoT, QTimer::timeout, this, onInfoTimer);
+
+    statusBar()->hide();
+
+    auto mainLayout = new QVBoxLayout;
+    mainLayout->addLayout(topLayout);
+    mainLayout->addLayout(bottomLayout);
+
+    auto *centralWidget = new QWidget();
+    centralWidget->setLayout(mainLayout);
+    setCentralWidget(centralWidget);
+
 
     // -------------------------------------------------------------------------
     // Actions
     // -------------------------------------------------------------------------
 
-    auto newAction = new QAction("&New", this);
-    auto loadAction = new QAction("&Load", this);
-    auto saveAction = new QAction("&Save", this);
-    auto saveAsAction = new QAction("Save &as", this);
-    connect(newAction, QAction::triggered, this, MainWindow::newSession);
-    connect(loadAction, QAction::triggered, this, MainWindow::loadSession);
-    connect(saveAction, QAction::triggered, this, MainWindow::saveSession);
-    connect(saveAsAction, QAction::triggered, this, MainWindow::saveAsSession);
+    connect(_selectFolderActn, QAction::triggered, this, onSelectFolder);
 
-    auto configureAction = new QAction("&Configure", this);
-    configureAction->setIcon(QIcon(":/icons/C-gold-24.png"));
-    configureAction->setIconVisibleInMenu(false);
-    configureAction->setShortcut(QKeySequence("Alt+C"));
-    configureAction->setStatusTip(tr("Switch to configuration mode"));
-    connect(configureAction, QAction::triggered, this, MainWindow::configure);
+    _configParamActn->setIcon(QIcon(":/icons/C-gold-24.png"));
+    _configParamActn->setIconVisibleInMenu(false);
+    _configParamActn->setShortcut(QKeySequence("Alt+C"));
+    _configParamActn->setStatusTip(tr("Switch to configuration mode"));
+    connect(_configParamActn, QAction::triggered, _configDlg, ConfigurationDlg::onDisplay);
 
     auto exitAction = new QAction("E&xit", this);
     exitAction->setShortcut(QKeySequence("Alt+F4"));
     exitAction->setStatusTip(tr("Exit the application"));
-    connect(exitAction, &QAction::triggered, this, QMainWindow::close);
+    connect(exitAction, &QAction::triggered, this, close);
 
     auto modeGroup = new QActionGroup(this);
-    modeGroup->addAction(mSnapshotModeAction);
-    modeGroup->addAction(mObservationModeAction);
-    modeGroup->addAction(mSweepModeAction);
+    modeGroup->addAction(_snapshotModeActn);
+    modeGroup->addAction(_observationModeActn);
+    modeGroup->addAction(_doasModeActn);
+    modeGroup->addAction(_sweepModeActn);
 
-    mSnapshotModeAction->setIcon(QIcon(":/icons/S-blue-24.png"));
-    mSnapshotModeAction->setIconVisibleInMenu(false);
-    mSnapshotModeAction->setCheckable(true);
-    mSnapshotModeAction->setShortcut(QKeySequence("Alt+S"));
-    mSnapshotModeAction->setStatusTip(tr("Switch to snapshot mode"));
-    connect(mSnapshotModeAction, QAction::triggered, this, MainWindow::switchMode);
+    _snapshotModeActn->setIcon(QIcon(":/icons/S-blue-24.png"));
+    _snapshotModeActn->setIconVisibleInMenu(false);
+    _snapshotModeActn->setCheckable(true);
+    _snapshotModeActn->setShortcut(QKeySequence("Alt+S"));
+    _snapshotModeActn->setStatusTip(tr("Switch to snapshot mode"));
+    connect(_snapshotModeActn, QAction::triggered, this, onSwitchMode);
 
-    mObservationModeAction->setIcon(QIcon(":/icons/O-blue-24.png"));
-    mObservationModeAction->setIconVisibleInMenu(false);
-    mObservationModeAction->setCheckable(true);
-    mObservationModeAction->setShortcut(QKeySequence("Alt+O"));
-    mObservationModeAction->setStatusTip(tr("Switch to observation mode"));
-    connect(mObservationModeAction, QAction::triggered, this, MainWindow::switchMode);
+    _observationModeActn->setIcon(QIcon(":/icons/O-blue-24.png"));
+    _observationModeActn->setIconVisibleInMenu(false);
+    _observationModeActn->setCheckable(true);
+    _observationModeActn->setShortcut(QKeySequence("Alt+O"));
+    _observationModeActn->setStatusTip(tr("Switch to observation mode"));
+    connect(_observationModeActn, QAction::triggered, this, onSwitchMode);
 
-    mSweepModeAction->setIcon(QIcon(":/icons/W-blue-24.png"));
-    mSweepModeAction->setIconVisibleInMenu(false);
-    mSweepModeAction->setCheckable(true);
-    mSweepModeAction->setShortcut(QKeySequence("Alt+W"));
-    mSweepModeAction->setStatusTip(tr("Switch to wavelength sweeping mode"));
-    connect(mSweepModeAction, QAction::triggered, this, MainWindow::switchMode);
+    _doasModeActn->setIcon(QIcon(":/icons/D-blue-24.png"));
+    _doasModeActn->setIconVisibleInMenu(false);
+    _doasModeActn->setCheckable(true);
+    _doasModeActn->setShortcut(QKeySequence("Alt+D"));
+    _doasModeActn->setStatusTip(tr("Switch to DOAS mode"));
+    connect(_doasModeActn, QAction::triggered, this, onSwitchMode);
+
+    _sweepModeActn->setIcon(QIcon(":/icons/W-blue-24.png"));
+    _sweepModeActn->setIconVisibleInMenu(false);
+    _sweepModeActn->setCheckable(true);
+    _sweepModeActn->setShortcut(QKeySequence("Alt+W"));
+    _sweepModeActn->setStatusTip(tr("Switch to wavelength sweeping mode"));
+    connect(_sweepModeActn, QAction::triggered, this, onSwitchMode);
 
     auto releaseNotesAction = new QAction("&Release Notes", this);
-    connect(releaseNotesAction, &QAction::triggered, this, &MainWindow::releaseNotes);
+    connect(releaseNotesAction, QAction::triggered, this, onDisplayReleaseNotes);
 
     auto aboutAction = new QAction("&About", this);
-    connect(aboutAction, &QAction::triggered, this, &MainWindow::about);
+    connect(aboutAction, QAction::triggered, this, onAbout);
 
     // -------------------------------------------------------------------------
     // Menus
     // -------------------------------------------------------------------------
 
     auto fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(newAction);
-    fileMenu->addAction(loadAction);
-    fileMenu->addAction(saveAction);
-    fileMenu->addAction(saveAsAction);
-    fileMenu->addSeparator();
-    fileMenu->addAction(configureAction);
+    fileMenu->addAction(_selectFolderActn);
+    fileMenu->addAction(_configParamActn);
     fileMenu->addSeparator();
     fileMenu->addAction(exitAction);
 
     auto modeMenu = menuBar()->addMenu(tr("&Mode"));
-    modeMenu->addAction(mSnapshotModeAction);
-    modeMenu->addAction(mObservationModeAction);
-    modeMenu->addAction(mSweepModeAction);
+    modeMenu->addAction(_snapshotModeActn);
+    modeMenu->addAction(_observationModeActn);
+    modeMenu->addAction(_doasModeActn);
+    modeMenu->addAction(_sweepModeActn);
 
     auto helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(releaseNotesAction);
     helpMenu->addAction(aboutAction);
 
-    // --------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Toolbar
-    // --------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     auto toolBar = addToolBar(tr("&Mode"));
-    toolBar->addAction(mSnapshotModeAction);
-    toolBar->addAction(mObservationModeAction);
-    toolBar->addAction(mSweepModeAction);
+    toolBar->addAction(_snapshotModeActn);
+    toolBar->addAction(_observationModeActn);
+    toolBar->addAction(_doasModeActn);
+    toolBar->addAction(_sweepModeActn);
     toolBar->addSeparator();
-    toolBar->addAction(configureAction);
+    toolBar->addAction(_configParamActn);
 
     // -------------------------------------------------------------------------
     // Varia
     // -------------------------------------------------------------------------
 
-    setWindowTitle("NO2 Camera");
     setWindowIcon(QIcon(":/icons/video-camera-64.png"));
     setFixedSize(sizeHint());
-    mSnapshotModeAction->setChecked(true);
+    _snapshotModeActn->setChecked(true);
+
+    connect(_configDlg, ConfigurationDlg::parametersUpdated,
+            this, onParametersUpdated);
+    if (!_configDlg->isValid())
+        QTimer::singleShot(0, this, onDisplayConfigurationDlg); //TODO emit instead of timer?
+
+    connect(coreManager, core::Manager::updateApplicationReadiness, this, onUpdateApplicationReadiness);
+    connect(coreManager, core::Manager::displaySnapshot, this, onDisplaySnapshot);
+
+    connect(_snapshotPane, BaseParameterPane::parametersChanged, this, refreshBtns);
+    connect(_observationPane, BaseParameterPane::parametersChanged, this, refreshBtns);
+    connect(_doasPane, BaseParameterPane::parametersChanged, this, refreshBtns);
+    connect(_sweepPane, BaseParameterPane::parametersChanged, this, refreshBtns);
+
+    connect(_snapshotPane, SnapshotParameterPane::opticalSnapshot,
+            coreManager, core::Manager::onOpticalSnapshot);
+    connect(_snapshotPane, SnapshotParameterPane::acousticSnapshot,
+            coreManager, core::Manager::onAcousticSnapshot);
+    connect(_observationPane, ObservationParameterPane::observationRequested,
+            coreManager, core::Manager::onObservation);
+    connect(_doasPane, DoasParameterPane::doasRequested,
+            coreManager, core::Manager::onDoas);
+    connect(_sweepPane, SweepParameterPane::sweepRequested,
+            coreManager, core::Manager::onSweep);
+
+    connect(this, onStop, coreManager, core::Manager::stop);
+    connect(this, shutdownRequested, coreManager, core::Manager::onShutdown);
+    connect(this, temperaturePeriodUpdated, coreManager, core::Manager::onTemperaturePeriodUpdated);
+    connect(_cameraBtnBox, CameraBtnBox::started, this, onStart);
+    connect(_cameraBtnBox, CameraBtnBox::stopped, this, onStop);
+
+    connect(coreManager, core::Manager::fileCreationError, this, onFileCreationError);
+    connect(coreManager, core::Manager::fileWritingError, this, onFileWritingError);
+
+    connect(coreManager, core::Manager::updateTemperature,
+            this, onUpdateTemperature);
+
+    connect(coreManager, core::Manager::displayInformation,
+            this, onDisplayInformation);
+    connect(coreManager, core::Manager::displayWarning,
+            this, onDisplayWarning);
+    refreshBtns();
+    restore();
+
+    onParametersUpdated();
 }
 
-MainWindow::~MainWindow()
-{
+//------------------------------------------------------------------------------
 
-}
-
-void MainWindow::newSession()
+void MainWindow::onStart(bool burst, bool record)
 {
-    notImplemented("New");
-}
-
-void MainWindow::loadSession()
-{
-    notImplemented("Load");
-}
-
-bool MainWindow::saveSession()
-{
-    notImplemented("Save");
-    return true;
-}
-
-bool MainWindow::saveAsSession()
-{
-    notImplemented("Save as");
-    return true;
-}
-
-void MainWindow::switchMode()
-{
-    if (mSnapshotModeAction->isChecked())
+    if (record)
     {
-        mStackedWidget->setCurrentIndex(0);
-    }
-    else if (mObservationModeAction->isChecked())
-    {
-        mStackedWidget->setCurrentIndex(1);
-    }
-    else if (mSweepModeAction->isChecked())
-    {
-        mStackedWidget->setCurrentIndex(2);
-    }
-    else
-    {
-        mConfigurationDlg->exec();
-    }
-}
+        QDir dir(_dataFolder);
+        bool ok=dir.mkpath(".");
 
-void MainWindow::configure()
-{
-    mConfigurationDlg->exec();
-}
-
-void MainWindow::about()
-{
-    QMessageBox::about
-            (this,
-             tr("About NO2_CAM"),
-             tr("<h3>NO<sub>2</sub> Camera Control Software</h3>") +
-             tr("<p>Version 0.1.0</p>") +
-             tr("<p>Author: Didier Pieroux (didier.pieroux@aeronomie.be)</p>") +
-             tr("<p>Copyright 2016 BIRA-IASB</p>") +
-             tr("<p>This program is provided AS IS, with NO WARRANTY OF ANY "
-                "KIND.</p>")
-             );
-}
-
-void MainWindow::releaseNotes()
-{
-    QMessageBox::information
-            (this,
-             tr("NO2_CAM"),
-             tr("<h2>Release notes</h2>"
-                "<h3>Version 0.1.0</h3>"
-                "<p>Only the GUI is implemented in this version.</p>"
-                "<p>As a consequence of the lack of logic, the snapshot button"
-                "   remains depressed when clicked. In the final version, it"
-                "   will automatically get released once the snapshot is"
-                "   acquired.</p>"
-                ),
-             QMessageBox::Ok
-             );
-}
-
-void MainWindow::notImplemented(const QString &feature)
-{
-    QMessageBox::warning
-            (this,
-             "NO2_CAM",
-             "<b>" + feature + "</b> " + tr("is not yet implemented"),
-             QMessageBox::Ok);
-}
-
-bool MainWindow::okToContinue()
-{
-
-    if (isWindowModified())
-    {
-        auto code = QMessageBox::warning
-                (this,
-                 tr("NO2_CAM"),
-                 tr("The session has been modified.\n"
-                    "Do you want to save your changes?"),
-                 QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel
-                 );
-
-        switch (code)
+        if (!ok)
         {
-        case QMessageBox::Yes:
-            return saveSession();
-        case QMessageBox::No:
-            return true;
-        case QMessageBox::Cancel:
-            return false;
-        default:
-            Q_UNREACHABLE();
+            QMessageBox::critical
+            ( this
+              , tr("NO2 Camera: Operation cancelled")
+              , QString(tr("<p>The data folder %1 does not exist and can not be "
+                           "created.</p>"
+                           "<p>Please use another data directory or enable its "
+                           "creation before re-attempting the recording.</p>")
+                       ).arg(_dataFolder)
+              , QMessageBox::Ok);
+            onUpdateApplicationReadiness(true);
+            return;
         }
     }
+
+    onUpdateApplicationReadiness(false);
+    currentPane()->start(burst,
+                         record,
+                         _configDlg->stabilisingTime(),
+                         _sessionEdit->text(),
+                         _dataFolder);
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::onUpdateApplicationReadiness(bool isAppReady)
+{
+    _snapshotModeActn->setEnabled(isAppReady);
+    _observationModeActn->setEnabled(isAppReady);
+    _doasModeActn->setEnabled(isAppReady);
+    _sweepModeActn->setEnabled(isAppReady);
+    _configParamActn->setEnabled(isAppReady);
+    _snapshotPane->updateState(isAppReady);
+    _observationPane->updateState(isAppReady);
+    _doasPane->updateState(isAppReady);
+    _sweepPane->updateState(isAppReady);
+    _cameraBtnBox->updateState(isAppReady);
+    _sessionEdit->setEnabled(isAppReady);
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::onDisplaySnapshot()
+{
+    _snapshot->update();
+    _histogram->update(_snapshot->histogramData());
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::onDisplayWarning(QString msg)
+{
+    QMessageBox::warning
+    ( this
+      , tr("NO2 Camera Command Interface")
+      , msg
+      , QMessageBox::Ok);
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::onDisplayInformation(QString msg)
+{
+    _infoWdgt->setText(msg);
+    _infoT->start();
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::onInfoTimer()
+{
+    _infoWdgt->setText("");
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::onDisplayConfigurationDlg()
+{
+    QMessageBox::warning
+    ( this
+      , tr("NO2 Camera Command Interface")
+      , tr("<h3> Welcome to NO<sub>2</sub> Camera Command Interface</h3>"
+           "<p>No valid configuration was found from a previous usage.</p>"
+           "<p>Therefore, you need to provide the parameters to use the application.</p>")
+      , QMessageBox::Ok);
+    _configDlg->onDisplay(true);
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::onParametersUpdated()
+{
+    _snapshotPane->recomputeParams();
+    emit temperaturePeriodUpdated(_configDlg->temperaturePeriod());
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::onUpdateTemperature(double temperature)
+{
+    _snapshotPane->updateTemperature(temperature);
+    _temperatureWdgt->setText(QString("%1").arg(temperature, 5, 'f', 2));
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::onFileCreationError(QString datafolder,
+                                     QString filename)
+{
+    QMessageBox::critical
+    ( this
+      , tr("NO2 Camera: Operation cancelled")
+      , QString(tr("<p><b>Failure to open file in data folder.</b></p>"
+                   "<p><b>File:</b> %1<br/><b>Folder:</b> %2</p>"
+                   "<p>Hint: Check the folder access rights.</p>"
+                  )).arg(filename).arg(datafolder)
+      , QMessageBox::Ok);
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::onFileWritingError(QString datafolder,
+                                    QString filename)
+{
+    QMessageBox::critical
+    ( this
+      , tr("NO2 Camera: Operation cancelled")
+      , QString(tr("<p><b>Failure to dump snapshot in file.</b></p>"
+                   "<p><b>File:</b> %1<br/><b>Folder:</b> %2</p>"
+                   "<p>Hint: check the space left on the device and your usage"
+                   "quota.</p>"
+                  )).arg(filename).arg(datafolder)
+      , QMessageBox::Ok);
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    auto coreThread = _coreManager->thread();
+    // It is necessary to record the actual core thread as _coreManager is
+    // moved back to the main application thread upon exiting. Depending on
+    // race conditions, coreThread->wait() could be executed on the main thread.
+
+    emit shutdownRequested();
+    persiste();
+    _configDlg->persiste();
+    _snapshotPane->persiste();
+    _observationPane->persiste();
+    _doasPane->persiste();
+    _sweepPane->persiste();
+    coreThread->wait();
+
+    QMainWindow::closeEvent(event);
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::onSwitchMode()
+{
+    if (_snapshotModeActn->isChecked())
+    {
+        _stackedWdgt->setCurrentIndex(0);
+        refreshBtns();
+    }
+    else if (_observationModeActn->isChecked())
+    {
+        _stackedWdgt->setCurrentIndex(1);
+        refreshBtns();
+    }
+    else if (_doasModeActn->isChecked())
+    {
+        _stackedWdgt->setCurrentIndex(2);
+        refreshBtns();
+    }
+    else if (_sweepModeActn->isChecked())
+    {
+        _stackedWdgt->setCurrentIndex(3);
+        refreshBtns();
+    }
     else
-        return true;
+    {
+        _configDlg->exec();
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::refreshBtns()
+{
+    _cameraBtnBox->enableBtns(currentPane()->areParametersValid(), true);
+}
+
+//------------------------------------------------------------------------------
+
+
+void MainWindow::onSelectFolder()
+{
+    _dataFolder = QFileDialog::getExistingDirectory
+                  (this,
+                   tr("Select data folder"),
+                   _dataFolder,
+                   QFileDialog::ShowDirsOnly
+                  );
+    refreshWindowTitle();
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::onConfigure()
+{
+    _configDlg->exec();
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::onAbout()
+{
+    QMessageBox::about
+    ( this
+      , tr("NO2 Camera Command Interface")
+      , tr("<h3>NO<sub>2</sub> Camera Command Interface</h3>"
+           "<p>Version: %1</p>"
+           "<p>Author: Didier Pieroux (didier.pieroux@aeronomie.be)</p>"
+           "<p>Copyright (c) 2016-2018 BIRA-IASB</p>"
+           "<p>THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY "
+           "KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE "
+           "WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE "
+           "AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT "
+           "HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, "
+           "WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, "
+           "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER "
+           "DEALINGS IN THE SOFTWARE.</p>"
+          ).arg(_version));
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::onDisplayReleaseNotes()
+{
+    QMessageBox::information
+    ( this
+      , tr("NO2 Camera Command Interface")
+      , tr("<h2>NO<sub>2</sub> Camera Command Interface</h2>"
+           "<h3> Version: %1 </h3>"
+           "<h3>Functionalities</h3>"
+           "%2"
+           "<h3>Devices</h3>"
+           "%3"
+          )
+      .arg(_version)
+      .arg("<p>Version 0.3: all initial functionalities.</p>"
+           "<p>Version 0.4: DOAS mode and wavelength-dependent exposure time.</p>")
+      .arg(_devicesNotes)
+      , QMessageBox::Ok);
+}
+
+//------------------------------------------------------------------------------
+
+BaseParameterPane *MainWindow::currentPane()
+{
+    return dynamic_cast<BaseParameterPane *>(_stackedWdgt->currentWidget());
+}
+
+//------------------------------------------------------------------------------
+
+static const char *dataFolderLbl = "data folder";
+
+void MainWindow::persiste()
+{
+    qDebug("Persisting main window parameters");
+
+    QSettings settings;
+
+    settings.setValue(dataFolderLbl, _dataFolder);
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::restore()
+{
+    qDebug("Restoring main window parameters");
+
+    QSettings settings;
+
+    _dataFolder = settings.value(dataFolderLbl, "").toString();
+    if (_dataFolder.isEmpty())
+        _dataFolder = QDir::homePath()+"/no2cam";
+
+    refreshWindowTitle();
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::refreshWindowTitle()
+{
+    setWindowTitle("NO2 Camera " + _version +
+                   " - "+ QDir::toNativeSeparators(_dataFolder));
+}
+
+//------------------------------------------------------------------------------
+
 }

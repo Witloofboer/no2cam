@@ -1,22 +1,94 @@
-#ifndef NUMBEREDITWIDGET_H
-#define NUMBEREDITWIDGET_H
+#ifndef TOOLING_H
+#define TOOLING_H
 
-class QGridLayout;
-class QLineEdit;
+#include <QLineEdit>
+
 class QString;
-class QWidget;
+class QGridLayout;
 
-QLineEdit *new_NumberEdit(const QString &inputMask);
+namespace gui {
 
-QLineEdit *new_WavelengthEdit();
-QLineEdit *new_EetEdit();
-QLineEdit *new_CooldownEdit();
+//==============================================================================
+// LineEdit
+//==============================================================================
+
+class LineEdit: public QLineEdit
+{
+    Q_OBJECT
+
+public:
+    LineEdit(int length=19, const QString& regexp = ".*");
+
+    bool isValid();
+
+signals:
+    void focusLost();
+
+protected:
+    virtual void focusOutEvent(QFocusEvent *event) override;
+};
+
+
+//==============================================================================
+// IntLineEdit
+//==============================================================================
+
+class IntLineEdit: public LineEdit
+{
+    Q_OBJECT
+
+public:
+    IntLineEdit(int length=9, int nDgts=5);
+
+    virtual bool isValid();
+    void setValue(int value);
+    int value();
+};
+
+//==============================================================================
+// PosIntLineEdit
+//==============================================================================
+
+class PosIntLineEdit: public IntLineEdit
+{
+    Q_OBJECT
+
+public:
+    PosIntLineEdit(int length=9, int nDgts=5);
+
+    bool isValid() override;
+};
+
+//==============================================================================
+// DoubleLineEdit
+//==============================================================================
+
+class DoubleLineEdit: public LineEdit
+{
+    Q_OBJECT
+
+public:
+    DoubleLineEdit(int length=9, int nIntDgts=3, int nFracDgts=1);
+
+    bool isValid();
+    void setValue(double value);
+    double value();
+
+private:
+    int _nFracDgts;
+};
+
+
+//==============================================================================
 
 void putInGrid(QWidget* widget,
                QGridLayout* grid,
-               int row,
+               int &row,
                const QString &label,
                const QString &unit);
 
+//==============================================================================
 
-#endif // NUMBEREDITWIDGET_H
+}
+
+#endif // TOOLING_H
